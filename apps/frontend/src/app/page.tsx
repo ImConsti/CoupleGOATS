@@ -7,7 +7,7 @@ export default function Home() {
     const [backendReached, setBackendReached] = useState<boolean>(false);
 
     function backendTest() {
-        fetch('http://localhost:3001/test')
+        fetch(`${process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001'}/test`)
             .then((res) => res.json())
             .then((data) => {
                 console.log(data);
