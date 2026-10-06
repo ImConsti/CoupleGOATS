@@ -12,6 +12,11 @@ app.get("/", (_req, res) => {
   res.send("Hello World!");
 });
 
+app.get("/test", (_req, res) => {
+  console.log("Test endpoint hit");
+  res.json({ ok: true });
+});
+
 app.listen(port, () => {
   console.log(`Backend listening on http://localhost:${port}`);
 });
