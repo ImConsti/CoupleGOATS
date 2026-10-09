@@ -235,6 +235,8 @@ def main():
 
     dates = sorted(history)
     values = [history[d] for d in dates]
+    print("Chart-Daten:", list(zip(dates, values)))
+    print("Anzahl Datenpunkte:", len(values))
 
     sprint_start = date.fromisoformat(active_iteration["startDate"])
     sprint_end = sprint_start + timedelta(
