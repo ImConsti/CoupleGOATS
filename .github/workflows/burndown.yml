@@ -25,6 +25,7 @@ jobs:
 
       - name: Burndown-Skript ausführen
         env:
+          PROJECTS_TOKEN: ${{ secrets.PROJECTS_TOKEN }}
           OWNER: "ImConsti"
           PROJECT_NUMBER: "1"
         run: python burndown.py
