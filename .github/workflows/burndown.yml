@@ -31,6 +31,12 @@ jobs:
           OWNER: "ImConsti"
           PROJECT_NUMBER: "1"
         run: python burndown.py
+      
+      - name: PNG-Erstellung prüfen
+        run: |
+          ls -lh burndown-data.csv burndown.png
+          file burndown.png
+          git status --short
 
       - name: Ergebnisse speichern
         run: |
