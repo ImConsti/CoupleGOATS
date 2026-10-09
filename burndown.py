@@ -373,6 +373,11 @@ def main():
     ax1.set_xlabel("Datum")
     ax1.set_ylabel("Verbleibende Story Points")
     ax2.set_ylabel("Anzahl Aufgaben")
+    max_tasks = max(
+    (open_values[i] + completed_values[i] for i in range(len(dates))),
+    default=0,
+    )
+    ax2.set_ylim(0, max_tasks if max_tasks > 0 else 1)
 
     ax1.xaxis_date()
     ax1.xaxis.set_major_formatter(
