@@ -1,2 +1,2 @@
-date,sprint,sprint_start,remaining_points
-2026-10-09,Iteration 1,2026-10-06,2.0
+date,sprint,sprint_start,remaining_points,open_tasks,completed_tasks
+2026-10-09,Iteration 1,2026-10-06,2.0,1,7
