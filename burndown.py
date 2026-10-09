@@ -9,7 +9,7 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import requests
 
-TOKEN = os.environ["PROJECTS_TOKEN", ""]
+TOKEN = os.environ.get("PROJECTS_TOKEN", "")
 OWNER = os.environ["OWNER"]
 PROJECT_NUMBER = int(os.environ["PROJECT_NUMBER"])
 
