@@ -1,6 +1,6 @@
 # CoupleGOATS
 
-Tinder, but for adopting animals. Animal shelters upload profiles of the animals they're looking to rehome, and users swipe through them. When a user matches with an animal, they can book a visit at the shelter to meet it in person before adopting.
+Tinder, aber für die Vermittlung von Tieren. Tierheime laden Profile der Tiere hoch, für die sie ein neues Zuhause suchen, und Nutzende swipen durch diese Profile. Kommt es zu einem „Match“ zwischen Nutzendem und Tier, kann ein Besuchstermin im Tierheim gebucht werden, um das Tier vor der Adoption kennenzulernen.
 
 ## Team
 
@@ -13,17 +13,17 @@ Tinder, but for adopting animals. Animal shelters upload profiles of the animals
 
 ## Features
 
-- **Swipe**: browse animals and swipe to match
-- **Animal detail view**: full profile of a single animal
-- **Animal profiles with tags**: shelters create and edit animal profiles
-- **User and shelter profiles**: create and edit profiles for both
-- **Meet & greet**: book a visit with an animal, with views for both the user and the shelter
-- **Shelter dashboard**: overview for shelters
+- **Swipe**: Tiere durchstöbern und per Swipe matchen
+- **Tier-Detailansicht**: vollständiges Profil eines einzelnen Tieres
+- **Tierprofile mit Tags**: Tierheime erstellen und bearbeiten Tierprofile
+- **Nutzer- und Tierheimprofile**: Erstellung und Bearbeitung von Profilen für beide Rollen
+- **Meet & greet**: Besuch bei einem Tier buchen, mit jeweils eigenen Ansichten für Nutzer*innen und Tierheim
+- **Tierheim-Dashboard**: Übersicht für Tierheime
 
-Possible extras:
+Mögliche Erweiterungen:
 
-- System admin with its own view
-- Map view
+- Systemadministration mit eigener Ansicht
+- Kartenansicht
 - Authorization
 
 ## Tech stack
@@ -32,7 +32,7 @@ Possible extras:
 
 **Backend:** TypeScript, Express, SQLite
 
-## Project structure
+## Projektstruktur
 
 Monorepo:
 
