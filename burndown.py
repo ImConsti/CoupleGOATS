@@ -1,6 +1,9 @@
 # AI-generated code
 import csv
 import os
+import re
+import shutil
+from collections import defaultdict
 from datetime import date, datetime, timedelta
 from pathlib import Path
 
@@ -18,8 +21,21 @@ PROJECT_NUMBER = int(os.environ["PROJECT_NUMBER"])
 GRAPHQL_URL = "https://api.github.com/graphql"
 HEADERS = {"Authorization": f"Bearer {TOKEN}"}
 
-DATA_FILE = Path("burndown-data.csv")
-CHART_FILE = Path("burndown.png")
+# Neuer Ordner für alle Iterationen
+HISTORY_DIR = Path("burndown-history")
+
+# Bisherige Dateien zur einmaligen Übernahme
+LEGACY_DATA_FILE = Path("burndown-data.csv")
+LEGACY_CHART_FILE = Path("burndown.png")
+
+CSV_FIELDS = [
+    "date",
+    "sprint",
+    "sprint_start",
+    "remaining_points",
+    "open_tasks",
+    "completed_tasks",
+]
 
 
 def github_query(query, variables=None):
@@ -95,6 +111,140 @@ query($owner: String!, $number: Int!, $cursor: String) {
 """
 
 
+def safe_filename_part(value):
+    """
+    Bereitet den Iterationstitel für einen Dateinamen auf.
+    Unzulässige Zeichen werden durch Bindestriche ersetzt.
+    """
+    value = re.sub(r'[<>:"/\\|?*\x00-\x1f]', "-", value)
+    value = value.strip(" .")
+
+    return value or "Iteration"
+
+
+def get_history_paths(iteration_title, sprint_start):
+    """
+    Erstellt die Dateipfade für eine Iteration.
+
+    Normalerweise entstehen beispielsweise:
+    Iteration 1 BDC.csv
+    Iteration 1 BDC.png
+
+    Falls ein Iterationstitel später erneut mit einem anderen
+    Startdatum verwendet wird, wird das Startdatum ergänzt,
+    damit ältere Daten nicht überschrieben werden.
+    """
+    title = safe_filename_part(iteration_title)
+
+    base_name = f"{title} BDC"
+    data_file = HISTORY_DIR / f"{base_name}.csv"
+    chart_file = HISTORY_DIR / f"{base_name}.png"
+
+    if data_file.exists():
+        with data_file.open(
+            "r", newline="", encoding="utf-8"
+        ) as file:
+            existing_starts = {
+                row.get("sprint_start", "")
+                for row in csv.DictReader(file)
+                if row.get("sprint_start")
+            }
+
+        if existing_starts and existing_starts != {sprint_start}:
+            base_name = f"{title} - {sprint_start} BDC"
+            data_file = HISTORY_DIR / f"{base_name}.csv"
+            chart_file = HISTORY_DIR / f"{base_name}.png"
+
+    return data_file, chart_file
+
+
+def migrate_legacy_files():
+    """
+    Übernimmt vorhandene burndown-data.csv und burndown.png
+    aus dem Hauptverzeichnis in den Verlaufsordner.
+
+    Die vorhandenen CSV-Daten werden nach Iteration und
+    Startdatum archiviert. Die alte PNG-Datei wird dem
+    zuletzt aufgezeichneten Sprint zugeordnet.
+    """
+    if not LEGACY_DATA_FILE.exists():
+        return
+
+    with LEGACY_DATA_FILE.open(
+        "r", newline="", encoding="utf-8"
+    ) as file:
+        legacy_rows = list(csv.DictReader(file))
+
+    grouped_rows = defaultdict(list)
+
+    for row in legacy_rows:
+        sprint_start = (row.get("sprint_start") or "").strip()
+
+        if not sprint_start:
+            continue
+
+        sprint_title = (row.get("sprint") or "Iteration").strip()
+
+        grouped_rows[(sprint_title, sprint_start)].append(row)
+
+    # Ohne gültige historische Einträge nichts entfernen.
+    if not grouped_rows:
+        return
+
+    HISTORY_DIR.mkdir(parents=True, exist_ok=True)
+
+    # CSV-Daten jeder gefundenen Iteration archivieren.
+    for (sprint_title, sprint_start), rows in grouped_rows.items():
+        data_file, _ = get_history_paths(
+            sprint_title,
+            sprint_start,
+        )
+
+        # Bereits vorhandene historische Daten nicht überschreiben.
+        if data_file.exists():
+            continue
+
+        with data_file.open(
+            "w", newline="", encoding="utf-8"
+        ) as file:
+            writer = csv.DictWriter(
+                file,
+                fieldnames=CSV_FIELDS,
+            )
+            writer.writeheader()
+
+            for row in sorted(rows, key=lambda item: item.get("date", "")):
+                writer.writerow({
+                    field: row.get(field, "")
+                    for field in CSV_FIELDS
+                })
+
+    # Die bisherige PNG-Datei gehört zum zuletzt
+    # aufgezeichneten Sprint der alten CSV-Datei.
+    newest_key = max(
+        grouped_rows.keys(),
+        key=lambda item: item[1],
+    )
+
+    _, legacy_chart_target = get_history_paths(
+        newest_key[0],
+        newest_key[1],
+    )
+
+    if LEGACY_CHART_FILE.exists() and not legacy_chart_target.exists():
+        shutil.copy2(
+            LEGACY_CHART_FILE,
+            legacy_chart_target,
+        )
+
+    # Die bisherigen Dateien wurden archiviert.
+    # Ihre Entfernung wird von git add -A erfasst.
+    LEGACY_DATA_FILE.unlink(missing_ok=True)
+    LEGACY_CHART_FILE.unlink(missing_ok=True)
+
+    print("Bisherige Burndown-Dateien wurden archiviert.")
+
+
 def get_project():
     items = []
     cursor = None
@@ -110,7 +260,14 @@ def get_project():
             },
         )
 
-        project = data["user"]["projectV2"]
+        user = data.get("user")
+
+        if user is None:
+            raise RuntimeError(
+                "GitHub-Benutzer nicht gefunden. OWNER prüfen."
+            )
+
+        project = user.get("projectV2")
 
         if project is None:
             raise RuntimeError(
@@ -191,6 +348,16 @@ def main():
             "und das Startdatum eures Sprints."
         )
 
+    # Verlaufsordner erstellen und alte Dateien übernehmen.
+    HISTORY_DIR.mkdir(parents=True, exist_ok=True)
+    migrate_legacy_files()
+
+    # Dateinamen aus dem tatsächlichen GitHub-Iterationstitel bilden.
+    data_file, chart_file = get_history_paths(
+        active_iteration["title"],
+        active_iteration["startDate"],
+    )
+
     # Story Points und Aufgaben der aktuellen Iteration zählen.
     remaining_points = 0
     open_tasks = 0
@@ -213,17 +380,18 @@ def main():
             remaining_points += fields["estimate"]
 
     print(f"Projekt: {project_title}")
-    print(f"Sprint: {active_iteration['title']}")
+    print(f"Iteration: {active_iteration['title']}")
     print(f"Verbleibende Story Points: {remaining_points}")
     print(f"Offene Aufgaben: {open_tasks}")
     print(f"Erledigte Aufgaben: {completed_tasks}")
+    print(f"CSV-Zieldatei: {data_file}")
+    print(f"PNG-Zieldatei: {chart_file}")
 
-    # Vorhandene Tageswerte dieses Sprints laden.
-    # Pro Tag gibt es jeweils nur einen Messwert.
+    # Vorhandene Tageswerte dieser Iteration laden.
     history = {}
 
-    if DATA_FILE.exists():
-        with DATA_FILE.open(
+    if data_file.exists():
+        with data_file.open(
             "r", newline="", encoding="utf-8"
         ) as file:
             for row in csv.DictReader(file):
@@ -240,27 +408,22 @@ def main():
                     ),
                 }
 
-    # Den heutigen Messwert aktualisieren oder neu hinzufügen.
+    # Heutigen Messwert aktualisieren oder neu hinzufügen.
+    # Mehrere Läufe am selben Tag erzeugen keinen zusätzlichen Tageswert.
     history[today.isoformat()] = {
         "remaining_points": remaining_points,
         "open_tasks": open_tasks,
         "completed_tasks": completed_tasks,
     }
 
-    # CSV mit allen bisherigen Tageswerten des aktuellen Sprints speichern.
-    with DATA_FILE.open(
+    # CSV nur für die aktuelle Iteration schreiben.
+    with data_file.open(
         "w", newline="", encoding="utf-8"
     ) as file:
-        fieldnames = [
-            "date",
-            "sprint",
-            "sprint_start",
-            "remaining_points",
-            "open_tasks",
-            "completed_tasks",
-        ]
-
-        writer = csv.DictWriter(file, fieldnames=fieldnames)
+        writer = csv.DictWriter(
+            file,
+            fieldnames=CSV_FIELDS,
+        )
         writer.writeheader()
 
         for recorded_date in sorted(history):
@@ -277,31 +440,43 @@ def main():
 
     # Daten für die Grafik vorbereiten.
     dates = sorted(history)
+
     chart_dates = [
-        datetime.strptime(d, "%Y-%m-%d").date()
-        for d in dates
+        datetime.strptime(
+            recorded_date, "%Y-%m-%d"
+        ).date()
+        for recorded_date in dates
     ]
 
     remaining_values = [
-        history[d]["remaining_points"] for d in dates
-    ]
-    open_values = [
-        history[d]["open_tasks"] for d in dates
-    ]
-    completed_values = [
-        history[d]["completed_tasks"] for d in dates
+        history[recorded_date]["remaining_points"]
+        for recorded_date in dates
     ]
 
-    sprint_start = date.fromisoformat(active_iteration["startDate"])
+    open_values = [
+        history[recorded_date]["open_tasks"]
+        for recorded_date in dates
+    ]
+
+    completed_values = [
+        history[recorded_date]["completed_tasks"]
+        for recorded_date in dates
+    ]
+
+    sprint_start = date.fromisoformat(
+        active_iteration["startDate"]
+    )
+
     sprint_end = sprint_start + timedelta(
         days=active_iteration["duration"]
     )
 
-    # Zwei Y-Achsen: Story Points links, Aufgabenanzahl rechts.
+    # Zwei Y-Achsen:
+    # links Story Points, rechts Anzahl Aufgaben.
     fig, ax1 = plt.subplots(figsize=(12, 7))
     ax2 = ax1.twinx()
 
-    # Bestehende Linie: tatsächlich verbleibende Story Points.
+    # Tatsächlich verbleibende Story Points.
     line_remaining, = ax1.plot(
         chart_dates,
         remaining_values,
@@ -311,7 +486,7 @@ def main():
         label="Verbleibende Story Points",
     )
 
-    # Bestehende Ideallinie bis zum Sprintende.
+    # Idealer Verlauf bis zum Sprintende.
     first_date = chart_dates[0]
     total_days = (sprint_end - first_date).days
 
@@ -340,6 +515,7 @@ def main():
             [],
             color="red",
             linestyle="--",
+            linewidth=2,
             label="Idealer Verlauf",
         )
 
@@ -373,16 +549,22 @@ def main():
     ax1.set_xlabel("Datum")
     ax1.set_ylabel("Verbleibende Story Points")
     ax2.set_ylabel("Anzahl Aufgaben")
+
     max_tasks = max(
-    (open_values[i] + completed_values[i] for i in range(len(dates))),
-    default=0,
+        (
+            open_values[i] + completed_values[i]
+            for i in range(len(dates))
+        ),
+        default=0,
     )
+
     ax2.set_ylim(0, max_tasks if max_tasks > 0 else 1)
 
     ax1.xaxis_date()
     ax1.xaxis.set_major_formatter(
         mdates.DateFormatter("%d.%m.")
     )
+
     ax1.set_xlim(
         mdates.date2num(first_date) - 0.5,
         mdates.date2num(sprint_end) + 0.5,
@@ -390,27 +572,36 @@ def main():
 
     ax1.grid(True, axis="y", alpha=0.3)
 
-    # Eine gemeinsame Legende für Linien und Balken.
+    # Gemeinsame Legende.
     handles = [
         line_remaining,
         line_ideal,
         bars_open,
         bars_completed,
     ]
-    labels = [handle.get_label() for handle in handles]
 
-    ax1.legend(handles, labels, loc="upper right")
+    labels = [
+        handle.get_label()
+        for handle in handles
+    ]
+
+    ax1.legend(
+        handles,
+        labels,
+        loc="upper right",
+    )
 
     fig.autofmt_xdate()
     fig.tight_layout()
 
-    # PNG bei jedem Lauf neu erzeugen und überschreiben.
-    fig.savefig(CHART_FILE, dpi=150)
+    # PNG für die aktuelle Iteration speichern.
+    # Frühere Iterationen werden nicht überschrieben.
+    fig.savefig(chart_file, dpi=150)
     plt.close(fig)
 
-    print(f"Chart gespeichert: {CHART_FILE}")
-    print(f"Daten gespeichert: {DATA_FILE}")
-    print("Chart-Daten:")
+    print(f"Chart gespeichert: {chart_file}")
+    print(f"Daten gespeichert: {data_file}")
+    print("Aktuelle Chart-Daten:")
 
     for recorded_date in dates:
         print(recorded_date, history[recorded_date])
