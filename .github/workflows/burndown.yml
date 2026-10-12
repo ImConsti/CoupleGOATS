@@ -31,19 +31,34 @@ jobs:
           OWNER: "ImConsti"
           PROJECT_NUMBER: "1"
         run: python burndown.py
-      
-      - name: PNG-Erstellung prüfen
+
+      - name: Historische Dateien prüfen
         run: |
-          ls -lh burndown-data.csv burndown.png
-          file burndown.png
+          test -d burndown-history
+
+          echo "Gespeicherte Burndown-Dateien:"
+          find burndown-history \
+            -maxdepth 1 \
+            -type f \
+            \( -name '*.csv' -o -name '*.png' \) \
+            -printf '%f (%k KB)\n' | sort
+
+          echo "PNG-Dateien prüfen:"
+          find burndown-history \
+            -maxdepth 1 \
+            -type f \
+            -name '*.png' \
+            -print0 | xargs -0 -r file
+
           git status --short
 
       - name: Ergebnisse speichern
         run: |
-          git add burndown-data.csv burndown.png
+          git add -A
+
           git diff --cached --quiet || (
             git config user.name "github-actions[bot]"
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git commit -m "Update burndown chart"
+            git commit -m "Update burndown chart history"
             git push
           )
