@@ -11,7 +11,7 @@ Tinder, aber für die Vermittlung von Tieren. Tierheime laden Profile der Tiere 
 | Aaron      | [@brdly06](https://github.com/brdly06)     |
 | Constantin | [@ImConsti](https://github.com/ImConsti)   |
 
-## Features
+## Use Cases
 
 - **Swipe**: Tiere durchstöbern und per Swipe matchen
 - **Tier-Detailansicht**: vollständiges Profil eines einzelnen Tieres
