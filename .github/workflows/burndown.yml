@@ -4,7 +4,7 @@ name: Burndown Chart
 on:
   workflow_dispatch:
   schedule:
-    - cron: "0 20 * * 1-5"
+    - cron: "0 20 * * *"
 
 permissions:
   contents: write
