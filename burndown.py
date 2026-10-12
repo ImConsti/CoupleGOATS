@@ -21,12 +21,12 @@ PROJECT_NUMBER = int(os.environ["PROJECT_NUMBER"])
 GRAPHQL_URL = "https://api.github.com/graphql"
 HEADERS = {"Authorization": f"Bearer {TOKEN}"}
 
-# Neuer Ordner für alle Iterationen
+# Ordner für alle historischen Iterationen.
 HISTORY_DIR = Path("burndown-history")
 
-# Bisherige Dateien zur einmaligen Übernahme
-LEGACY_DATA_FILE = Path("burndown-data.csv")
-LEGACY_CHART_FILE = Path("burndown.png")
+# Aktuelle Dateien im Hauptverzeichnis.
+CURRENT_DATA_FILE = Path("burndown-data.csv")
+CURRENT_CHART_FILE = Path("burndown.png")
 
 CSV_FIELDS = [
     "date",
@@ -42,10 +42,14 @@ def github_query(query, variables=None):
     response = requests.post(
         GRAPHQL_URL,
         headers=HEADERS,
-        json={"query": query, "variables": variables or {}},
+        json={
+            "query": query,
+            "variables": variables or {},
+        },
         timeout=30,
     )
     response.raise_for_status()
+
     result = response.json()
 
     if result.get("errors"):
@@ -126,13 +130,12 @@ def get_history_paths(iteration_title, sprint_start):
     """
     Erstellt die Dateipfade für eine Iteration.
 
-    Normalerweise entstehen beispielsweise:
-    Iteration 1 BDC.csv
-    Iteration 1 BDC.png
+    Beispiel:
+    burndown-history/Iteration 1 BDC.csv
+    burndown-history/Iteration 1 BDC.png
 
-    Falls ein Iterationstitel später erneut mit einem anderen
-    Startdatum verwendet wird, wird das Startdatum ergänzt,
-    damit ältere Daten nicht überschrieben werden.
+    Wird derselbe Titel mit einem anderen Startdatum erneut
+    verwendet, wird das Datum ergänzt, um ältere Daten zu schützen.
     """
     title = safe_filename_part(iteration_title)
 
@@ -142,7 +145,9 @@ def get_history_paths(iteration_title, sprint_start):
 
     if data_file.exists():
         with data_file.open(
-            "r", newline="", encoding="utf-8"
+            "r",
+            newline="",
+            encoding="utf-8",
         ) as file:
             existing_starts = {
                 row.get("sprint_start", "")
@@ -150,7 +155,10 @@ def get_history_paths(iteration_title, sprint_start):
                 if row.get("sprint_start")
             }
 
-        if existing_starts and existing_starts != {sprint_start}:
+        if (
+            existing_starts
+            and sprint_start not in existing_starts
+        ):
             base_name = f"{title} - {sprint_start} BDC"
             data_file = HISTORY_DIR / f"{base_name}.csv"
             chart_file = HISTORY_DIR / f"{base_name}.png"
@@ -160,52 +168,64 @@ def get_history_paths(iteration_title, sprint_start):
 
 def migrate_legacy_files():
     """
-    Übernimmt vorhandene burndown-data.csv und burndown.png
-    aus dem Hauptverzeichnis in den Verlaufsordner.
+    Übernimmt bisherige burndown-data.csv und burndown.png
+    in den Verlaufsordner.
 
-    Die vorhandenen CSV-Daten werden nach Iteration und
-    Startdatum archiviert. Die alte PNG-Datei wird dem
-    zuletzt aufgezeichneten Sprint zugeordnet.
+    Die Root-Dateien bleiben bestehen und werden danach bei jedem
+    regulären Lauf mit den aktuellen Daten überschrieben.
     """
-    if not LEGACY_DATA_FILE.exists():
+    if not CURRENT_DATA_FILE.exists():
         return
 
-    with LEGACY_DATA_FILE.open(
-        "r", newline="", encoding="utf-8"
+    with CURRENT_DATA_FILE.open(
+        "r",
+        newline="",
+        encoding="utf-8",
     ) as file:
         legacy_rows = list(csv.DictReader(file))
 
     grouped_rows = defaultdict(list)
 
     for row in legacy_rows:
-        sprint_start = (row.get("sprint_start") or "").strip()
+        sprint_start = (
+            row.get("sprint_start") or ""
+        ).strip()
 
         if not sprint_start:
             continue
 
-        sprint_title = (row.get("sprint") or "Iteration").strip()
+        sprint_title = (
+            row.get("sprint") or "Iteration"
+        ).strip()
 
-        grouped_rows[(sprint_title, sprint_start)].append(row)
+        grouped_rows[
+            (sprint_title, sprint_start)
+        ].append(row)
 
-    # Ohne gültige historische Einträge nichts entfernen.
     if not grouped_rows:
+        print(
+            "Keine übernehmbaren historischen CSV-Daten "
+            "im Hauptverzeichnis gefunden."
+        )
         return
 
     HISTORY_DIR.mkdir(parents=True, exist_ok=True)
 
-    # CSV-Daten jeder gefundenen Iteration archivieren.
+    # CSV-Dateien aus dem bisherigen Hauptverzeichnis archivieren.
     for (sprint_title, sprint_start), rows in grouped_rows.items():
         data_file, _ = get_history_paths(
             sprint_title,
             sprint_start,
         )
 
-        # Bereits vorhandene historische Daten nicht überschreiben.
+        # Bereits vorhandene Archive nicht überschreiben.
         if data_file.exists():
             continue
 
         with data_file.open(
-            "w", newline="", encoding="utf-8"
+            "w",
+            newline="",
+            encoding="utf-8",
         ) as file:
             writer = csv.DictWriter(
                 file,
@@ -213,14 +233,17 @@ def migrate_legacy_files():
             )
             writer.writeheader()
 
-            for row in sorted(rows, key=lambda item: item.get("date", "")):
+            for row in sorted(
+                rows,
+                key=lambda item: item.get("date", ""),
+            ):
                 writer.writerow({
                     field: row.get(field, "")
                     for field in CSV_FIELDS
                 })
 
-    # Die bisherige PNG-Datei gehört zum zuletzt
-    # aufgezeichneten Sprint der alten CSV-Datei.
+    # Die bisherige PNG-Datei wird der Iteration mit dem
+    # neuesten Startdatum in der alten CSV zugeordnet.
     newest_key = max(
         grouped_rows.keys(),
         key=lambda item: item[1],
@@ -231,18 +254,16 @@ def migrate_legacy_files():
         newest_key[1],
     )
 
-    if LEGACY_CHART_FILE.exists() and not legacy_chart_target.exists():
+    if (
+        CURRENT_CHART_FILE.exists()
+        and not legacy_chart_target.exists()
+    ):
         shutil.copy2(
-            LEGACY_CHART_FILE,
+            CURRENT_CHART_FILE,
             legacy_chart_target,
         )
 
-    # Die bisherigen Dateien wurden archiviert.
-    # Ihre Entfernung wird von git add -A erfasst.
-    LEGACY_DATA_FILE.unlink(missing_ok=True)
-    LEGACY_CHART_FILE.unlink(missing_ok=True)
-
-    print("Bisherige Burndown-Dateien wurden archiviert.")
+    print("Vorhandene Burndown-Daten wurden geprüft und archiviert.")
 
 
 def get_project():
@@ -271,7 +292,8 @@ def get_project():
 
         if project is None:
             raise RuntimeError(
-                "Project nicht gefunden. OWNER und PROJECT_NUMBER prüfen."
+                "Project nicht gefunden. OWNER und "
+                "PROJECT_NUMBER prüfen."
             )
 
         project_title = project["title"]
@@ -344,15 +366,15 @@ def main():
 
     if active_iteration is None:
         raise RuntimeError(
-            "Keine aktive Iteration gefunden. Prüfe das Iteration-Feld "
-            "und das Startdatum eures Sprints."
+            "Keine aktive Iteration gefunden. Prüfe das "
+            "Iteration-Feld und das Startdatum eures Sprints."
         )
 
-    # Verlaufsordner erstellen und alte Dateien übernehmen.
+    # Verlaufsordner anlegen und bisherige Dateien übernehmen.
     HISTORY_DIR.mkdir(parents=True, exist_ok=True)
     migrate_legacy_files()
 
-    # Dateinamen aus dem tatsächlichen GitHub-Iterationstitel bilden.
+    # Archivdateien für die aktuelle Iteration festlegen.
     data_file, chart_file = get_history_paths(
         active_iteration["title"],
         active_iteration["startDate"],
@@ -384,41 +406,51 @@ def main():
     print(f"Verbleibende Story Points: {remaining_points}")
     print(f"Offene Aufgaben: {open_tasks}")
     print(f"Erledigte Aufgaben: {completed_tasks}")
-    print(f"CSV-Zieldatei: {data_file}")
-    print(f"PNG-Zieldatei: {chart_file}")
 
-    # Vorhandene Tageswerte dieser Iteration laden.
+    print(f"Archiv-CSV: {data_file}")
+    print(f"Archiv-PNG: {chart_file}")
+
+    # Bisherige Tageswerte dieser Iteration laden.
     history = {}
 
     if data_file.exists():
         with data_file.open(
-            "r", newline="", encoding="utf-8"
+            "r",
+            newline="",
+            encoding="utf-8",
         ) as file:
             for row in csv.DictReader(file):
-                if row.get("sprint_start") != active_iteration["startDate"]:
+                if (
+                    row.get("sprint_start")
+                    != active_iteration["startDate"]
+                ):
                     continue
 
                 history[row["date"]] = {
                     "remaining_points": float(
                         row.get("remaining_points") or 0
                     ),
-                    "open_tasks": int(row.get("open_tasks") or 0),
+                    "open_tasks": int(
+                        row.get("open_tasks") or 0
+                    ),
                     "completed_tasks": int(
                         row.get("completed_tasks") or 0
                     ),
                 }
 
-    # Heutigen Messwert aktualisieren oder neu hinzufügen.
-    # Mehrere Läufe am selben Tag erzeugen keinen zusätzlichen Tageswert.
+    # Heutigen Wert aktualisieren oder hinzufügen.
+    # Mehrere Workflow-Läufe pro Tag erzeugen nur einen Tageswert.
     history[today.isoformat()] = {
         "remaining_points": remaining_points,
         "open_tasks": open_tasks,
         "completed_tasks": completed_tasks,
     }
 
-    # CSV nur für die aktuelle Iteration schreiben.
+    # CSV der aktuellen Iteration im Archiv speichern.
     with data_file.open(
-        "w", newline="", encoding="utf-8"
+        "w",
+        newline="",
+        encoding="utf-8",
     ) as file:
         writer = csv.DictWriter(
             file,
@@ -438,12 +470,19 @@ def main():
                 "completed_tasks": values["completed_tasks"],
             })
 
+    # Dieselbe CSV zusätzlich als aktuelle Datei ablegen.
+    shutil.copy2(
+        data_file,
+        CURRENT_DATA_FILE,
+    )
+
     # Daten für die Grafik vorbereiten.
     dates = sorted(history)
 
     chart_dates = [
         datetime.strptime(
-            recorded_date, "%Y-%m-%d"
+            recorded_date,
+            "%Y-%m-%d",
         ).date()
         for recorded_date in dates
     ]
@@ -472,7 +511,7 @@ def main():
     )
 
     # Zwei Y-Achsen:
-    # links Story Points, rechts Anzahl Aufgaben.
+    # links Story Points, rechts Aufgabenanzahl.
     fig, ax1 = plt.subplots(figsize=(12, 7))
     ax2 = ax1.twinx()
 
@@ -486,7 +525,7 @@ def main():
         label="Verbleibende Story Points",
     )
 
-    # Idealer Verlauf bis zum Sprintende.
+    # Idealer Verlauf bis zum Ende der Iteration.
     first_date = chart_dates[0]
     total_days = (sprint_end - first_date).days
 
@@ -558,7 +597,10 @@ def main():
         default=0,
     )
 
-    ax2.set_ylim(0, max_tasks if max_tasks > 0 else 1)
+    ax2.set_ylim(
+        0,
+        max_tasks if max_tasks > 0 else 1,
+    )
 
     ax1.xaxis_date()
     ax1.xaxis.set_major_formatter(
@@ -572,7 +614,7 @@ def main():
 
     ax1.grid(True, axis="y", alpha=0.3)
 
-    # Gemeinsame Legende.
+    # Gemeinsame Legende für Linien und Balken.
     handles = [
         line_remaining,
         line_ideal,
@@ -594,13 +636,21 @@ def main():
     fig.autofmt_xdate()
     fig.tight_layout()
 
-    # PNG für die aktuelle Iteration speichern.
-    # Frühere Iterationen werden nicht überschrieben.
+    # PNG im Archiv speichern.
     fig.savefig(chart_file, dpi=150)
     plt.close(fig)
 
-    print(f"Chart gespeichert: {chart_file}")
-    print(f"Daten gespeichert: {data_file}")
+    # Dieselbe Grafik zusätzlich als aktuelle Datei ablegen.
+    shutil.copy2(
+        chart_file,
+        CURRENT_CHART_FILE,
+    )
+
+    print(f"Aktuelle Grafik: {CURRENT_CHART_FILE}")
+    print(f"Aktuelle CSV: {CURRENT_DATA_FILE}")
+    print(f"Archiv-Grafik: {chart_file}")
+    print(f"Archiv-CSV: {data_file}")
+
     print("Aktuelle Chart-Daten:")
 
     for recorded_date in dates:
