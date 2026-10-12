@@ -32,23 +32,24 @@ jobs:
           PROJECT_NUMBER: "1"
         run: python burndown.py
 
-      - name: Historische Dateien prüfen
+      - name: Burndown-Dateien prüfen
         run: |
+          test -f burndown-data.csv
+          test -f burndown.png
           test -d burndown-history
 
-          echo "Gespeicherte Burndown-Dateien:"
+          echo "Aktuelle Dateien:"
+          ls -lh burndown-data.csv burndown.png
+
+          echo "Archivierte Iterationen:"
           find burndown-history \
             -maxdepth 1 \
             -type f \
             \( -name '*.csv' -o -name '*.png' \) \
             -printf '%f (%k KB)\n' | sort
 
-          echo "PNG-Dateien prüfen:"
-          find burndown-history \
-            -maxdepth 1 \
-            -type f \
-            -name '*.png' \
-            -print0 | xargs -0 -r file
+          echo "PNG prüfen:"
+          file burndown.png
 
           git status --short
 
