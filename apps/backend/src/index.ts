@@ -6,6 +6,8 @@ import {drizzle} from "drizzle-orm/libsql";
 import {readFileSync} from "node:fs";
 import swaggerUi from "swagger-ui-express";
 import {parse} from "yaml";
+import {routeNotFoundHandler} from "./middleware/routeNotFoundHandler.js";
+import {errorHandler} from "./middleware/errorHandler.js";
 
 async function runMigration() {
     const db = drizzle({
@@ -42,6 +44,9 @@ app.get("/test", (_req, res) => {
     console.log("Test endpoint hit");
     res.json({ok: true});
 });
+
+app.use(routeNotFoundHandler);
+app.use(errorHandler);
 
 app.listen(port, () => {
     console.log(`Backend listening on http://localhost:${port}`);
