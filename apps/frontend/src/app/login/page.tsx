@@ -6,12 +6,11 @@ export default function LoginPage() {
             <div className="flex flex-col gap-4 w-full max-w-md">
                 <div>
                     <h1 className="loginHeader">
-                        Willkommen bei <span className="greenFont">Couple</span><span className="orangeFont">GOATS</span>
+                        Willkommen bei <span className="coupleGoatsFont greenFont text-6xl">Couple</span><span className="coupleGoatsFont orangeFont text-6xl">GOATS</span>
                     </h1>
+                    <br />
                     <h3 className="descriptionText">Melde dich an um loszulegen</h3>
                 </div>
-
-                <br />
 
                 <button className="selectRoleButton">
                     <div className="iconDiv">

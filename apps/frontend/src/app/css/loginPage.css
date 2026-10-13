@@ -26,6 +26,10 @@ body {
   @apply bg-emerald-50 text-emerald-900 p-3 rounded-xl flex items-center justify-center;
 }
 
+.coupleGoatsFont{
+  font-family: var(--oswald-font);
+}
+
 .orangeFont{
   @apply text-orange-600;
 }
