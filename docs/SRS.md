@@ -120,9 +120,9 @@ specific requirements: the use cases (3.1) and the quality requirements and cons
      Task 3: at least one specified use case per team member (four entries with a link below).
      List every use case of your diagram; mark the ones not specified yet as "planned". -->
 
-#### 3.1.1 UC-01 [Verb object]
+#### 3.1.1 UC-01 Tiere swipen
 
-*Author: [first name]* · [One sentence.] · [Specification](use_cases/UC-01_[name].md)
+*Author: Mika* · Adoptierende können Tierprofile ansehen, Tiere mit Like oder Dislike bewerten und anhand von Filtern sowie einem Auswahlalgorithmus weitere passende Tiere entdecken. · [Specification](use_cases/UC-01_swipe.md)
 
 #### 3.1.2 UC-02 [Verb object]
 
