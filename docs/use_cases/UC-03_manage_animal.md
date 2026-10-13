@@ -1,27 +1,27 @@
 # UC-03 Tierprofil verwalten
 
-| Author | Estimate | User stories |
+| Autor | Schätzung | User Stories |
 | ------ | -------- | ------------ |
-| brdly06 | 34 – 55 Story Points | [#17](https://github.com/ImConsti/CoupleGOATS/issues/17), [#25](https://github.com/ImConsti/CoupleGOATS/issues/25), [#28](https://github.com/ImConsti/CoupleGOATS/issues/28), [#31](https://github.com/ImConsti/CoupleGOATS/issues/31) |
+| brdly06 | 34 – 55 Story Points | [#17](https://github.com/ImConsti/CoupleGOATS/issues/17), [#25](https://github.com/ImConsti/CoupleGOATS/issues/25), [#28](https://github.com/ImConsti/CoupleGOATS/issues/28), [#31](https://github.com/ImConsti/CoupleGOATS/issues/31) — in jedes Issue „Implements UC-03“ eintragen |
 
-## 1 Brief description
+## 1 Kurzbeschreibung
 
 Dieser Use Case beschreibt, wie ein Tierheim-Mitarbeiter Tierprofile erstellen, bearbeiten und löschen sowie die zugehörigen Fotos verwalten kann. Ein Tierprofil enthält den Namen, die Tierart, die Rasse, das Geburtsjahr, das Geschlecht, eine Beschreibung, verschiedene Tags und Fotos des Tieres. Es können mehrere Fotos hochgeladen und ein Hauptbild ausgewählt werden. Ein Tierprofil wird erst dann auf der Discovery-Page angezeigt, wenn es alle festgelegten Anforderungen an die Vollständigkeit erfüllt. Dadurch können Nutzende geeignete Tiere entdecken und sich über mögliche Adoptionen informieren.
 
-## 2 Actors
+## 2 Akteure
 
-- **Primary:** Tierheim-Mitarbeiter – verwaltet die Tierprofile des eigenen Tierheims.
-- **Secondary:** System – prüft die eingegebenen Daten, speichert Änderungen, steuert die Sichtbarkeit der Profile und verarbeitet Löschvorgänge.
-- **Secondary:** Bildspeicher – speichert hochgeladene Fotos und stellt sie bei Bedarf bereit, sofern dieser als separater Dienst umgesetzt wird.
-- **Secondary:** Adoptierende bzw. interessierte Nutzende – betrachten veröffentlichte Tierprofile auf der Discovery-Page, sind jedoch nicht direkt an der Verwaltung beteiligt.
+- **Primär:** Tierheim-Mitarbeiter – verwaltet die Tierprofile des eigenen Tierheims.
+- **Sekundär:** System – prüft die eingegebenen Daten, speichert Änderungen, steuert die Sichtbarkeit der Profile und verarbeitet Löschvorgänge.
+- **Sekundär:** Bildspeicher – speichert hochgeladene Fotos und stellt sie bei Bedarf bereit, sofern dieser als separater Dienst umgesetzt wird.
+- **Sekundär:** Adoptierende bzw. interessierte Nutzende – betrachten veröffentlichte Tierprofile auf der Discovery-Page, sind jedoch nicht direkt an der Verwaltung beteiligt.
 
 ## 3 Mockup
 
 <img width="1870" height="1336" alt="Mockup UC-03" src="https://github.com/user-attachments/assets/dbc13c4c-92f3-487a-9a73-4e791f62e81f" />
 
-## 4 Flow of events
+## 4 Ablauf der Ereignisse
 
-### 4.1 Basic flow
+### 4.1 Basisablauf
 
 1. Der Tierheim-Mitarbeiter ruft die Verwaltung der Tierprofile seines Tierheims auf.
 2. Das System zeigt die vorhandenen Tierprofile sowie die Möglichkeit, ein neues Profil anzulegen oder ein bestehendes Profil auszuwählen.
@@ -32,7 +32,7 @@ Dieser Use Case beschreibt, wie ein Tierheim-Mitarbeiter Tierprofile erstellen, 
 7. Das System speichert das Tierprofil und die zugehörigen Fotos. Ist das Profil vollständig, wird es auf der Discovery-Page veröffentlicht. Andernfalls bleibt es unveröffentlicht.
 8. Das System bestätigt die erfolgreiche Speicherung und zeigt den aktuellen Status des Tierprofils an.
 
-### 4.2 Alternative flows
+### 4.2 Alternative Abläufe
 
 **3a · Bestehendes Tierprofil bearbeiten.** In Schritt 3 wählt der Tierheim-Mitarbeiter ein bestehendes Tierprofil seines Tierheims aus. Das System zeigt die gespeicherten Daten an. Der Mitarbeiter ändert die gewünschten Angaben, fügt Fotos hinzu, entfernt Fotos oder wählt ein anderes Hauptbild aus. Das System überprüft die Änderungen und speichert sie. Die Sichtbarkeit des Profils wird anhand seiner Vollständigkeit aktualisiert. Der Ablauf endet mit einer Bestätigung der erfolgreichen Aktualisierung.
 
@@ -52,11 +52,11 @@ Dieser Use Case beschreibt, wie ein Tierheim-Mitarbeiter Tierprofile erstellen, 
 
 **6b · Fehler beim Speichern.** In Schritt 7 kann das System das Tierprofil oder die vorgenommenen Änderungen nicht speichern. Das System informiert den Mitarbeiter über den Fehler und erhält die eingegebenen Daten nach Möglichkeit, damit der Speichervorgang erneut versucht werden kann. Das System bestätigt weder eine erfolgreiche Speicherung noch veröffentlicht es ein nicht gespeichertes Profil.
 
-### 4.3 Sequence diagram
+### 4.3 Sequenzdiagramm
 
 <img alt="Sequenzdiagramm UC-03" src="../diagrams/UC-03_sequence.png" />
 
-## 5 Special requirements
+## 5 Besondere Anforderungen
 
 - **NFR-UC03-01 – Zugriffskontrolle:** Nur authentifizierte und für das jeweilige Tierheim autorisierte Mitarbeiter dürfen Tierprofile dieses Tierheims erstellen, anzeigen, bearbeiten oder löschen. Unberechtigte Zugriffe und Änderungen müssen abgewiesen werden.
 - **NFR-UC03-02 – Datenvalidierung:** Das System muss Tierprofildaten vor der Veröffentlichung überprüfen. Ungültige oder unvollständige Profile dürfen nicht auf der Discovery-Page angezeigt werden.
@@ -67,7 +67,7 @@ Dieser Use Case beschreibt, wie ein Tierheim-Mitarbeiter Tierprofile erstellen, 
 
 *(Noch festzulegen: Konkrete Antwortzeitvorgaben, maximale Bildgröße, unterstützte Bildformate und die verbindlichen Pflichtfelder müssen mit dem Team abgestimmt werden.)*
 
-## 6 Preconditions
+## 6 Vorbedingungen
 
 - Der Tierheim-Mitarbeiter ist im System angemeldet.
 - Der Mitarbeiter ist berechtigt, Tierprofile seines Tierheims zu verwalten.
@@ -75,7 +75,7 @@ Dieser Use Case beschreibt, wie ein Tierheim-Mitarbeiter Tierprofile erstellen, 
 - Für die Bearbeitung oder Löschung existiert das betreffende Tierprofil und es gehört zum zuständigen Tierheim.
 - Für das Hochladen von Fotos steht die erforderliche Upload- und Speicherfunktion zur Verfügung.
 
-## 7 Postconditions
+## 7 Nachbedingungen
 
 - **Nach erfolgreicher Erstellung:** Das Tierprofil und die zugehörigen Fotos sind gespeichert. Das Profil wird auf der Discovery-Page veröffentlicht, wenn es alle Vollständigkeitsanforderungen erfüllt. Andernfalls bleibt es unveröffentlicht.
 - **Nach erfolgreicher Bearbeitung:** Das Tierprofil enthält die aktualisierten Daten und Fotos. Seine Sichtbarkeit richtet sich nach seiner Vollständigkeit.
