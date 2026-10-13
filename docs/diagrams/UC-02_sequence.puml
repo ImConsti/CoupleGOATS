@@ -1,0 +1,37 @@
+@startuml
+title UC-02 – Tierprofil ansehen
+
+autonumber
+
+actor "Interessierter Nutzer" as User
+participant "Frontend" as FE
+participant "Backend" as BE
+database "Datenbank" as DB
+
+User -> FE: Discovery-Page öffnen
+FE -> BE: Verfügbare Tierprofile anfordern
+BE -> DB: Veröffentlichte Profile abfragen
+DB --> BE: Liste der Tierprofile
+BE --> FE: Tierprofile übermitteln
+FE --> User: Discovery-Page anzeigen
+
+User -> FE: Tierprofil auswählen
+FE -> BE: Detailinformationen anfordern
+BE -> DB: Profil anhand der ID abrufen
+
+alt Tierprofil verfügbar und veröffentlicht
+    DB --> BE: Profildaten und Fotoreferenzen
+    BE --> FE: Tierdetails übermitteln
+    FE --> User: Tierprofil mit Tags und Fotos anzeigen
+    User -> FE: Profil ansehen
+    User -> FE: Zur Discovery-Page zurückkehren
+    FE --> User: Discovery-Page anzeigen
+
+else Tierprofil nicht verfügbar
+    DB --> BE: Kein verfügbares Profil
+    BE --> FE: Profil nicht verfügbar melden
+    FE --> User: Hinweis anzeigen
+    User -> FE: Zur Discovery-Page zurückkehren
+    FE --> User: Discovery-Page anzeigen
+end
+@enduml
