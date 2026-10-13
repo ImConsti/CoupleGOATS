@@ -102,6 +102,15 @@ export const users = sqliteTable("users", {
             "check_house_type",
             sql`house_type
             IN ('apartment', 'house')`
+        ),
+        check(
+            "check_boolean_fields",
+            sql`is_admin
+            IN (0, 1)
+        AND is_smoker IN (0, 1)
+        AND has_garden IN (0, 1)
+        AND has_children IN (0, 1)
+        AND roaming_possible IN (0, 1)`
         )
     ]);
 
@@ -159,5 +168,11 @@ export const animalPictures = sqliteTable("animal_pictures", {
     picture: blob().notNull(),
     createdAt: text("created_at").$default(() => new Date().toISOString()).notNull(),
     updatedAt: text("updated_at").$default(() => new Date().toISOString()).$onUpdate(() => new Date().toISOString()).notNull(),
-})
+}, () => [
+    check(
+        "check_boolean_fields",
+        sql` show_on_card
+        IN (0, 1)`
+    )
+]);
 
