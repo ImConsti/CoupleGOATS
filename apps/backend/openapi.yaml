@@ -1,0 +1,1087 @@
+openapi: 3.1.0
+info:
+  title: CoupleGOATS API
+  version: 0.1.0
+  description: |
+    Geplante REST-API für CoupleGOATS. Übersicht in Prosa: `docs/api-endpoints.md`.
+
+    Rollen: **User** (Adoptierende), **Shelter** (Tierheim), **Admin** (User mit `isAdmin`).
+    `me` steht immer für das eingeloggte Konto.
+servers:
+  - url: /api
+tags:
+  - name: Auth
+  - name: Users
+    description: Profil der Adoptierenden
+  - name: Filters
+    description: Suchfilter der Adoptierenden
+  - name: Discovery
+    description: Swipe-Ansicht
+  - name: Animals
+    description: Öffentliche Tierprofile (UC-02)
+  - name: Shelters
+    description: Tierheimprofile
+  - name: Shelter Animals
+    description: Tierverwaltung durch das Tierheim (UC-03)
+  - name: Interests
+    description: Likes, Anfragen und Meet & Greet
+  - name: Master Data
+    description: Tierarten, Rassen, Tags
+
+security:
+  - bearerAuth: []
+
+paths:
+  # ---------- Auth ----------
+  /auth/register/user:
+    post:
+      tags: [Auth]
+      summary: Adoptierenden-Konto anlegen
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/UserCreate" }
+      responses:
+        "201":
+          description: Angelegt
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AuthResponse" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "409": { $ref: "#/components/responses/Conflict" }
+  /auth/register/shelter:
+    post:
+      tags: [Auth]
+      summary: Tierheim-Konto anlegen
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ShelterCreate" }
+      responses:
+        "201":
+          description: Angelegt
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AuthResponse" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "409": { $ref: "#/components/responses/Conflict" }
+  /auth/login:
+    post:
+      tags: [Auth]
+      summary: Login für beide Rollen
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email: { type: string, format: email }
+                password: { type: string, format: password }
+      responses:
+        "200":
+          description: Eingeloggt
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AuthResponse" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+  /auth/logout:
+    post:
+      tags: [Auth]
+      summary: Logout
+      responses:
+        "204": { description: Ausgeloggt }
+  /auth/me:
+    get:
+      tags: [Auth]
+      summary: Eingeloggtes Konto und Rolle
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  role: { $ref: "#/components/schemas/Role" }
+                  id: { type: string, format: uuid }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+
+  # ---------- Users ----------
+  /users/me:
+    get:
+      tags: [Users]
+      summary: Eigenes Profil abrufen
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/User" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+    patch:
+      tags: [Users]
+      summary: Profil bearbeiten
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/UserUpdate" }
+      responses:
+        "200":
+          description: Aktualisiert
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/User" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+    delete:
+      tags: [Users]
+      summary: Konto löschen
+      responses:
+        "204": { description: Gelöscht }
+  /users/me/picture:
+    put:
+      tags: [Users]
+      summary: Profilbild hochladen
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema: { $ref: "#/components/schemas/PictureUpload" }
+      responses:
+        "204": { description: Gespeichert }
+        "400": { $ref: "#/components/responses/BadRequest" }
+    delete:
+      tags: [Users]
+      summary: Profilbild entfernen
+      responses:
+        "204": { description: Entfernt }
+  /users/{userId}:
+    get:
+      tags: [Users]
+      summary: Profil eines Anfragenden (nur Shelter mit bestehendem Interest)
+      parameters: [{ $ref: "#/components/parameters/UserId" }]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/User" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+  /users/{userId}/picture:
+    get:
+      tags: [Users]
+      summary: Profilbild abrufen
+      parameters: [{ $ref: "#/components/parameters/UserId" }]
+      responses:
+        "200": { $ref: "#/components/responses/Image" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  # ---------- Filters ----------
+  /users/me/filters:
+    get:
+      tags: [Filters]
+      summary: Eigene Filter auflisten
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/UserFilter" }
+    post:
+      tags: [Filters]
+      summary: Filter anlegen
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/UserFilterInput" }
+      responses:
+        "201":
+          description: Angelegt
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/UserFilter" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "409": { $ref: "#/components/responses/Conflict" }
+  /users/me/filters/{filterId}:
+    parameters: [{ $ref: "#/components/parameters/FilterId" }]
+    patch:
+      tags: [Filters]
+      summary: Filter ändern
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/UserFilterInput" }
+      responses:
+        "200":
+          description: Aktualisiert
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/UserFilter" }
+        "404": { $ref: "#/components/responses/NotFound" }
+    delete:
+      tags: [Filters]
+      summary: Filter löschen
+      responses:
+        "204": { description: Gelöscht }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  # ---------- Discovery ----------
+  /discovery:
+    get:
+      tags: [Discovery]
+      summary: Nächste Tierkarten
+      description: Veröffentlichte Tiere, die zu den Filtern passen und noch nicht geswipt wurden.
+      parameters:
+        - name: limit
+          in: query
+          schema: { type: integer, minimum: 1, maximum: 50, default: 10 }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/AnimalCard" }
+  /animals/{animalId}/swipe:
+    post:
+      tags: [Discovery]
+      summary: Tier liken oder ablehnen
+      parameters: [{ $ref: "#/components/parameters/AnimalId" }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [liked]
+              properties:
+                liked: { type: boolean }
+      responses:
+        "201":
+          description: Interest angelegt (`user_liked` / `user_disliked`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Interest" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "409": { $ref: "#/components/responses/Conflict" }
+
+  # ---------- Animals (public) ----------
+  /animals/{animalId}:
+    get:
+      tags: [Animals]
+      summary: Tierprofil ansehen
+      description: Liefert `404`, wenn das Tier nicht existiert oder nicht veröffentlicht ist.
+      parameters: [{ $ref: "#/components/parameters/AnimalId" }]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AnimalDetail" }
+        "404": { $ref: "#/components/responses/NotFound" }
+  /animals/{animalId}/pictures/{pictureId}:
+    get:
+      tags: [Animals]
+      summary: Tierbild abrufen
+      security: []
+      parameters:
+        - { $ref: "#/components/parameters/AnimalId" }
+        - { $ref: "#/components/parameters/PictureId" }
+      responses:
+        "200": { $ref: "#/components/responses/Image" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  # ---------- Shelters ----------
+  /shelters/{shelterId}:
+    get:
+      tags: [Shelters]
+      summary: Öffentliches Tierheimprofil
+      parameters: [{ $ref: "#/components/parameters/ShelterId" }]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Shelter" }
+        "404": { $ref: "#/components/responses/NotFound" }
+  /shelters/{shelterId}/animals:
+    get:
+      tags: [Shelters]
+      summary: Veröffentlichte Tiere eines Tierheims
+      parameters: [{ $ref: "#/components/parameters/ShelterId" }]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/AnimalCard" }
+        "404": { $ref: "#/components/responses/NotFound" }
+  /shelters/me:
+    get:
+      tags: [Shelters]
+      summary: Eigenes Tierheimprofil
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Shelter" }
+    patch:
+      tags: [Shelters]
+      summary: Tierheimprofil bearbeiten
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ShelterUpdate" }
+      responses:
+        "200":
+          description: Aktualisiert
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Shelter" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+    delete:
+      tags: [Shelters]
+      summary: Tierheimkonto löschen
+      responses:
+        "204": { description: Gelöscht }
+
+  # ---------- Shelter Animals ----------
+  /shelters/me/animals:
+    get:
+      tags: [Shelter Animals]
+      summary: Alle eigenen Tiere (inkl. unveröffentlichter)
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/AnimalDetail" }
+    post:
+      tags: [Shelter Animals]
+      summary: Tier anlegen
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/AnimalCreate" }
+      responses:
+        "201":
+          description: Angelegt
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AnimalDetail" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+  /shelters/me/animals/{animalId}:
+    parameters: [{ $ref: "#/components/parameters/AnimalId" }]
+    get:
+      tags: [Shelter Animals]
+      summary: Eigenes Tier laden
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AnimalDetail" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+    patch:
+      tags: [Shelter Animals]
+      summary: Tier bearbeiten
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/AnimalUpdate" }
+      responses:
+        "200":
+          description: Aktualisiert
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AnimalDetail" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+    delete:
+      tags: [Shelter Animals]
+      summary: Tier löschen
+      responses:
+        "204": { description: Gelöscht (Bilder per Cascade) }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+  /shelters/me/animals/{animalId}/tags:
+    put:
+      tags: [Shelter Animals]
+      summary: Tags eines Tiers ersetzen
+      parameters: [{ $ref: "#/components/parameters/AnimalId" }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [tagIds]
+              properties:
+                tagIds:
+                  type: array
+                  items: { type: string, format: uuid }
+      responses:
+        "200":
+          description: Aktualisiert
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Tag" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+  /shelters/me/animals/{animalId}/pictures:
+    post:
+      tags: [Shelter Animals]
+      summary: Foto hochladen
+      parameters: [{ $ref: "#/components/parameters/AnimalId" }]
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              allOf:
+                - { $ref: "#/components/schemas/PictureUpload" }
+                - type: object
+                  properties:
+                    showOnCard: { type: boolean, default: false }
+      responses:
+        "201":
+          description: Hochgeladen
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AnimalPicture" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+  /shelters/me/animals/{animalId}/pictures/{pictureId}:
+    parameters:
+      - { $ref: "#/components/parameters/AnimalId" }
+      - { $ref: "#/components/parameters/PictureId" }
+    patch:
+      tags: [Shelter Animals]
+      summary: Als Hauptbild setzen
+      description: Alle anderen Bilder des Tiers verlieren `showOnCard`.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [showOnCard]
+              properties:
+                showOnCard: { type: boolean, const: true }
+      responses:
+        "200":
+          description: Aktualisiert
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AnimalPicture" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+    delete:
+      tags: [Shelter Animals]
+      summary: Foto löschen
+      responses:
+        "204": { description: Gelöscht }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  # ---------- Interests ----------
+  /users/me/interests:
+    get:
+      tags: [Interests]
+      summary: Eigene Likes und Anfragen
+      parameters:
+        - name: status
+          in: query
+          schema: { $ref: "#/components/schemas/InterestStatus" }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Interest" }
+  /users/me/interests/{animalId}/request:
+    post:
+      tags: [Interests]
+      summary: Besuch anfragen (`user_requested`)
+      parameters: [{ $ref: "#/components/parameters/AnimalId" }]
+      responses:
+        "200":
+          description: Angefragt
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Interest" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "409": { $ref: "#/components/responses/Conflict" }
+  /users/me/interests/{animalId}:
+    delete:
+      tags: [Interests]
+      summary: Like/Anfrage zurückziehen
+      parameters: [{ $ref: "#/components/parameters/AnimalId" }]
+      responses:
+        "204": { description: Entfernt }
+        "404": { $ref: "#/components/responses/NotFound" }
+  /shelters/me/interests:
+    get:
+      tags: [Interests]
+      summary: Eingegangene Anfragen
+      parameters:
+        - name: status
+          in: query
+          schema: { $ref: "#/components/schemas/InterestStatus" }
+        - name: animalId
+          in: query
+          schema: { type: string, format: uuid }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Interest" }
+  /shelters/me/interests/{animalId}/{userId}:
+    patch:
+      tags: [Interests]
+      summary: Termin setzen oder Vermittlung abschließen
+      parameters:
+        - { $ref: "#/components/parameters/AnimalId" }
+        - { $ref: "#/components/parameters/UserId" }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [status]
+              properties:
+                status:
+                  type: string
+                  enum: [shelter_deadline, shelter_completed]
+                appointmentAt:
+                  type: string
+                  format: date-time
+                  description: Pflicht bei `shelter_deadline`
+      responses:
+        "200":
+          description: Aktualisiert
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Interest" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  # ---------- Master Data ----------
+  /species:
+    get:
+      tags: [Master Data]
+      summary: Tierarten auflisten
+      security: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Species" }
+    post:
+      tags: [Master Data]
+      summary: Tierart anlegen (Admin)
+      requestBody: { $ref: "#/components/requestBodies/NameInput" }
+      responses:
+        "201":
+          description: Angelegt
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Species" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "409": { $ref: "#/components/responses/Conflict" }
+  /species/{speciesId}:
+    parameters: [{ $ref: "#/components/parameters/SpeciesId" }]
+    patch:
+      tags: [Master Data]
+      summary: Tierart umbenennen (Admin)
+      requestBody: { $ref: "#/components/requestBodies/NameInput" }
+      responses:
+        "200":
+          description: Aktualisiert
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Species" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+    delete:
+      tags: [Master Data]
+      summary: Tierart löschen (Admin)
+      responses:
+        "204": { description: Gelöscht }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+  /species/{speciesId}/breeds:
+    get:
+      tags: [Master Data]
+      summary: Rassen einer Tierart
+      security: []
+      parameters: [{ $ref: "#/components/parameters/SpeciesId" }]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Breed" }
+        "404": { $ref: "#/components/responses/NotFound" }
+  /breeds:
+    post:
+      tags: [Master Data]
+      summary: Rasse anlegen (Admin)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/BreedInput" }
+      responses:
+        "201":
+          description: Angelegt
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Breed" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "409": { $ref: "#/components/responses/Conflict" }
+  /breeds/{breedId}:
+    parameters: [{ $ref: "#/components/parameters/BreedId" }]
+    patch:
+      tags: [Master Data]
+      summary: Rasse ändern (Admin)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/BreedInput" }
+      responses:
+        "200":
+          description: Aktualisiert
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Breed" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+    delete:
+      tags: [Master Data]
+      summary: Rasse löschen (Admin)
+      responses:
+        "204": { description: Gelöscht }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+  /tags:
+    get:
+      tags: [Master Data]
+      summary: Tags auflisten
+      security: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Tag" }
+    post:
+      tags: [Master Data]
+      summary: Tag anlegen (Admin)
+      requestBody: { $ref: "#/components/requestBodies/NameInput" }
+      responses:
+        "201":
+          description: Angelegt
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Tag" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "409": { $ref: "#/components/responses/Conflict" }
+  /tags/{tagId}:
+    parameters: [{ $ref: "#/components/parameters/TagId" }]
+    patch:
+      tags: [Master Data]
+      summary: Tag umbenennen (Admin)
+      requestBody: { $ref: "#/components/requestBodies/NameInput" }
+      responses:
+        "200":
+          description: Aktualisiert
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Tag" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+    delete:
+      tags: [Master Data]
+      summary: Tag löschen (Admin)
+      responses:
+        "204": { description: Gelöscht }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+
+  parameters:
+    UserId:
+      name: userId
+      in: path
+      required: true
+      schema: { type: string, format: uuid }
+    FilterId:
+      name: filterId
+      in: path
+      required: true
+      schema: { type: string, format: uuid }
+    ShelterId:
+      name: shelterId
+      in: path
+      required: true
+      schema: { type: string, format: uuid }
+    SpeciesId:
+      name: speciesId
+      in: path
+      required: true
+      schema: { type: string, format: uuid }
+    BreedId:
+      name: breedId
+      in: path
+      required: true
+      schema: { type: string, format: uuid }
+    TagId:
+      name: tagId
+      in: path
+      required: true
+      schema: { type: string, format: uuid }
+    AnimalId:
+      name: animalId
+      in: path
+      required: true
+      schema: { type: string, format: uuid }
+    PictureId:
+      name: pictureId
+      in: path
+      required: true
+      schema: { type: string, format: uuid }
+
+  requestBodies:
+    NameInput:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [name]
+            properties:
+              name: { type: string }
+
+  responses:
+    BadRequest:
+      description: Ungültige Eingabe
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+    Unauthorized:
+      description: Nicht eingeloggt
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+    Forbidden:
+      description: Keine Berechtigung für diese Ressource
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+    NotFound:
+      description: Nicht vorhanden oder nicht veröffentlicht
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+    Conflict:
+      description: Existiert bereits
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+    Image:
+      description: Bilddaten
+      content:
+        image/*:
+          schema: { type: string, format: binary }
+
+  schemas:
+    Error:
+      type: object
+      required: [message]
+      properties:
+        message: { type: string }
+        issues:
+          type: array
+          description: Zod-Validierungsfehler
+          items: { type: object }
+
+    Role:
+      type: string
+      enum: [user, shelter, admin]
+    Gender:
+      type: string
+      enum: [male, female, unknown]
+    ExperienceLevel:
+      type: string
+      enum: [beginner, experienced, expert]
+    HouseType:
+      type: string
+      enum: [apartment, house]
+    InterestStatus:
+      type: string
+      enum: [user_liked, user_disliked, user_requested, shelter_deadline, shelter_completed]
+
+    Timestamps:
+      type: object
+      properties:
+        createdAt: { type: string, format: date-time, readOnly: true }
+        updatedAt: { type: string, format: date-time, readOnly: true }
+
+    AuthResponse:
+      type: object
+      properties:
+        token: { type: string }
+        role: { $ref: "#/components/schemas/Role" }
+        id: { type: string, format: uuid }
+
+    Address:
+      type: object
+      required: [streetAddress, postalCode, city]
+      properties:
+        streetAddress: { type: string }
+        postalCode: { type: string, pattern: "^\\d{5}$" }
+        city: { type: string }
+
+    UserFields:
+      type: object
+      properties:
+        firstName: { type: string }
+        lastName: { type: string }
+        email: { type: string, format: email }
+        isSmoker: { type: boolean }
+        houseType: { $ref: "#/components/schemas/HouseType" }
+        hasGarden: { type: boolean }
+        hasChildren: { type: boolean }
+        roamingPossible: { type: boolean }
+    User:
+      allOf:
+        - type: object
+          properties:
+            id: { type: string, format: uuid }
+            isAdmin: { type: boolean }
+            hasPicture: { type: boolean }
+        - { $ref: "#/components/schemas/UserFields" }
+        - { $ref: "#/components/schemas/Address" }
+        - { $ref: "#/components/schemas/Timestamps" }
+    UserCreate:
+      allOf:
+        - { $ref: "#/components/schemas/UserFields" }
+        - { $ref: "#/components/schemas/Address" }
+        - type: object
+          required: [firstName, lastName, email, password, isSmoker, houseType, hasGarden, hasChildren, roamingPossible]
+          properties:
+            password: { type: string, format: password, minLength: 8 }
+    UserUpdate:
+      allOf:
+        - { $ref: "#/components/schemas/UserFields" }
+        - type: object
+          properties:
+            streetAddress: { type: string }
+            postalCode: { type: string, pattern: "^\\d{5}$" }
+            city: { type: string }
+            password: { type: string, format: password, minLength: 8 }
+
+    Shelter:
+      allOf:
+        - type: object
+          properties:
+            id: { type: string, format: uuid }
+            name: { type: string }
+            email: { type: string, format: email }
+        - { $ref: "#/components/schemas/Address" }
+        - { $ref: "#/components/schemas/Timestamps" }
+    ShelterCreate:
+      allOf:
+        - { $ref: "#/components/schemas/Address" }
+        - type: object
+          required: [name, email, password]
+          properties:
+            name: { type: string }
+            email: { type: string, format: email }
+            password: { type: string, format: password, minLength: 8 }
+    ShelterUpdate:
+      type: object
+      properties:
+        name: { type: string }
+        email: { type: string, format: email }
+        password: { type: string, format: password, minLength: 8 }
+        streetAddress: { type: string }
+        postalCode: { type: string, pattern: "^\\d{5}$" }
+        city: { type: string }
+
+    Species:
+      allOf:
+        - type: object
+          properties:
+            id: { type: string, format: uuid }
+            name: { type: string }
+        - { $ref: "#/components/schemas/Timestamps" }
+    Breed:
+      allOf:
+        - type: object
+          properties:
+            id: { type: string, format: uuid }
+            species: { type: string, format: uuid }
+            name: { type: string }
+        - { $ref: "#/components/schemas/Timestamps" }
+    BreedInput:
+      type: object
+      required: [species, name]
+      properties:
+        species: { type: string, format: uuid }
+        name: { type: string }
+    Tag:
+      allOf:
+        - type: object
+          properties:
+            id: { type: string, format: uuid }
+            name: { type: string }
+        - { $ref: "#/components/schemas/Timestamps" }
+
+    AnimalFields:
+      type: object
+      properties:
+        name: { type: string }
+        species: { type: string, format: uuid }
+        breed: { type: string, format: uuid }
+        birthYear: { type: integer }
+        gender: { $ref: "#/components/schemas/Gender" }
+        requiredExperience: { $ref: "#/components/schemas/ExperienceLevel" }
+        description: { type: string }
+    AnimalCreate:
+      allOf:
+        - { $ref: "#/components/schemas/AnimalFields" }
+        - type: object
+          required: [name, species, breed, birthYear, gender, requiredExperience, description]
+          properties:
+            tagIds:
+              type: array
+              items: { type: string, format: uuid }
+    AnimalUpdate:
+      $ref: "#/components/schemas/AnimalFields"
+    AnimalCard:
+      type: object
+      description: Kompakte Darstellung für Discovery und Listen
+      properties:
+        id: { type: string, format: uuid }
+        name: { type: string }
+        species: { $ref: "#/components/schemas/Species" }
+        breed: { $ref: "#/components/schemas/Breed" }
+        birthYear: { type: integer }
+        gender: { $ref: "#/components/schemas/Gender" }
+        tags:
+          type: array
+          items: { $ref: "#/components/schemas/Tag" }
+        cardPictureId: { type: [string, "null"], format: uuid }
+        shelter:
+          type: object
+          properties:
+            id: { type: string, format: uuid }
+            name: { type: string }
+            city: { type: string }
+    AnimalDetail:
+      allOf:
+        - { $ref: "#/components/schemas/AnimalCard" }
+        - type: object
+          properties:
+            requiredExperience: { $ref: "#/components/schemas/ExperienceLevel" }
+            description: { type: string }
+            pictures:
+              type: array
+              items: { $ref: "#/components/schemas/AnimalPicture" }
+        - { $ref: "#/components/schemas/Timestamps" }
+    AnimalPicture:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        animalId: { type: string, format: uuid }
+        showOnCard: { type: boolean }
+        url:
+          type: string
+          description: "/api/animals/{animalId}/pictures/{pictureId}"
+    PictureUpload:
+      type: object
+      required: [picture]
+      properties:
+        picture: { type: string, format: binary }
+
+    UserFilterInput:
+      type: object
+      properties:
+        animalSpecies: { type: [string, "null"], format: uuid }
+        animalBreed: { type: [string, "null"], format: uuid }
+        animalMinAge: { type: [integer, "null"] }
+        animalMaxAge: { type: [integer, "null"] }
+        animalGender:
+          oneOf:
+            - { $ref: "#/components/schemas/Gender" }
+            - { type: "null" }
+        experienceLevel:
+          oneOf:
+            - { $ref: "#/components/schemas/ExperienceLevel" }
+            - { type: "null" }
+    UserFilter:
+      allOf:
+        - type: object
+          properties:
+            id: { type: string, format: uuid }
+            userId: { type: string, format: uuid }
+        - { $ref: "#/components/schemas/UserFilterInput" }
+        - { $ref: "#/components/schemas/Timestamps" }
+
+    Interest:
+      allOf:
+        - type: object
+          properties:
+            userId: { type: string, format: uuid }
+            animalId: { type: string, format: uuid }
+            status: { $ref: "#/components/schemas/InterestStatus" }
+            appointmentAt: { type: [string, "null"], format: date-time }
+            animal: { $ref: "#/components/schemas/AnimalCard" }
+        - { $ref: "#/components/schemas/Timestamps" }

@@ -3,6 +3,9 @@ import express from "express";
 import cors from "cors";
 import {migrate} from "drizzle-orm/libsql/migrator";
 import {drizzle} from "drizzle-orm/libsql";
+import {readFileSync} from "node:fs";
+import swaggerUi from "swagger-ui-express";
+import {parse} from "yaml";
 
 async function runMigration() {
     const db = drizzle({
@@ -27,6 +30,9 @@ const port = Number(process.env.PORT ?? 3001);
 
 app.use(cors());
 app.use(express.json());
+
+const openApiSpec = parse(readFileSync(new URL("../openapi.yaml", import.meta.url), "utf8"));
+app.use("/api/docs", swaggerUi.serve, swaggerUi.setup(openApiSpec));
 
 app.get("/", (_req, res) => {
     res.send("Hello World!");

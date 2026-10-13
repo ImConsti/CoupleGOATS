@@ -12,6 +12,7 @@ COPY package.json package-lock.json ./
 RUN npm ci --omit=dev && npm cache clean --force
 COPY --from=build /app/dist ./dist
 COPY --from=build /app/drizzle ./drizzle
+COPY --from=build /app/openapi.yaml ./openapi.yaml
 RUN mkdir /data && chown node:node /data
 USER node
 EXPOSE 3001
