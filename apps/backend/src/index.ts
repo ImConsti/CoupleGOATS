@@ -1,6 +1,10 @@
 import "dotenv/config";
 import express from "express";
 import cors from "cors";
+import { migrate } from "drizzle-orm/libsql/migrator";
+import { db } from "./db/db.js";
+
+await migrate(db, { migrationsFolder: "./drizzle" });
 
 const app = express();
 const port = Number(process.env.PORT ?? 3001);

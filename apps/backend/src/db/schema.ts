@@ -27,7 +27,7 @@ export const animals = sqliteTable("animals", {
         createdAt: text("created_at").$default(() => new Date().toISOString()).notNull(),
         updatedAt: text("updated_at").$default(() => new Date().toISOString()).$onUpdate(() => new Date().toISOString()).notNull(),
     },
-    (table) => [
+    () => [
         check(
             "check_required_experience",
             sql`required_experience
@@ -97,7 +97,7 @@ export const users = sqliteTable("users", {
         createdAt: text("created_at").$default(() => new Date().toISOString()).notNull(),
         updatedAt: text("updated_at").$default(() => new Date().toISOString()).$onUpdate(() => new Date().toISOString()).notNull(),
     },
-    (table) => [
+    () => [
         check(
             "check_house_type",
             sql`house_type
