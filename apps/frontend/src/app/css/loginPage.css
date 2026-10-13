@@ -18,3 +18,18 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
+.selectRoleButton {
+  @apply bg-white border border-gray-200 rounded-2xl p-4 flex items-center gap-4 w-full text-left shadow-sm transition-all hover:border-gray-300 cursor-pointer;
+}
+.iconDiv{
+  @apply bg-emerald-50 text-emerald-900 p-3 rounded-xl flex items-center justify-center;
+}
+.orangeFont{
+  @apply text-orange-600;
+}
+.greenFont{
+  @apply text-emerald-900
+}
+.loginHeader{
+  
+}
