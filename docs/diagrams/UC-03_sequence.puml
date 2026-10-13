@@ -1,0 +1,28 @@
+@startuml
+title UC-03 – Tierprofil erstellen
+
+autonumber
+
+actor "Tierheim-Mitarbeiter" as User
+participant "Frontend" as FE
+participant "Backend" as BE
+database "Datenbank" as DB
+
+User -> FE: Tierprofil erstellen
+FE --> User: Formular anzeigen
+
+User -> FE: Tierdaten, Tags und Fotos eingeben
+FE -> BE: Profildaten übermitteln
+BE -> BE: Eingaben und Vollständigkeit prüfen
+
+alt Profil vollständig und gültig
+    BE -> DB: Tierprofil und Fotoreferenzen speichern
+    DB --> BE: Speicherung erfolgreich
+    BE -> BE: Profil zur Veröffentlichung freigeben
+    BE --> FE: Erfolg und Status "veröffentlicht"
+    FE --> User: Erfolgsmeldung anzeigen
+else Profil unvollständig oder ungültig
+    BE --> FE: Fehlende oder ungültige Angaben melden
+    FE --> User: Fehler anzeigen und Korrektur ermöglichen
+end
+@enduml
