@@ -1,0 +1,32 @@
+sequenceDiagram
+    actor User as Adoptierende Person
+    participant FE as Frontend
+    participant BE as Backend
+    participant DB as Datenbank
+
+    User->>FE: Öffnet Tierübersicht
+    FE->>BE: Fordert nächstes Tier an
+    BE->>DB: Fragt passendes, veröffentlichtes Tierprofil ab
+    DB-->>BE: Tierprofil und bisherige Bewertungen
+    BE->>BE: Prüft Auswahl anhand des Algorithmus
+    BE-->>FE: Übermittelt Tierprofil
+    FE-->>User: Zeigt Tierkarte an
+
+    User->>FE: Klickt Like oder Dislike
+    FE->>BE: Sendet Bewertung und Tier-ID
+    BE->>DB: Speichert Bewertung
+    DB-->>BE: Bestätigung der Speicherung
+    BE-->>FE: Bewertung erfolgreich
+
+    FE->>BE: Fordert nächstes Tier an
+    BE->>DB: Fragt nächstes passendes Tierprofil ab
+
+    alt Weiteres passendes Tier vorhanden
+        DB-->>BE: Nächstes Tierprofil
+        BE-->>FE: Übermittelt Tierprofil
+        FE-->>User: Zeigt nächste Tierkarte
+    else Kein passendes Tier vorhanden
+        DB-->>BE: Keine passenden Tierprofile gefunden
+        BE-->>FE: Keine weiteren Tiere verfügbar
+        FE-->>User: Zeigt Hinweis an
+    end
