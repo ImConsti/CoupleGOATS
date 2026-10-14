@@ -1,6 +1,7 @@
 "use client";
 
 import {useState} from "react";
+import Link from "next/link";
 import "../css/loginPage.css";
 
 export default function LoginPage() {
@@ -18,7 +19,6 @@ export default function LoginPage() {
             setIsShelterLoginVisible(true);
         }
     }
-
 
     return (
         <main className="flex min-h-screen items-center justify-center">
@@ -53,7 +53,18 @@ export default function LoginPage() {
 
                 {isAdopterLoginVisible && (
                     <div>
-                        anmeldung Adoptierender
+                        <hr />
+                        <br />
+                        <h3 className="descriptionText">E-Mail:</h3>
+                        <input type="email" className="textfield" placeholder=" you@example.com"></input>
+                        <br />
+                        <br />
+                        <h3 className="descriptionText">Passwort:</h3>
+                        <input type="password" className="textfield" placeholder=" Enter your password"></input>
+                        <br />
+                        <br />
+                        <button className="submitButton">Als Adoptierender anmelden</button>
+                        <h3 className="descriptionText">Neu bei CoupleGOATS? <Link href="/register" className="greenFont underline">erstelle einen Account</Link></h3>
                     </div>
                 )}
 

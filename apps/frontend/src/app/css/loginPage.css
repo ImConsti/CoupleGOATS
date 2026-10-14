@@ -45,3 +45,11 @@ body {
 .descriptionText{
   @apply block text-gray-500 text-sm;
 }
+
+.textfield{
+  @apply bg-white border border-gray-200 rounded-xl placeholder-gray-400 w-full h-10;
+}
+
+.submitButton{
+  @apply w-full h-10 bg-emerald-900 text-white rounded-xl;
+}
