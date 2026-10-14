@@ -151,7 +151,7 @@ specific requirements: the use cases (3.1) and the quality requirements and cons
 
 | ID | Requirement | Author |
 | -- | ----------- | ------ |
-| NFR-U-01 | [measurable requirement] | [first name] |
+| NFR-U-01 | Ein neuer Benutzer ohne Vorerfahrung mit der Anwendung muss in der Lage sein, die Hauptaufgabe (ausgenommen Registrierung und / oder Login) nach einer kurzen App-Definition in mindestens 9 von 10 Versuchen innerhalb von 60 Sekunden erfolgreich abzuschließen. | brdly06 |
 
 ### 3.3 Reliability
 
@@ -163,7 +163,7 @@ specific requirements: the use cases (3.1) and the quality requirements and cons
 
 | ID | Requirement | Author |
 | -- | ----------- | ------ |
-| NFR-P-01 | [measurable requirement] | [first name] |
+| NFR-P-01 | Bei einer Suchanfrage mit bis zu 1.000 gespeicherten Datensätzen muss die Anwendung die Suchergebnisse in mindestens 95 % der Fälle innerhalb von 10 Sekunden anzeigen. | brdly06 |
 
 ### 3.5 Supportability
 
