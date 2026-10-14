@@ -19,11 +19,15 @@ body {
 }
 
 .selectRoleButton {
-  @apply bg-white border border-gray-200 rounded-2xl p-4 flex items-center gap-4 w-full text-left shadow-sm transition-all hover:border-gray-300 cursor-pointer;
+  @apply bg-white border border-gray-200 rounded-2xl p-4 flex items-center gap-4 w-full text-left shadow-sm transition-all hover:cursor-pointer hover:scale-101;
 }
 
 .iconDiv{
   @apply bg-emerald-50 text-emerald-900 p-3 rounded-xl flex items-center justify-center;
+}
+
+.buttonSelected{
+  @apply border-emerald-900 border-2;
 }
 
 .coupleGoatsFont{
