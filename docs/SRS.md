@@ -124,13 +124,13 @@ specific requirements: the use cases (3.1) and the quality requirements and cons
 
 *Author: Mika* · Adoptierende können Tierprofile ansehen, Tiere mit Like oder Dislike bewerten und anhand von Filtern sowie einem Auswahlalgorithmus weitere passende Tiere entdecken. · [Specification](use_cases/UC-01_swipe.md)
 
-#### 3.1.2 UC-02 [Verb object]
+#### 3.1.2 UC-02 Tierprofil ansehen
 
-*Author: [first name]* · [One sentence.] · [Specification](use_cases/UC-02_[name].md)
+*Author: brdly06* · Adoptierende können über die Discovery-Page das Detailprofil eines Tieres aufrufen, um dessen Informationen, Bilder sowie das zuständige Tierheim anzusehen. · [Specification](use_cases/UC-02_animal_detail.md)
 
-#### 3.1.3 UC-03 [Verb object]
+#### 3.1.3 UC-03 Tierprofil verwalten
 
-*Author: [first name]* · [One sentence.] · [Specification](use_cases/UC-03_[name].md)
+*Author: brdly06* · Tierheim-Mitarbeiter können Tierprofile für ihr Tierheim erstellen, bearbeiten, löschen sowie Fotos verwalten und über Vollständigkeitskriterien die Veröffentlichung steuern. · [Specification](use_cases/UC-03_manage_animal.md)
 
 #### 3.1.4 UC-04 [Verb object]
 
