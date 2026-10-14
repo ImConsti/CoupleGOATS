@@ -31,7 +31,7 @@ export default function LoginPage() {
                     <h3 className="descriptionText">Melde dich an um loszulegen</h3>
                 </div>
 
-                <button className="selectRoleButton" onClick={()=>showInputDiv("adopter")}>
+                <button className={`selectRoleButton ${isAdopterLoginVisible ? "buttonSelected" : ""}`} onClick={()=>showInputDiv("adopter")}>
                     <div className="iconDiv">
                         <img src="/heart.svg" alt="Heart Icon" className="w-6 h-6"/>
                     </div>
@@ -41,7 +41,7 @@ export default function LoginPage() {
                     </div>
                 </button>
                 
-                <button className="selectRoleButton" onClick={()=>showInputDiv("shelter")}>
+                <button className={`selectRoleButton ${isShelterLoginVisible ? "buttonSelected" : ""}`} onClick={()=>showInputDiv("shelter")}>
                     <div className="iconDiv">
                         <img src="/house.svg" alt="House Icon" className="w-6 h-6"/>
                     </div>
@@ -70,7 +70,18 @@ export default function LoginPage() {
 
                 {isShelterLoginVisible && (
                     <div>
-                        anmeldung Tierheim
+                        <hr />
+                        <br />
+                        <h3 className="descriptionText">E-Mail:</h3>
+                        <input type="email" className="textfield" placeholder=" team@your-shelter.org"></input>
+                        <br />
+                        <br />
+                        <h3 className="descriptionText">Passwort:</h3>
+                        <input type="password" className="textfield" placeholder=" Enter your password"></input>
+                        <br />
+                        <br />
+                        <button className="submitButton">Als Tierheim anmelden</button>
+                        <h3 className="descriptionText">Neu bei CoupleGOATS? <Link href="/register" className="greenFont underline">erstelle einen Account</Link></h3>
                     </div>
                 )}
                 
