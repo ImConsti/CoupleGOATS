@@ -235,11 +235,15 @@ Not applicable. [Reason.]
 
 ### 3.12 Applicable standards
 
-*Author: [first name]*
+*Author: brdly06*
 
-<!-- E.g., WCAG 2.2 level AA, a coding standard. -->
-
-[…]
+| Standard | Requirement |
+| ----- | ----- |
+| WCAG 2.2 Level AA | Die Benutzeroberfläche muss die geltenden Barrierefreiheitsanforderungen gemäß WCAG 2.2 Level AA erfüllen. Die Barrierefreiheit wird durch automatisierte Barrierefreiheitstests und manuelle Tastaturnavigationstests überprüft. |
+| Konsistentes Design | Die Anwendung muss über alle Seiten hinweg ein konsistentes Design verwenden, einschließlich einheitlicher Farben, Typografie, Schaltflächen, Formularelemente, Navigation und Fehlermeldungen. |
+| Coding-Standard | Das Projekt muss TypeScript für den Frontend- und Backend-Code verwenden und konsistente Programmierkonventionen einhalten. Code-Formatierung und Linting werden automatisch mithilfe konfigurierter Tools überprüft. |
+| Git- und GitHub-Versionskontrolle | Der gesamte Quellcode des Projekts muss mit Git verwaltet und im GitHub-Repository des Teams gehostet werden. Änderungen müssen mit aussagekräftigen Nachrichten committet und Beiträge über Pull Requests integriert werden. |
+| Web Application Security (OWASP) | Die Anwendung muss die geltenden OWASP-Sicherheitsempfehlungen befolgen, insbesondere in Bezug auf Authentifizierung, Autorisierung, Eingabevalidierung sowie den Schutz von Benutzer- und Tierheimsdaten. |
 
 ## 4 Supporting information
 
