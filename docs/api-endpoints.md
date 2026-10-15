@@ -4,8 +4,6 @@
 (`apps/backend/src/db/schema.ts`), den Zod-Schemas (`apps/backend/src/validation/schemas.ts`),
 UC-02, UC-03 und den Use Cases im README.
 
-Die maschinenlesbare Spezifikation liegt in [`apps/backend/openapi.yaml`](../apps/backend/openapi.yaml).
-Bei laufendem Backend ist sie als Swagger UI unter <http://localhost:3001/api/docs> erreichbar.
 
 ## Konventionen
 
@@ -13,7 +11,7 @@ Bei laufendem Backend ist sie als Swagger UI unter <http://localhost:3001/api/do
 - Request- und Response-Bodies sind JSON. Ausnahme: Bild-Uploads (`multipart/form-data`) und Bild-Downloads (`image/*`).
 - `me` steht immer für das eingeloggte Konto. IDs von Tierheimen werden nie aus dem Body übernommen, sondern aus dem Token gelesen.
 - Auth-Spalte: `–` öffentlich · `User` Adoptierende · `Shelter` Tierheim · `Admin` User mit `isAdmin`.
-- Fehler: `400` Validierung · `401` nicht eingeloggt · `403` fremde Ressource · `404` nicht vorhanden oder nicht veröffentlicht.
+- Fehler: `400` Validierung · `401` nicht eingeloggt · `403` fremde Ressource · `404` nicht vorhanden.
 
 ## Auth
 
@@ -57,10 +55,10 @@ Bei laufendem Backend ist sie als Swagger UI unter <http://localhost:3001/api/do
 
 | Methode | Pfad | Auth | Zweck |
 | ------- | ---- | ---- | ----- |
-| GET | `/animals/{id}` | User | Tierprofil inkl. Tags, Bild-IDs, Tierheimname; `404` wenn nicht veröffentlicht |
+| GET | `/animals/{id}` | User | Tierprofil inkl. Tags, Bild-IDs, Tierheimname |
 | GET | `/animals/{id}/pictures/{pictureId}` | – | Bild als Binärdaten |
 | GET | `/shelters/{id}` | User | Öffentliches Tierheimprofil |
-| GET | `/shelters/{id}/animals` | User | Veröffentlichte Tiere eines Tierheims |
+| GET | `/shelters/{id}/animals` | User | Tiere eines Tierheims |
 
 ## Tierheimprofil und Tierverwaltung (UC-03)
 
@@ -69,7 +67,7 @@ Bei laufendem Backend ist sie als Swagger UI unter <http://localhost:3001/api/do
 | GET | `/shelters/me` | Shelter | Eigenes Tierheimprofil |
 | PATCH | `/shelters/me` | Shelter | Tierheimprofil bearbeiten |
 | DELETE | `/shelters/me` | Shelter | Tierheimkonto löschen |
-| GET | `/shelters/me/animals` | Shelter | Alle eigenen Tiere inkl. unveröffentlichter (Dashboard) |
+| GET | `/shelters/me/animals` | Shelter | Alle eigenen Tiere (Dashboard) |
 | POST | `/shelters/me/animals` | Shelter | Tier anlegen |
 | GET | `/shelters/me/animals/{id}` | Shelter | Eigenes Tier zum Bearbeiten laden |
 | PATCH | `/shelters/me/animals/{id}` | Shelter | Tier bearbeiten; `403` bei fremdem Tier |
@@ -116,10 +114,3 @@ Status-Ablauf: `user_liked` → `user_requested` → `shelter_deadline` (Termin 
 | GET | `/shelters/me/dashboard` | Shelter | Kennzahlen: Tiere, offene Anfragen, nächste Termine |
 | GET | `/shelters?near=` | – | Tierheime für Kartenansicht |
 | GET/PATCH/DELETE | `/admin/users[/{id}]`, `/admin/shelters[/{id}]` | Admin | Systemadministration |
-
-## Offene Punkte im Schema
-
-1. **Sichtbarkeit:** UC-02/UC-03 verlangen veröffentlichte bzw. vollständige Profile, `animals` hat dafür keine Spalte. Entweder `isPublished` ergänzen oder Vollständigkeit bei der Abfrage berechnen (z. B. mindestens ein Bild mit `showOnCard`).
-2. **`passwordHash` in den Create-Schemas:** Der Client sollte `password` schicken, das Backend hasht.
-3. **`shelter_deadline`:** Hier als „Termin gesetzt“ interpretiert. Soll der User den Termin bestätigen können, fehlt ein Status.
-4. **Termin-Slots:** Sollen Tierheime freie Zeiten anbieten, braucht es eine eigene Tabelle plus `/shelters/me/slots`.
