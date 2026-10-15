@@ -1,0 +1,31 @@
+@startuml
+title UC-05 – Nutzerprofil verwalten
+
+autonumber
+
+actor "Adoptierender" as User
+participant "Frontend" as FE
+participant "Backend" as BE
+database "Datenbank" as DB
+
+User -> FE: Profil öffnen
+FE -> BE: GET /users/me
+BE -> DB: Nutzer anhand der ID aus dem Token laden
+DB --> BE: Profildaten
+BE --> FE: Profil
+FE --> User: Vorausgefülltes Formular anzeigen
+
+User -> FE: Angaben ändern und speichern
+FE -> BE: PATCH /users/me
+BE -> BE: Eingaben validieren
+
+alt Eingaben gültig
+    BE -> DB: Profil aktualisieren
+    DB --> BE: OK
+    BE --> FE: 200 aktualisiertes Profil
+    FE --> User: Bestätigung anzeigen
+else Eingaben ungültig
+    BE --> FE: 400 mit fehlerhaften Feldern
+    FE --> User: Felder markieren, Eingaben behalten
+end
+@enduml

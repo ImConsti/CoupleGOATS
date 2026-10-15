@@ -15,7 +15,7 @@ HOW TO USE THIS TEMPLATE
 
 | Team | Version | Last change |
 | ---- | ------- | ----------- |
-| [Team name] | [0.1] | [dd.mm.yyyy] |
+| CoupleGOATS | 0.3 | 16.10.2026 |
 
 The Git history of this file is the revision history.
 
@@ -57,24 +57,43 @@ This document specifies the requirements of [project name]. […]
 
 ### 1.3 Definitions, acronyms and abbreviations
 
-*Author: [first name]*
+*Author: Constantin*
 
 | Term | Meaning |
 | ---- | ------- |
 | SRS | Software Requirements Specification |
 | UC | Use case |
 | NFR | Non-functional requirement (quality requirement or constraint) |
-| [term] | [meaning] |
+| DC | Design Constraint, feste technische Vorgabe (siehe 3.6) |
+| Adoptierender | Registrierter Nutzer, der ein Tier sucht und Tierprofile swipt |
+| Tierheim | Registriertes Konto eines Tierheims, das Tierprofile pflegt und Meet-&-greet-Anfragen beantwortet |
+| Tierprofil | Eintrag eines Tieres mit Stammdaten, Beschreibung, Tags und Fotos |
+| Tag | Schlagwort an einem Tierprofil, z. B. „verträglich mit Katzen“ |
+| Discovery-Page | Seite, auf der Adoptierende Tierkarten nacheinander angezeigt bekommen und swipen |
+| Swipe | Bewertung einer Tierkarte als Like oder Dislike |
+| Match | Tier, das ein Adoptierender geliked hat; erscheint auf der Matches-Seite |
+| Meet & greet | Besuchstermin im Tierheim, um ein Tier vor der Adoption kennenzulernen |
+| Appointments-Seite | Übersicht über offene, bestätigte und vergangene Meet-&-greet-Termine |
+| API | Application Programming Interface, hier die REST-Schnittstelle des Backends |
+| REST | Representational State Transfer, Architekturstil für HTTP-Schnittstellen |
+| ORM | Object-Relational Mapping, hier Drizzle |
+| DSGVO | Datenschutz-Grundverordnung (EU) 2016/679 |
+| MoSCoW | Priorisierung nach Must, Should, Could und Won't have |
 
 ### 1.4 References
 
-*Author: [first name]*
+*Author: Constantin*
 
 | Title | Link |
 | ----- | ---- |
-| Blog | [link to your GitHub Discussions] |
-| Board | [link to your GitHub Projects board] |
-| [other document] | [link] |
+| Blog | [GitHub Discussions](https://github.com/ImConsti/CoupleGOATS/discussions) |
+| Board | [CoupleGoats Board](https://github.com/users/ImConsti/projects/1) |
+| Repository | [ImConsti/CoupleGOATS](https://github.com/ImConsti/CoupleGOATS) |
+| Laufende Anwendung | [couplegoats.85.215.100.89.nip.io](https://couplegoats.85.215.100.89.nip.io/) |
+| API-Endpunkte | [api-endpoints.md](api-endpoints.md) |
+| OpenAPI-Spezifikation | [openapi.yaml](../apps/backend/openapi.yaml) |
+| RUP-Vorlage SRS | [rup_srs.htm](https://cin.ufpe.br/~if682/RUP/webtmpl/templates/req/rup_srs.htm) |
+| RUP-Vorlage Use Case | [rup_ucspec.htm](https://cin.ufpe.br/~if682/RUP/webtmpl/templates/req/rup_ucspec.htm) |
 
 ### 1.5 Overview
 
@@ -132,13 +151,13 @@ specific requirements: the use cases (3.1) and the quality requirements and cons
 
 *Author: brdly06* · Tierheim-Mitarbeiter können Tierprofile für ihr Tierheim erstellen, bearbeiten, löschen sowie Fotos verwalten und über Vollständigkeitskriterien die Veröffentlichung steuern. · [Specification](use_cases/UC-03_manage_animal.md)
 
-#### 3.1.4 UC-04 [Verb object]
+#### 3.1.4 UC-04 Meet & greet buchen
 
-*Author: [first name]* · [One sentence.] · [Specification](use_cases/UC-04_[name].md)
+*Author: Constantin* · Adoptierende fragen für ein geliktes Tier einen Besuchstermin beim Tierheim an, das Tierheim bestätigt, lehnt ab oder schlägt einen anderen Termin vor. · [Specification](use_cases/UC-04_meet_and_greet.md)
 
-#### 3.1.5 UC-05 [Verb object]
+#### 3.1.5 UC-05 Nutzerprofil verwalten
 
-*Author: [first name]* · [One sentence.] · planned
+*Author: Constantin* · Adoptierende bearbeiten ihre Profilangaben und ihr Profilbild oder löschen ihr Konto. · [Specification](use_cases/UC-05_manage_profile.md)
 
 <!-- QUALITY REQUIREMENTS (3.2 to 3.5)
      At least one per section. Each one: an ID, one sentence with "shall", a number you can
@@ -169,33 +188,40 @@ specific requirements: the use cases (3.1) and the quality requirements and cons
 
 | ID | Requirement | Author |
 | -- | ----------- | ------ |
-| NFR-S-01 | [measurable requirement] | [first name] |
+| NFR-S-01 | Jeder REST-Endpunkt des Backends muss in `openapi.yaml` dokumentiert sein; ein Abgleich der implementierten Routen mit der Spezifikation muss 100 % Abdeckung ergeben. | Constantin |
+| NFR-S-02 | Ein neues Teammitglied muss das Projekt anhand der README in höchstens 15 Minuten lokal starten können (Frontend und Backend laufen, Datenbank ist migriert). | Constantin |
+| NFR-S-03 | Der Code auf `main` muss `npm run lint` in Frontend und Backend mit 0 Fehlern bestehen. | Constantin |
 
 ### 3.6 Design constraints
 
-*Author: [first name]*
-
-<!-- Decisions that are fixed, not chosen per feature: your stack. -->
+*Author: Constantin*
 
 | ID | Constraint |
 | -- | ---------- |
-| DC-01 | Frontend: [JavaScript/TypeScript, framework] |
-| DC-02 | Backend: [Java, JavaScript/TypeScript or Python, framework] |
-| DC-03 | Database: […] |
+| DC-01 | Frontend: TypeScript, Next.js 16 (App Router) mit React 19 und Tailwind CSS 4 |
+| DC-02 | Backend: TypeScript auf Node.js 22, Express 5, Validierung mit Zod |
+| DC-03 | Database: SQLite über den libSQL-Client, Schema und Migrationen mit Drizzle ORM |
+| DC-04 | Schnittstelle zwischen Frontend und Backend: REST mit JSON, beschrieben in OpenAPI 3 |
+| DC-05 | Auslieferung: Frontend und Backend als Docker-Images, gebaut per GitHub Actions bei jedem Push auf `main` |
+| DC-06 | Repository: Monorepo mit `apps/frontend` und `apps/backend` |
 
 ### 3.7 Online user documentation and help system requirements
 
-Not applicable. [Reason, or replace with requirements.]
+*Author: Constantin*
+
+Not applicable. Die Anwendung soll ohne Handbuch bedienbar sein (siehe NFR-U-01); nötige Hinweise stehen direkt in der Oberfläche, z. B. bei Fehlermeldungen in Formularen.
 
 ### 3.8 Purchased components
 
-Not applicable. [Reason, or list them.]
+*Author: Constantin*
+
+Not applicable. Das Projekt hat kein Budget und verwendet ausschließlich freie Open-Source-Bibliotheken (siehe 3.10).
 
 ### 3.9 Interfaces
 
-*Author: [first name]*
-
 #### 3.9.1 User interfaces
+
+*Author: [first name]*
 
 <!-- Link the mockups of your use cases, or describe the main screens in one line each. -->
 
@@ -203,27 +229,44 @@ Not applicable. [Reason, or list them.]
 
 #### 3.9.2 Hardware interfaces
 
-Not applicable. [Reason.]
+*Author: Constantin*
+
+Not applicable. CoupleGOATS ist eine reine Webanwendung und steuert keine Hardware direkt an; Fotos werden über den normalen Datei-Upload des Browsers ausgewählt.
 
 #### 3.9.3 Software interfaces
 
-<!-- External services and APIs you use, e.g., an e-mail service. -->
+*Author: Constantin*
 
-[…]
+| Schnittstelle | Beschreibung |
+| ------------- | ------------ |
+| Webbrowser | Das Frontend läuft in den jeweils aktuellen Versionen von Chrome, Firefox, Safari und Edge, auf Desktop und Smartphone. |
+| REST-API des Backends | Das Frontend greift ausschließlich über die REST-API unter `/api` auf Daten zu. Die Endpunkte sind in [api-endpoints.md](api-endpoints.md) und [openapi.yaml](../apps/backend/openapi.yaml) beschrieben und als Swagger UI unter `/api/docs` abrufbar. |
+| Datenbank | Das Backend speichert alle Daten einschließlich der Bilder in einer SQLite-Datei und greift über Drizzle ORM darauf zu. Nur das Backend hat Zugriff auf die Datenbank. |
+| Externe Dienste | Derzeit keine. Ein E-Mail-Dienst für Benachrichtigungen zu Meet-&-greet-Anfragen ist eine mögliche Erweiterung. |
 
 #### 3.9.4 Communications interfaces
 
-<!-- E.g., HTTPS between frontend and backend. -->
+*Author: Constantin*
 
-[…]
+- Browser und Server kommunizieren ausschließlich über HTTPS (TLS); unverschlüsselte HTTP-Aufrufe werden auf HTTPS umgeleitet.
+- Frontend und Backend tauschen JSON über HTTP aus; Bild-Uploads nutzen `multipart/form-data`, Bild-Downloads `image/*`.
+- Geschützte Endpunkte erwarten das Token des angemeldeten Kontos im `Authorization`-Header; Fehler werden mit den HTTP-Statuscodes `400`, `401`, `403` und `404` gemeldet.
 
 ### 3.10 Licensing requirements
 
-*Author: [first name]*
+*Author: Constantin*
 
-<!-- The license of your project, and of libraries that impose conditions. -->
+Für das Projekt selbst ist noch keine Lizenz festgelegt; bis dahin liegen alle Rechte beim Team. Alle eingesetzten Bibliotheken stehen unter freizügigen Open-Source-Lizenzen, die eine kostenlose Nutzung erlauben und nur verlangen, dass der Lizenz- und Copyright-Hinweis bei einer Weitergabe erhalten bleibt:
 
-[…]
+| Bibliothek | Lizenz |
+| ---------- | ------ |
+| Next.js, React, Tailwind CSS | MIT |
+| Express, cors, Zod, @libsql/client, swagger-ui-express | MIT |
+| Drizzle ORM | Apache-2.0 |
+| yaml | ISC |
+| dotenv | BSD-2-Clause |
+
+Neue Abhängigkeiten mit Copyleft-Lizenzen (z. B. GPL) dürfen nur nach Absprache im Team aufgenommen werden.
 
 ### 3.11 Legal, copyright and other notices
 
