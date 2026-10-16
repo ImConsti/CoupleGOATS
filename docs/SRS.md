@@ -1,4 +1,4 @@
-# [Project Name] — Software Requirements Specification
+# CoupleGOATS — Software Requirements Specification
 
 <!--
 HOW TO USE THIS TEMPLATE
@@ -122,13 +122,15 @@ specific requirements: the use cases (3.1) and the quality requirements and cons
 ![Use case diagram](diagrams/use-case-diagram.png)
 
 ### 2.3 Assumptions and dependencies
+*Author: Carolin*
 
-*Author: [first name]*
 
-<!-- Optional: what you assume (e.g., users have a DHBW account) and what you depend on
-     (e.g., an external API). Delete the comment and write "None" if there are none. -->
+**Annahme:** Adoptierende und Tierheime haben Zugang zu einem modernen Browser mit Internetverbindung.
 
-[…]
+**Annahme:** Tierheime liefern korrekte sowie aktuelle Daten zu den Tieren und bearbeiten Terminanfragen von Adoptierenden.
+
+**Abhängigkeit:** Das Projekt ist von der Verfügbarkeit und Stabilität der verwendeten npm-Pakete (siehe [Abschnitt 3.6](#36-design-constraints)) abhängig.
+
 
 ## 3 Specific requirements
 
@@ -159,6 +161,10 @@ specific requirements: the use cases (3.1) and the quality requirements and cons
 
 *Author: Constantin* · Adoptierende bearbeiten ihre Profilangaben und ihr Profilbild oder löschen ihr Konto. · [Specification](use_cases/UC-05_manage_profile.md)
 
+#### 3.1.6 UC-06 Tierheim-Dashboard ansehen
+
+*Author: Carolin* · Tierheim-Mitarbeitende können sich einen Überblick über Kennzahlen und anstehende Termine verschaffen sowie direkt zu den wichtigsten Verwaltungsfunktionen navigieren. · [Specification](use_cases/UC-06_shelter_dashboard.md)
+
 <!-- QUALITY REQUIREMENTS (3.2 to 3.5)
      At least one per section. Each one: an ID, one sentence with "shall", a number you can
      test, and if possible stimulus, response and measure. IDs are unique in the whole SRS,
@@ -176,7 +182,9 @@ specific requirements: the use cases (3.1) and the quality requirements and cons
 
 | ID | Requirement | Author |
 | -- | ----------- | ------ |
-| NFR-R-01 | [measurable requirement] | [first name] |
+| NFR-R-01 | Bereits gespeicherte Daten (bspw. Matches und Termine) dürfen bei einem Serverneustart nicht verloren gehen. | Carolin |
+| NFR-R-02 | Ungültige Nutzereingaben dürfen nicht zu einem Serverabsturz führen. | Carolin |
+| NFR-R-03 | Gleichzeitige Datenänderungen durch mehrere Nutzende (z.B. Terminbuchung) dürfen nicht zu inkonsistenten oder widersprüchlichen Datenbankzuständen führen. | Carolin |
 
 ### 3.4 Performance
 
@@ -270,11 +278,16 @@ Neue Abhängigkeiten mit Copyleft-Lizenzen (z. B. GPL) dürfen nur nach Absprach
 
 ### 3.11 Legal, copyright and other notices
 
-*Author: [first name]*
+*Author: Carolin*
 
-<!-- E.g., data protection (GDPR) if you store personal data. -->
+Dieses Projekt entsteht im Rahmen eines Informatik-Studiums und dient Lernzwecken. Eine kommerzielle Nutzung ist nicht vorgesehen.
+Verwendete Drittanbieter-Bibliotheken unterliegen ihren jeweiligen Open-Source-Lizenzen, die zu beachten sind.
+Alle Rechte am Quellcode, an diesem Dokument sowie an allen weiteren im Rahmen des Projekts erstellten Unterlagen liegen, soweit nicht anders angegeben, beim CoupleGOATS-Team.
 
-[…]
+Das System verarbeitet und speichert personenbezogene Daten (z. B. Name, E-Mail-Adresse und weitere Profilangaben von Nutzenden und Tierheimen sowie gebuchte Kennenlerntermine).
+Es wird darauf geachtet, grundlegende Datenschutzprinzipien (z. B. Datenminimierung, sichere Speicherung) umzusetzen.
+
+Für hochgeladene Inhalte wie Tierfotos und Beschreibungen sind die jeweiligen Tierheime verantwortlich.
 
 ### 3.12 Applicable standards
 

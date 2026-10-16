@@ -1,8 +1,7 @@
 # CoupleGOATS — API-Endpunkte
 
 Übersicht aller geplanten REST-Endpunkte des Backends. Abgeleitet aus dem DB-Schema
-(`apps/backend/src/db/schema.ts`), den Zod-Schemas (`apps/backend/src/validation/schemas.ts`),
-UC-02, UC-03 und den Use Cases im README.
+(`apps/backend/src/db/schema.ts`), den Zod-Schemas (`apps/backend/src/validation/schemas.ts`), den Use Cases im README.
 
 
 ## Konventionen
@@ -51,7 +50,7 @@ UC-02, UC-03 und den Use Cases im README.
 | GET | `/discovery?limit=` | User | Nächste Tierkarten: veröffentlicht, gefiltert, noch nicht geswipt |
 | POST | `/animals/{id}/swipe` | User | `{ liked }` → Interest `user_liked` / `user_disliked` |
 
-## Tiere und Tierheime (öffentliche Ansicht, UC-02)
+## Tiere und Tierheime (öffentliche Ansicht)
 
 | Methode | Pfad | Auth | Zweck |
 | ------- | ---- | ---- | ----- |
@@ -60,13 +59,14 @@ UC-02, UC-03 und den Use Cases im README.
 | GET | `/shelters/{id}` | User | Öffentliches Tierheimprofil |
 | GET | `/shelters/{id}/animals` | User | Tiere eines Tierheims |
 
-## Tierheimprofil und Tierverwaltung (UC-03)
+## Tierheimprofil und Tierverwaltung
 
 | Methode | Pfad | Auth | Zweck |
 | ------- | ---- | ---- | ----- |
 | GET | `/shelters/me` | Shelter | Eigenes Tierheimprofil |
 | PATCH | `/shelters/me` | Shelter | Tierheimprofil bearbeiten |
 | DELETE | `/shelters/me` | Shelter | Tierheimkonto löschen |
+| GET | `/shelters/me/dashboard` | Shelter | Kennzahlen: Tiere, offene Anfragen, nächste Termine |
 | GET | `/shelters/me/animals` | Shelter | Alle eigenen Tiere (Dashboard) |
 | POST | `/shelters/me/animals` | Shelter | Tier anlegen |
 | GET | `/shelters/me/animals/{id}` | Shelter | Eigenes Tier zum Bearbeiten laden |
@@ -107,10 +107,9 @@ Status-Ablauf: `user_liked` → `user_requested` → `shelter_deadline` (Termin 
 | PATCH | `/tags/{id}` | Admin | Tag umbenennen |
 | DELETE | `/tags/{id}` | Admin | Tag löschen |
 
-## Optional (Erweiterungen laut README)
+## Optional
 
 | Methode | Pfad | Auth | Zweck |
 | ------- | ---- | ---- | ----- |
-| GET | `/shelters/me/dashboard` | Shelter | Kennzahlen: Tiere, offene Anfragen, nächste Termine |
 | GET | `/shelters?near=` | – | Tierheime für Kartenansicht |
 | GET/PATCH/DELETE | `/admin/users[/{id}]`, `/admin/shelters[/{id}]` | Admin | Systemadministration |
