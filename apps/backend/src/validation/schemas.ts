@@ -1,4 +1,4 @@
-import {z} from 'zod'
+import {z} from "zod";
 
 export const interestStatus = [
     "user_liked",
@@ -30,12 +30,11 @@ export const createAnimalShelterSchema = z.object({
     email: z.email(),
     passwordHash: z.string(),
     streetAddress: z.string(),
-    postalCode: z.string()
-        .regex(/^\d{5}$/),
+    postalCode: z.string().regex(/^\d{5}$/),
     city: z.string(),
-})
+});
 
-export const updateAnimalShelterSchema = createAnimalShelterSchema.partial()
+export const updateAnimalShelterSchema = createAnimalShelterSchema.partial();
 
 export const createAnimalSchema = z.object({
     animalShelterId: z.uuid(),
@@ -46,36 +45,35 @@ export const createAnimalSchema = z.object({
     gender: z.enum(genders),
     requiredExperience: z.enum(experienceLevels),
     description: z.string(),
-})
+});
 
-export const updateAnimalSchema = createAnimalSchema.partial()
+export const updateAnimalSchema = createAnimalSchema.partial();
 
-export const createTagSchema = z.object({
-    name: z.string(),
-})
+export const createTagSchema = z.object({name: z.string()});
 
-export const updateTagSchema = createTagSchema
+export const updateTagSchema = createTagSchema;
 
 export const createInterestSchema = z.object({
     animalId: z.uuid(),
     status: z.enum(interestStatus),
-    appointmentAt: z.iso.datetime({ local: true}).transform((value) =>  new Date(value).toISOString()).nullish(),
-})
+    appointmentAt: z.iso
+        .datetime({local: true})
+        .transform((value) => new Date(value).toISOString())
+        .nullish(),
+});
 
-export const updateInterestSchema = createInterestSchema.partial()
+export const updateInterestSchema = createInterestSchema.partial();
 
 export const createBreedSchema = z.object({
     species: z.uuid(),
     name: z.string(),
-})
+});
 
-export const updateBreedSchema = createBreedSchema.partial()
+export const updateBreedSchema = createBreedSchema.partial();
 
-export const createSpeciesSchema = z.object({
-    name: z.string(),
-})
+export const createSpeciesSchema = z.object({name: z.string()});
 
-export const updateSpeciesSchema = createSpeciesSchema
+export const updateSpeciesSchema = createSpeciesSchema;
 
 export const createUserFilterSchema = z.object({
     animalSpecies: z.uuid().nullish(),
@@ -83,10 +81,10 @@ export const createUserFilterSchema = z.object({
     animalMinAge: z.int().nullish(),
     animalMaxAge: z.int().nullish(),
     animalGender: z.enum(genders).nullish(),
-    experienceLevel: z.enum(experienceLevels).nullish()
-})
+    experienceLevel: z.enum(experienceLevels).nullish(),
+});
 
-export const updateUserFilterSchema = createUserFilterSchema.partial()
+export const updateUserFilterSchema = createUserFilterSchema.partial();
 
 export const createUserSchema = z.object({
     firstName: z.string(),
@@ -95,23 +93,24 @@ export const createUserSchema = z.object({
     email: z.email(),
     passwordHash: z.string(),
     streetAddress: z.string(),
-    postalCode: z.string()
-        .regex(/^\d{5}$/),
+    postalCode: z.string().regex(/^\d{5}$/),
     city: z.string(),
-    isAdmin: z.boolean().transform((value) => value ? 1 : 0).optional(),
-    isSmoker: z.boolean().transform((value) => value ? 1 : 0),
+    isAdmin: z
+        .boolean()
+        .optional(),
+    isSmoker: z.boolean(),
     houseType: z.enum(houseTypes),
-    hasGarden: z.boolean().transform((value) => value ? 1 : 0),
-    hasChildren: z.boolean().transform((value) => value ? 1 : 0),
-    roamingPossible: z.boolean().transform((value) => value ? 1 : 0),
-})
+    hasGarden: z.boolean(),
+    hasChildren: z.boolean(),
+    roamingPossible: z.boolean(),
+});
 
-export const updateUserSchema = createUserSchema.partial()
+export const updateUserSchema = createUserSchema.partial();
 
 export const createAnimalPicturesSchema = z.object({
     animalId: z.uuid(),
-    showOnCard: z.boolean().transform((value) => value ? 1 : 0),
+    showOnCard: z.boolean(),
     picture: z.instanceof(Blob),
-})
+});
 
-export const updateAnimalPictureSchema = createAnimalPicturesSchema.partial()
+export const updateAnimalPictureSchema = createAnimalPicturesSchema.partial();
