@@ -127,7 +127,7 @@ export const interests = sqliteTable("interests", {
         check(
             "check_status",
             sql`status
-            IN ('user_liked', 'user_disliked', 'user_requested', 'shelter_deadline', 'shelter_completed')`
+            IN ('user_liked', 'user_disliked', 'user_requested', 'shelter_rejected', 'shelter_accepted')`
         )
     ]);
 

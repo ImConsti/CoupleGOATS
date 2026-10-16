@@ -4,8 +4,8 @@ export const interestStatus = [
     "user_liked",
     "user_disliked",
     "user_requested",
-    "shelter_deadline",
-    "shelter_completed",
+    "shelter_rejected",
+    "shelter_accepted",
 ] as const;
 
 export const houseTypes = [

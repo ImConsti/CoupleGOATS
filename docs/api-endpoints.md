@@ -79,7 +79,7 @@
 
 ## Interessen / Meet & Greet
 
-Status-Ablauf: `user_liked` → `user_requested` → `shelter_deadline` (Termin gesetzt) → `shelter_completed`.
+Status-Ablauf: `user_liked` → `user_requested` → `shelter_accepted` / `shelter_rejected`.
 `user_disliked` ist ein Endzustand und blendet das Tier in der Discovery aus.
 
 | Methode | Pfad | Auth | Zweck |
