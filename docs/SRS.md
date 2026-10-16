@@ -241,11 +241,24 @@ Not applicable. Das Projekt hat kein Budget und verwendet ausschließlich freie 
 
 #### 3.9.1 User interfaces
 
-*Author: [first name]*
+*Author: Mika*
 
-<!-- Link the mockups of your use cases, or describe the main screens in one line each. -->
+CoupleGOATS bietet eine responsive Weboberfläche für Adoptierende und Tierheime. Die Anwendung kann über einen modernen Webbrowser auf Desktop-Computern und mobilen Geräten genutzt werden. Die folgenden Seiten bilden die wichtigsten Benutzeroberflächen:
 
-[…]
+| Seite | Beschreibung |
+|---|---|
+| Anmeldeseite | Ermöglicht registrierten Nutzern und Tierheimen, sich bei ihrem Konto anzumelden. |
+| Registrierungsseite | Ermöglicht neuen Nutzern und Tierheimen, ein Konto mit den jeweils erforderlichen Angaben zu erstellen. |
+| Discovery-Seite | Zeigt Tierkarten an, die Adoptierende durchstöbern und mit Likes oder Dislikes bewerten können. Filter helfen dabei, passende Tiere zu finden. |
+| Tierdetailseite | Zeigt ausführliche Informationen zu einem Tier, darunter Beschreibung, Fotos, Eigenschaften und das zuständige Tierheim. |
+| Matches-Seite | Zeigt Tiere an, die ein Adoptierender geliked hat, und ermöglicht den erneuten Zugriff auf deren Profile. |
+| Terminübersicht | Zeigt angefragte, bestätigte und vergangene Kennenlerntermine sowie deren aktuellen Status an. |
+| Nutzerprofilseite | Ermöglicht Adoptierenden, persönliche Angaben, das Profilbild und Präferenzen für die Tieradoption zu verwalten. |
+| Tierheim-Dashboard | Bietet Tierheimmitarbeitenden einen Überblick über relevante Kennzahlen, Tierprofile und anstehende Termine. |
+| Tierverwaltung | Ermöglicht Tierheimmitarbeitenden, Tierprofile zu erstellen, zu bearbeiten und zu löschen sowie Fotos und Informationen zu verwalten. |
+| Terminverwaltung | Ermöglicht Tierheimmitarbeitenden, Terminanfragen einzusehen, zu bestätigen oder abzulehnen sowie alternative Termine vorzuschlagen. |
+
+Die Benutzeroberfläche verwendet ein einheitliches Design für alle Seiten. Navigation, Schriftarten, Farben, Schaltflächen, Formularelemente und Fehlermeldungen sind konsistent gestaltet, um eine intuitive und barrierearme Bedienung zu ermöglichen. Das Layout passt sich an unterschiedliche Bildschirmgrößen an. Interaktive Elemente sollen außerdem über die Tastatur bedienbar sein.
 
 #### 3.9.2 Hardware interfaces
 
