@@ -126,7 +126,7 @@ Der Hauptvorteil von CoupleGOATS liegt darin, die Suche nach einem Tier zu erlei
 
 ### 2.2 Use case diagram
 
-*Author: [first name]*
+*Author: Mika*
 
 <!-- One UML use case diagram for the whole application, at least five high-level use cases;
      login and registration do not count. Commit the source file next to the image. -->
