@@ -113,12 +113,16 @@ specific requirements: the use cases (3.1) and the quality requirements and cons
 
 ### 2.1 Vision
 
-*Author: [first name]*
+*Author: Mika*
 
-<!-- Your vision from Task 1, updated: the problem, the target group and the stakeholders,
-     the value, and how you differ from alternatives. The investor should get it in two minutes. -->
+CoupleGOATS hat sich zum Ziel gesetzt, die Tiervermittlung zu vereinfachen und mehr Menschen die Möglichkeit zur Tieradoption zu bieten. Der Prozess, geeignete Tiere zu finden und mit Tierheimen in Verbindung zu treten, soll so einfach und intuitiv wie möglich gestaltet werden. Deshalb wurde sich dafür entschieden das ganze wie eine Dating App zu gestalten (z.B. Tinder).
 
-[…]
+Viele Menschen haben Interesse daran, Tiere zu adoptieren, aber sie sind unsicher, wo sie ihre Suche anfangen sollen oder wie sie geeignete Tiere finden können. Zugleich brauchen Tierheime geeignete Wege, um ihre Tiere abzugeben und potenzielle Adoptierende zu erreichen.
+
+Die primären Zielgruppen sind zum einen Benutzer, die ein Tier adoptieren möchten, und zum anderen Tierheime, die ihre Tiere abgeben wollen. Adoptierende haben die Möglichkeit, Tierprofile anzuschauen, Tiere nach  Kriterien zu filtern und Kennenlerntermine zu beantragen.
+
+Der Hauptvorteil von CoupleGOATS liegt darin, die Suche nach einem Tier zu erleichtern und den Fokus auf Tiere zu richten, die ein neues Zuhause brauchen. Die App soll durch die Verbindung einer benutzerfreundlichen Oberfläche Tiere und Adoptierende zusammenführen.
+
 
 ### 2.2 Use case diagram
 
