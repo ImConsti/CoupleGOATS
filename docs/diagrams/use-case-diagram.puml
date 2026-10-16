@@ -1,0 +1,36 @@
+@startuml
+left to right direction
+skinparam packageStyle rectangle
+skinparam actorStyle awesome
+
+actor "Adoptierender" as ADO
+actor "Tierheim-Mitarbeiter" as TH
+
+rectangle "CoupleGOATS (Tier-Adoptionsplattform)" {
+    usecase "UC-01\nTiere swipen" as UC01
+    usecase "UC-02\nTierprofil ansehen" as UC02
+    usecase "UC-03\nTierprofil verwalten" as UC03
+    usecase "UC-04\nMeet & greet buchen" as UC04
+    usecase "UC-05\nNutzerprofil verwalten" as UC05
+    usecase "UC-06\nTierheim-Dashboard\nansehen" as UC06
+}
+
+' Assoziationen Adoptierender
+ADO -- UC01
+ADO -- UC02
+ADO -- UC04
+ADO -- UC05
+
+' Assoziationen Tierheim
+TH -- UC03
+TH -- UC04
+TH -- UC06
+
+' Beziehungen zwischen Use Cases
+UC02 .> UC01 : <<extend>>
+
+note on link
+  Extension Point:
+  Schritt 6 "More info"
+end note
+@enduml
