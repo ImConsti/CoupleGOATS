@@ -30,12 +30,9 @@ The Git history of this file is the revision history.
 
 ### 1.1 Purpose
 
-*Author: [first name]*
+*Autor: Mika*
 
-<!-- One paragraph: what this document describes and who reads it
-     (your team, the lecturer as investor, the developer who takes over). -->
-
-This document specifies the requirements of [project name]. […]
+Dieses Dokument beschreibt die funktionalen und nicht-funktionalen Anforderungen von unserer Webanwendung CoupleGOATS, die Menschen dabei hilft, geeignete Tiere zur Adoption zu finden. Es dient dem Entwicklungsteam als gemeinsame Grundlage, damit alle Teammitglieder ein einheitliches Verständnis der erwarteten Funktionen, technischen Rahmenbedingungen und Qualitätsanforderungen haben. Darüber hinaus bietet es dem Dozenten einen Überblick über die Ziele, den Umfang und die Anforderungen an die Umsetzung des Projekts.
 
 ### 1.2 Scope
 
