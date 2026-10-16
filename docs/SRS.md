@@ -30,27 +30,38 @@ The Git history of this file is the revision history.
 
 ### 1.1 Purpose
 
-*Autor: Mika*
+*Author: Mika*
 
 Dieses Dokument beschreibt die funktionalen und nicht-funktionalen Anforderungen von unserer Webanwendung CoupleGOATS, die Menschen dabei hilft, geeignete Tiere zur Adoption zu finden. Es dient dem Entwicklungsteam als gemeinsame Grundlage, damit alle Teammitglieder ein einheitliches Verständnis der erwarteten Funktionen, technischen Rahmenbedingungen und Qualitätsanforderungen haben. Darüber hinaus bietet es dem Dozenten einen Überblick über die Ziele, den Umfang und die Anforderungen an die Umsetzung des Projekts.
 
 ### 1.2 Scope
 
-*Author: [first name]*
-
 <!-- What the software does and for whom, in two or three sentences.
      Then split explicitly into in scope and out of scope, each with a reason.
      Out of scope = your MoSCoW "won't have this time". Document later changes here. -->
+*Author: Mika*
 
-[Two or three sentences.]
+CoupleGOATS ist eine Webanwendung, die potenzielle Adoptierende und Tierheime über eine intuitive Swipe-Funktion miteinander verbindet. Nutzer können Tierprofile entdecken, detaillierte Informationen zu Tieren ansehen, interessante Tiere durch Likes speichern und Kennenlerntermine bei den zuständigen Tierheimen anfragen. Tierheime können ihre Tierprofile verwalten, Informationen zu den Tieren pflegen und Terminanfragen bearbeiten.
 
-| In scope | Reason |
-| -------- | ------ |
-| [feature] | [why] |
+| Im Projektumfang enthalten | Begründung |
+|---|---|
+| Registrierung und Anmeldung für Nutzer und Tierheime | Ermöglicht beiden Zielgruppen den Zugriff auf die jeweils passenden Funktionen. |
+| Tierprofile durchsuchen und swipen | Bildet die Kernfunktion der Anwendung und unterstützt die Suche nach geeigneten Tieren. |
+| Detaillierte Tierprofile anzeigen | Liefert wichtige Informationen, um die Eignung eines Tieres einschätzen zu können. |
+| Tiere filtern und passende Tiere empfehlen | Unterstützt die Suche anhand individueller Wünsche und Lebensbedingungen. |
+| Tierprofile erstellen, bearbeiten und löschen | Ermöglicht Tierheimen, ihre Tiere zu verwalten und Informationen aktuell zu halten. |
+| Nutzerprofile verwalten | Ermöglicht Adoptierenden, persönliche Daten und Präferenzen zu pflegen. |
+| Kennenlerntermine anfragen und verwalten | Unterstützt den Kontakt zwischen Adoptierenden und Tierheimen. |
+| Tierheim-Dashboard | Bietet einen Überblick über relevante Kennzahlen und anstehende Termine. |
 
-| Out of scope | Reason |
-| ------------ | ------ |
-| [feature] | [why not, or not now] |
+| Nicht im Projektumfang enthalten | Begründung |
+|---|---|
+| Vollständige rechtliche Abwicklung einer Adoption online | Die Anwendung unterstützt die Vermittlung, ersetzt aber nicht den offiziellen Adoptionsprozess des Tierheims. |
+| Online-Zahlungen oder Spenden | Finanzielle Transaktionen sind für die Kernfunktionen nicht erforderlich. |
+| Native Android- oder iOS-Apps | Das Projekt konzentriert sich auf eine responsive Webanwendung. |
+| Automatische tiermedizinische Diagnosen oder Gesundheitsbewertungen | Medizinische Beurteilungen erfordern qualifiziertes Fachpersonal und gehören nicht zum Projektziel. |
+| Integrierter Echtzeit-Chat oder Videoanrufe | Eine direkte Kommunikation über die Terminanfrage hinaus ist für die geplanten Kernfunktionen nicht notwendig. |
+| Automatische E-Mail- oder Push-Benachrichtigungen | Ein externer Benachrichtigungsdienst ist derzeit nicht Bestandteil der geplanten Umsetzung. |
 
 ### 1.3 Definitions, acronyms and abbreviations
 
