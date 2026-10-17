@@ -22,11 +22,6 @@ export const loginSchema = z.object({
   role: z.enum(roles).exclude(["admin"]),
 });
 
-export const jwtPayloadInputSchema = z.object({
-  sub: z.string(),
-  role: z.enum(roles)
-})
-
 export const createAnimalShelterSchema = z.object({
   name: z.string(),
   email: z.email(),

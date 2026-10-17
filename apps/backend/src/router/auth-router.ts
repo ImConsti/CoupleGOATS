@@ -3,7 +3,7 @@ import express, {
   type Response,
   type NextFunction,
 } from "express";
-import { loginSchema, jwtPayloadInputSchema } from "../validation/schemas.js";
+import { loginSchema } from "../validation/schemas.js";
 import { zodValidation } from "../validation/zod-validation.js";
 import { getUserByEmail } from "../repositories/users.js";
 import { verifyPassword } from "../utils/bcrypt.js";
@@ -11,9 +11,9 @@ import { generateToken } from "../utils/jwt.js";
 import { AuthenticationError, InternalServerError } from "../errors/errors.js";
 import { getShelterByEmail } from "../repositories/shelters.js";
 import {
-  authorizationHandler,
+  authenticationHandler,
   type AuthRequest,
-} from "../middleware/authorizationHandler.js";
+} from "../middleware/authenticationHandler.js";
 
 export const router = express.Router({ mergeParams: true });
 
@@ -55,17 +55,22 @@ router.post(
   },
 );
 
-router.post("/logout", authorizationHandler, (_req: Request, res: Response) => {
+router.post("/logout", authenticationHandler, (_req: AuthRequest, res: Response) => {
   res.status(204).send();
 });
 
 router.get(
   "/me",
-  authorizationHandler,
+  authenticationHandler,
   (req: AuthRequest, res: Response, next: NextFunction) => {
     try {
-      const authInfo = zodValidation(jwtPayloadInputSchema, req.auth);
-      res.status(200).json(authInfo);
+      if (!req.auth?.sub || !req.auth?.role){
+        throw new InternalServerError("An internal server error occurred");
+      }
+      res.status(200).json({
+        userOrShelterId: req.auth.sub,
+        role: req.auth.role,
+      });
     } catch (error) {
       next(error);
     }
