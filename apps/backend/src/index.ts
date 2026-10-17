@@ -8,6 +8,8 @@ import swaggerUi from "swagger-ui-express";
 import {parse} from "yaml";
 import {routeNotFoundHandler} from "./middleware/routeNotFoundHandler.js";
 import {errorHandler} from "./middleware/errorHandler.js";
+import { router as authRouter } from "./router/auth-router.js";
+import { authenticationHandler } from "./middleware/authenticationHandler.js";
 
 async function runMigration() {
     const db = drizzle({
@@ -44,6 +46,8 @@ app.get("/test", (_req, res) => {
     console.log("Test endpoint hit");
     res.json({ok: true});
 });
+app.use("/api/v1/auth", authRouter);
+app.use(authenticationHandler)
 
 app.use(routeNotFoundHandler);
 app.use(errorHandler);
