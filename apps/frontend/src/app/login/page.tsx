@@ -2,12 +2,19 @@
 
 import {useState} from "react";
 import Link from "next/link";
+import {useRouter} from "next/navigation";
 import "../css/loginPage.css";
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
 
 export default function LoginPage() {
 
+    const router = useRouter();
+
     const [isAdopterLoginVisible, setIsAdopterLoginVisible] = useState(false);
     const [isShelterLoginVisible, setIsShelterLoginVisible] = useState(false);
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
 
     function showInputDiv(role : string){
         if(role == "adopter"){
@@ -18,6 +25,23 @@ export default function LoginPage() {
             setIsAdopterLoginVisible(false);
             setIsShelterLoginVisible(true);
         }
+    }
+
+    async function handleLogin(role: "user" | "shelter") {
+        const response = await fetch(`${API_URL}/api/v1/auth/login`, {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({email, password, role}),
+        });
+
+        if (!response.ok) {
+            return;
+        }
+
+        const data = await response.json();
+
+        localStorage.setItem("token", data.token);
+        router.push(role === "shelter" ? "/dashboard" : "/swipe");
     }
 
     return (
@@ -56,16 +80,16 @@ export default function LoginPage() {
                         <hr />
                         <br />
                         <h3 className="descriptionText">E-Mail:</h3>
-                        <input type="email" className="textfield" placeholder=" you@example.com"></input>
+                        <input type="email" className="textfield" placeholder=" you@example.com"  onChange={(e) => setEmail(e.target.value)}></input>
                         <br />
                         <br />
                         <h3 className="descriptionText">Passwort:</h3>
-                        <input type="password" className="textfield" placeholder=" Enter your password"></input>
+                        <input type="password" className="textfield" placeholder=" Enter your password" onChange={(e) => setPassword(e.target.value)}></input>
                         <br />
                         <br />
-                        <button className="submitButton">Als Adoptierender anmelden</button>
+                        <button className="submitButton" onClick={()=>handleLogin("user")}>Als Adoptierender anmelden</button>
                         <h3 className="descriptionText">Neu bei CoupleGOATS? <Link href="/register" className="greenFont underline">erstelle einen Account</Link></h3>
-                    </div>
+                    </div>    
                 )}
 
                 {isShelterLoginVisible && (
@@ -73,14 +97,14 @@ export default function LoginPage() {
                         <hr />
                         <br />
                         <h3 className="descriptionText">E-Mail:</h3>
-                        <input type="email" className="textfield" placeholder=" team@your-shelter.org"></input>
+                        <input type="email" className="textfield" placeholder=" team@your-shelter.org" onChange={(e) => setEmail(e.target.value)}></input>
                         <br />
                         <br />
                         <h3 className="descriptionText">Passwort:</h3>
-                        <input type="password" className="textfield" placeholder=" Enter your password"></input>
+                        <input type="password" className="textfield" placeholder=" Enter your password" onChange={(e) => setPassword(e.target.value)}></input>
                         <br />
                         <br />
-                        <button className="submitButton">Als Tierheim anmelden</button>
+                        <button className="submitButton" onClick={()=>handleLogin("shelter")}>Als Tierheim anmelden</button>
                         <h3 className="descriptionText">Neu bei CoupleGOATS? <Link href="/register" className="greenFont underline">erstelle einen Account</Link></h3>
                     </div>
                 )}
