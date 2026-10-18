@@ -23,6 +23,14 @@ export class ValidationError extends AppError {
   }
 }
 
+export class ForbiddenError extends AppError {
+  statusCode: number = 403;
+  code: string = "FORBIDDEN";
+  constructor(message: string) {
+    super(message, "ForbiddenError");
+  }
+}
+
 export class NotFoundError extends AppError {
   statusCode: number = 404;
   code: string = "NOT_FOUND";

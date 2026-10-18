@@ -16,16 +16,20 @@ export const genders = ["male", "female", "unknown"] as const;
 
 export const roles = ["admin", "user", "shelter"] as const;
 
+export const emailSchema = z.string().trim().toLowerCase().pipe(z.email());
+
+export const passwordSchema = z.string().min(8).max(72);
+
 export const loginSchema = z.object({
-  email: z.email(),
+  email: emailSchema,
   password: z.string(),
   role: z.enum(roles).exclude(["admin"]),
 });
 
 export const createAnimalShelterSchema = z.object({
   name: z.string(),
-  email: z.email(),
-  password: z.string(),
+  email: emailSchema,
+  password: passwordSchema,
   streetAddress: z.string(),
   postalCode: z.string().regex(/^\d{5}$/),
   city: z.string(),
@@ -87,8 +91,8 @@ export const createUserSchema = z.object({
   firstName: z.string(),
   lastName: z.string(),
   picture: z.instanceof(Blob).optional(),
-  email: z.email(),
-  password: z.string(),
+  email: emailSchema,
+  password: passwordSchema,
   streetAddress: z.string(),
   postalCode: z.string().regex(/^\d{5}$/),
   city: z.string(),
@@ -101,6 +105,11 @@ export const createUserSchema = z.object({
 });
 
 export const updateUserSchema = createUserSchema.partial();
+
+export const registerUserSchema = createUserSchema.omit({
+  isAdmin: true,
+  picture: true,
+});
 
 export const createAnimalPicturesSchema = z.object({
   animalId: z.uuid(),

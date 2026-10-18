@@ -8,7 +8,7 @@ info:
     Rollen: **User** (Adoptierende), **Shelter** (Tierheim), **Admin** (User mit `isAdmin`).
     `me` steht immer für das eingeloggte Konto.
 servers:
-  - url: /api
+  - url: /api/v1
 tags:
   - name: Auth
   - name: Users
@@ -80,16 +80,18 @@ paths:
           application/json:
             schema:
               type: object
-              required: [email, password]
+              required: [email, password, role]
               properties:
                 email: { type: string, format: email }
                 password: { type: string, format: password }
+                role: { type: string, enum: [user, shelter] }
       responses:
         "200":
           description: Eingeloggt
           content:
             application/json:
               schema: { $ref: "#/components/schemas/AuthResponse" }
+        "400": { $ref: "#/components/responses/BadRequest" }
         "401": { $ref: "#/components/responses/Unauthorized" }
   /auth/logout:
     post:
@@ -97,6 +99,7 @@ paths:
       summary: Logout
       responses:
         "204": { description: Ausgeloggt }
+        "401": { $ref: "#/components/responses/Unauthorized" }
   /auth/me:
     get:
       tags: [Auth]
@@ -108,9 +111,10 @@ paths:
             application/json:
               schema:
                 type: object
+                required: [userOrShelterId, role]
                 properties:
+                  userOrShelterId: { type: string, format: uuid }
                   role: { $ref: "#/components/schemas/Role" }
-                  id: { type: string, format: uuid }
         "401": { $ref: "#/components/responses/Unauthorized" }
 
   # ---------- Users ----------
@@ -875,6 +879,7 @@ components:
 
     AuthResponse:
       type: object
+      required: [token, role, id]
       properties:
         token: { type: string }
         role: { $ref: "#/components/schemas/Role" }
@@ -916,7 +921,7 @@ components:
         - type: object
           required: [firstName, lastName, email, password, isSmoker, houseType, hasGarden, hasChildren, roamingPossible]
           properties:
-            password: { type: string, format: password, minLength: 8 }
+            password: { type: string, format: password, minLength: 8, maxLength: 72 }
     UserUpdate:
       allOf:
         - { $ref: "#/components/schemas/UserFields" }
@@ -925,7 +930,7 @@ components:
             streetAddress: { type: string }
             postalCode: { type: string, pattern: "^\\d{5}$" }
             city: { type: string }
-            password: { type: string, format: password, minLength: 8 }
+            password: { type: string, format: password, minLength: 8, maxLength: 72 }
 
     Shelter:
       allOf:
@@ -944,13 +949,13 @@ components:
           properties:
             name: { type: string }
             email: { type: string, format: email }
-            password: { type: string, format: password, minLength: 8 }
+            password: { type: string, format: password, minLength: 8, maxLength: 72 }
     ShelterUpdate:
       type: object
       properties:
         name: { type: string }
         email: { type: string, format: email }
-        password: { type: string, format: password, minLength: 8 }
+        password: { type: string, format: password, minLength: 8, maxLength: 72 }
         streetAddress: { type: string }
         postalCode: { type: string, pattern: "^\\d{5}$" }
         city: { type: string }
@@ -1044,7 +1049,7 @@ components:
         showOnCard: { type: boolean }
         url:
           type: string
-          description: "/api/animals/{animalId}/pictures/{pictureId}"
+          description: "/api/v1/animals/{animalId}/pictures/{pictureId}"
     PictureUpload:
       type: object
       required: [picture]
