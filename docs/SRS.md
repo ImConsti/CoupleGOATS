@@ -273,7 +273,7 @@ Not applicable. CoupleGOATS ist eine reine Webanwendung und steuert keine Hardwa
 | Schnittstelle | Beschreibung |
 | ------------- | ------------ |
 | Webbrowser | Das Frontend läuft in den jeweils aktuellen Versionen von Chrome, Firefox, Safari und Edge, auf Desktop und Smartphone. |
-| REST-API des Backends | Das Frontend greift ausschließlich über die REST-API unter `/api` auf Daten zu. Die Endpunkte sind in [api-endpoints.md](api-endpoints.md) und [openapi.yaml](../apps/backend/openapi.yaml) beschrieben und als Swagger UI unter `/api/docs` abrufbar. |
+| REST-API des Backends | Das Frontend greift ausschließlich über die REST-API unter `/api/v1` auf Daten zu. Die Endpunkte sind in [api-endpoints.md](api-endpoints.md) und [openapi.yaml](../apps/backend/openapi.yaml) beschrieben und als Swagger UI unter `/api/docs` abrufbar. |
 | Datenbank | Das Backend speichert alle Daten einschließlich der Bilder in einer SQLite-Datei und greift über Drizzle ORM darauf zu. Nur das Backend hat Zugriff auf die Datenbank. |
 | Externe Dienste | Derzeit keine. Ein E-Mail-Dienst für Benachrichtigungen zu Meet-&-greet-Anfragen ist eine mögliche Erweiterung. |
 

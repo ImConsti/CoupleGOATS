@@ -6,7 +6,7 @@
 
 ## Konventionen
 
-- Alle Pfade haben das Präfix `/api`.
+- Alle Pfade haben das Präfix `/api/v1`.
 - Request- und Response-Bodies sind JSON. Ausnahme: Bild-Uploads (`multipart/form-data`) und Bild-Downloads (`image/*`).
 - `me` steht immer für das eingeloggte Konto. IDs von Tierheimen werden nie aus dem Body übernommen, sondern aus dem Token gelesen.
 - Auth-Spalte: `–` öffentlich · `User` Adoptierende · `Shelter` Tierheim · `Admin` User mit `isAdmin`.
@@ -18,7 +18,7 @@
 | ------- | ---- | ---- | ----- |
 | POST | `/auth/register/user` | – | Adoptierenden-Konto anlegen |
 | POST | `/auth/register/shelter` | – | Tierheim-Konto anlegen |
-| POST | `/auth/login` | – | Login für beide Rollen, liefert Token |
+| POST | `/auth/login` | – | Login für beide Rollen (`role` im Body), liefert Token |
 | POST | `/auth/logout` | User/Shelter | Logout |
 | GET | `/auth/me` | User/Shelter | Eingeloggtes Konto und Rolle |
 
