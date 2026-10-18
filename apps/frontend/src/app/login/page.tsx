@@ -13,6 +13,7 @@ export default function LoginPage() {
 
     const [isAdopterLoginVisible, setIsAdopterLoginVisible] = useState(false);
     const [isShelterLoginVisible, setIsShelterLoginVisible] = useState(false);
+    const [isEyeVisible, setIsEyeVisible] = useState(true);
     const [isLoginValid, setIsLoginValid] = useState(true);
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
@@ -44,6 +45,10 @@ export default function LoginPage() {
 
         localStorage.setItem("token", data.token);
         router.push(role === "shelter" ? "/dashboard" : "/swipe");
+    }
+
+    async function switchEye() {
+        setIsEyeVisible(!isEyeVisible);
     }
 
     return (
@@ -86,7 +91,7 @@ export default function LoginPage() {
                         <br />
                         <br />
                         <h3 className="descriptionText">Passwort:</h3>
-                        <input type="password" className="textfield" placeholder=" Enter your password" onChange={(e) => setPassword(e.target.value)}></input>
+                        <div className="password-wrapper"><input type={isEyeVisible ? "password" : "text"} className="textfield" placeholder=" Enter your password" onChange={(e) => setPassword(e.target.value)}/><button className="password-toggle" onClick={switchEye}><img src={isEyeVisible ? "/showEye.svg" : "/hideEye.svg"} alt="showPW" /></button></div>
                         <br />
                         <br />
                         {!isLoginValid && (

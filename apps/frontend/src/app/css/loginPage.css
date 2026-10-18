@@ -57,3 +57,21 @@ body {
 .submitButton{
   @apply w-full h-10 bg-emerald-900 text-white rounded-xl;
 }
+
+.password-toggle {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  padding: 0;
+  font-size: 16px;
+}
+
+.password-wrapper {
+  position: relative;
+  display: inline-block;
+  @apply w-full;
+}
