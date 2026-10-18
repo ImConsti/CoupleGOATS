@@ -2,7 +2,7 @@
 
 | Author  | Estimate | User stories |
 | ------- | -------- | ------------ |
-| Carolin | 5        | #37          |
+| Carolin | 5 Story Points        | [#37](https://github.com/ImConsti/CoupleGOATS/issues/37)          |
 
 ## 1 Kurzbeschreibung
 
