@@ -13,6 +13,7 @@ export default function LoginPage() {
 
     const [isAdopterLoginVisible, setIsAdopterLoginVisible] = useState(false);
     const [isShelterLoginVisible, setIsShelterLoginVisible] = useState(false);
+    const [isLoginValid, setIsLoginValid] = useState(true);
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
 
@@ -35,6 +36,7 @@ export default function LoginPage() {
         });
 
         if (!response.ok) {
+            setIsLoginValid(false);
             return;
         }
 
@@ -87,6 +89,9 @@ export default function LoginPage() {
                         <input type="password" className="textfield" placeholder=" Enter your password" onChange={(e) => setPassword(e.target.value)}></input>
                         <br />
                         <br />
+                        {!isLoginValid && (
+                            <span className="text-red-500">E-Mail oder Passwort ist falsch</span>
+                        )}
                         <button className="submitButton" onClick={()=>handleLogin("user")}>Als Adoptierender anmelden</button>
                         <h3 className="descriptionText">Neu bei CoupleGOATS? <Link href="/register" className="greenFont underline">erstelle einen Account</Link></h3>
                     </div>    
@@ -104,6 +109,9 @@ export default function LoginPage() {
                         <input type="password" className="textfield" placeholder=" Enter your password" onChange={(e) => setPassword(e.target.value)}></input>
                         <br />
                         <br />
+                        {!isLoginValid && (
+                            <span className="text-red-500">E-Mail oder Passwort ist falsch</span>
+                        )}
                         <button className="submitButton" onClick={()=>handleLogin("shelter")}>Als Tierheim anmelden</button>
                         <h3 className="descriptionText">Neu bei CoupleGOATS? <Link href="/register" className="greenFont underline">erstelle einen Account</Link></h3>
                     </div>
