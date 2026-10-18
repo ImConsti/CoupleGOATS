@@ -1,0 +1,47 @@
+@startuml
+title UC-04 – Meet & greet buchen
+
+autonumber
+
+actor "Adoptierender" as User
+participant "Frontend" as FE
+participant "Backend" as BE
+database "Datenbank" as DB
+actor "Tierheim" as Shelter
+
+User -> FE: Matches-Seite öffnen
+FE -> BE: GET /users/me/interests?status=user_liked
+BE -> DB: Likes des Nutzers abfragen
+DB --> BE: Gelikte Tiere
+BE --> FE: Liste der Matches
+FE --> User: Matches anzeigen
+
+User -> FE: Meet & greet anfragen (Wunschtermin, Nachricht)
+FE -> BE: POST /users/me/interests/{animalId}/request
+BE -> BE: Wunschtermin prüfen
+BE -> DB: Interest und Tier laden
+
+alt Tier verfügbar und keine aktive Anfrage
+    BE -> DB: Status = user_requested, Wunschtermin speichern
+    DB --> BE: OK
+    BE --> FE: 200 Anfrage gespeichert
+    FE --> User: Bestätigung "Anfrage versendet"
+else Tier nicht mehr verfügbar oder Anfrage existiert bereits
+    BE --> FE: 404 / 409 mit Fehlermeldung
+    FE --> User: Hinweis anzeigen
+end
+
+Shelter -> FE: Appointments-Seite öffnen
+FE -> BE: GET /shelters/me/interests?status=user_requested
+BE -> DB: Anfragen zu eigenen Tieren abfragen
+DB --> BE: Anfragen mit Tier und Interessent
+BE --> FE: Offene Anfragen
+FE --> Shelter: Anfragen anzeigen
+
+Shelter -> FE: Termin bestätigen
+FE -> BE: PATCH /shelters/me/interests/{animalId}/{userId}
+BE -> DB: Status = shelter_deadline, appointmentAt speichern
+DB --> BE: OK
+BE --> FE: 200 Termin bestätigt
+FE --> Shelter: Termin unter "Zukünftige Termine"
+@enduml

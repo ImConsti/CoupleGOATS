@@ -15,6 +15,20 @@
       "when": 1791886886190,
       "tag": "0001_salty_nocturne",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1792138477832,
+      "tag": "0002_wooden_wonder_man",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1792176122557,
+      "tag": "0003_volatile_marvel_zombies",
+      "breakpoints": true
     }
   ]
 }

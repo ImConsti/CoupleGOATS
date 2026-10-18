@@ -2,7 +2,7 @@
 
 | Autor | Schätzung | User Stories |
 | ------ | -------- | ------------ |
-| brdly06 | 34 – 55 Story Points | [#17](https://github.com/ImConsti/CoupleGOATS/issues/17), [#25](https://github.com/ImConsti/CoupleGOATS/issues/25), [#28](https://github.com/ImConsti/CoupleGOATS/issues/28), [#31](https://github.com/ImConsti/CoupleGOATS/issues/31) — in jedes Issue „Implements UC-03“ eintragen |
+| brdly06 | 34 – 55 Story Points | [#20](https://github.com/ImConsti/CoupleGOATS/issues/20), [#17](https://github.com/ImConsti/CoupleGOATS/issues/17), [#25](https://github.com/ImConsti/CoupleGOATS/issues/25), [#28](https://github.com/ImConsti/CoupleGOATS/issues/28), [#31](https://github.com/ImConsti/CoupleGOATS/issues/31) |
 
 ## 1 Kurzbeschreibung
 

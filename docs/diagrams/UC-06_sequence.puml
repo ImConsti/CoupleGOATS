@@ -1,0 +1,48 @@
+@startuml
+title UC-06 – Tierheim-Dashboard ansehen
+
+autonumber
+
+actor "Tierheim-Mitarbeitender" as User
+participant "Frontend" as FE
+participant "Backend" as BE
+database "Datenbank" as DB
+
+User -> FE: Dashboard aufrufen
+FE -> BE: Dashboard-Daten anfordern
+BE -> BE: Anmeldung und Rolle prüfen, Tierheim aus Token ermitteln
+
+alt Nicht angemeldet oder Sitzung abgelaufen
+    BE --> FE: Anfrage ablehnen (nicht authentifiziert)
+    FE --> User: Weiterleitung zum Login
+
+else Rolle ist nicht "Tierheim"
+    BE --> FE: Anfrage ablehnen (keine Berechtigung)
+    FE --> User: Hinweis anzeigen und zur Swipe-Ansicht weiterleiten
+
+else Berechtigt
+    BE -> DB: Kennzahlen ermitteln
+    BE -> DB: Zuletzt hinzugefügte Tierprofile abfragen
+
+    alt Daten nicht ermittelbar
+            DB --> BE: Fehler
+            BE --> FE: Fehler melden
+            FE --> User: Fehlermeldung
+
+    else Keine Tierprofile vorhanden
+        DB --> BE: Kennzahlen mit Wert 0, leere Tierliste
+        BE --> FE: Dashboard-Daten übermitteln
+        FE --> User: Dashboard mit Nullwerten anzeigen
+
+    else Tierprofile vorhanden
+        DB --> BE: Kennzahlen und Tierprofile
+        BE --> FE: Dashboard-Daten übermitteln
+        FE --> User: Dashboard anzeigen
+    end
+end
+
+opt Optional: Wechsel zu Tierprofilen oder Terminverwaltung
+    User -> FE: Navigationsziel wählen
+    FE --> User: Weiterleitung zu UC-03 bzw. UC-05
+end
+@enduml

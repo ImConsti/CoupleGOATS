@@ -14,7 +14,7 @@ HOW TO USE THIS TEMPLATE
 
 | Author | Estimate | User stories |
 | ------ | -------- | ------------ |
-| Mika | 2 | #16, #18, #21, #24, #26 |     
+| Mika | 2 | #16, #18, #21, #24 |     
 
 ## 1 Brief description
 
