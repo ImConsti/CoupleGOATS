@@ -122,7 +122,7 @@ router.get(
         throw new InternalServerError("An internal server error occurred");
       }
       res.status(200).json({
-        userOrShelterId: req.auth.sub,
+        id: req.auth.sub,
         role: req.auth.role,
       });
     } catch (error) {
