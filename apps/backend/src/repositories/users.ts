@@ -1,6 +1,7 @@
 import { db } from "../db/db.js";
 import { users } from "../db/schema.js";
 import { mapDatabaseError } from "../errors/map-database-error.js";
+import { DatabaseError } from "../errors/errors.js";
 
 export async function getUserByEmail(
   email: string,
@@ -31,7 +32,10 @@ export async function createUser(
       .insert(users)
       .values(user)
       .returning({ id: users.id });
-    return created!;
+    if (!created) {
+      throw new DatabaseError("failed to create user");
+    }
+    return created;
   } catch (error: unknown) {
     throw mapDatabaseError(error);
   }

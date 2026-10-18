@@ -1,6 +1,7 @@
 import { db } from "../db/db.js";
 import { animalShelters } from "../db/schema.js";
 import { mapDatabaseError } from "../errors/map-database-error.js";
+import { DatabaseError } from "../errors/errors.js";
 
 export async function getShelterByEmail(
   email: string,
@@ -30,7 +31,10 @@ export async function createShelter(
       .insert(animalShelters)
       .values(shelter)
       .returning({ id: animalShelters.id });
-    return created!;
+    if (!created) {
+      throw new DatabaseError("failed to create shelter");
+    }
+    return created;
   } catch (error: unknown) {
     throw mapDatabaseError(error);
   }
