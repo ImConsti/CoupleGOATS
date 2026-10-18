@@ -23,6 +23,7 @@ export function generateToken(
 
   const options: SignOptions = {
     expiresIn: "20d",
+    algorithm: "HS256",
   };
 
   return jwt.sign(payload, process.env.JWT_SECRET!, options);
@@ -30,7 +31,9 @@ export function generateToken(
 
 export function verifyToken(token: string): JwtPayloadOutput {
   try {
-    return jwt.verify(token, process.env.JWT_SECRET!) as JwtPayloadOutput;
+    return jwt.verify(token, process.env.JWT_SECRET!, {
+      algorithms: ["HS256"],
+    }) as JwtPayloadOutput;
   } catch (err) {
     if (err instanceof jwt.TokenExpiredError) {
       throw new AuthenticationError("Token has expired");
