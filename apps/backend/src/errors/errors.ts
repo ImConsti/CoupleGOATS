@@ -54,3 +54,11 @@ export class DatabaseError extends AppError {
     super(message, "DatabaseError");
   }
 }
+
+export class InternalServerError extends AppError {
+  statusCode: number = 500;
+  code: string = "INTERNAL_SERVER_ERROR";
+  constructor(message: string) {
+    super(message, "InternalServerError");
+  }
+}
