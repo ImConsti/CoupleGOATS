@@ -1,4 +1,5 @@
 import { db } from "../db/db.js";
+import { animalShelters } from "../db/schema.js";
 import { mapDatabaseError } from "../errors/map-database-error.js";
 
 export async function getShelterByEmail(
@@ -16,6 +17,20 @@ export async function getShelterByEmail(
       return undefined;
     }
     return shelter;
+  } catch (error: unknown) {
+    throw mapDatabaseError(error);
+  }
+}
+
+export async function createShelter(
+  shelter: typeof animalShelters.$inferInsert,
+): Promise<{ id: string }> {
+  try {
+    const [created] = await db
+      .insert(animalShelters)
+      .values(shelter)
+      .returning({ id: animalShelters.id });
+    return created!;
   } catch (error: unknown) {
     throw mapDatabaseError(error);
   }

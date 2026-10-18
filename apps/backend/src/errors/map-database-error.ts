@@ -7,7 +7,7 @@ import {
 
 type dbError = {
   cause: {
-    rawCode: string;
+    rawCode: number;
   };
 };
 
@@ -17,9 +17,9 @@ export function mapDatabaseError(error: unknown): AppError {
   } else {
     const dbError: dbError = error as dbError;
     switch (dbError?.cause?.rawCode) {
-      case "2067":
+      case 2067:
         return new ConflictError("resource already exists");
-      case "787":
+      case 787:
         return new UnprocessableEntityError("invalid reference");
       default:
         return new DatabaseError("unknown database error");

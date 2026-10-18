@@ -3,19 +3,69 @@ import express, {
   type Response,
   type NextFunction,
 } from "express";
-import { loginSchema } from "../validation/schemas.js";
+import {
+  createAnimalShelterSchema,
+  loginSchema,
+  registerUserSchema,
+} from "../validation/schemas.js";
 import { zodValidation } from "../validation/zod-validation.js";
-import { getUserByEmail } from "../repositories/users.js";
-import { verifyPassword } from "../utils/bcrypt.js";
+import { createUser, getUserByEmail } from "../repositories/users.js";
+import { hashPassword, verifyPassword } from "../utils/bcrypt.js";
 import { generateToken } from "../utils/jwt.js";
 import { AuthenticationError, InternalServerError } from "../errors/errors.js";
-import { getShelterByEmail } from "../repositories/shelters.js";
+import { createShelter, getShelterByEmail } from "../repositories/shelters.js";
 import {
   authenticationHandler,
   type AuthRequest,
 } from "../middleware/authenticationHandler.js";
 
 export const router = express.Router({ mergeParams: true });
+
+router.post(
+  "/register/user",
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { password, ...request } = zodValidation(
+        registerUserSchema,
+        req.body,
+      );
+      const user = await createUser({
+        ...request,
+        passwordHash: await hashPassword(password),
+      });
+      res.status(201).json({
+        token: generateToken(user.id, "user"),
+        role: "user",
+        id: user.id,
+      });
+    } catch (error: unknown) {
+      next(error);
+    }
+  },
+);
+
+router.post(
+  "/register/shelter",
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { password, ...request } = zodValidation(
+        createAnimalShelterSchema,
+        req.body,
+      );
+      const shelter = await createShelter({
+        ...request,
+        passwordHash: await hashPassword(password),
+      });
+      res.status(201).json({
+        token: generateToken(shelter.id, "shelter"),
+        role: "shelter",
+        id: shelter.id,
+      });
+    } catch (error: unknown) {
+      next(error);
+    }
+  },
+);
 
 router.post(
   "/login",

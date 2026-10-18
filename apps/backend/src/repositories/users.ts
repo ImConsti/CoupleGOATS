@@ -1,4 +1,5 @@
 import { db } from "../db/db.js";
+import { users } from "../db/schema.js";
 import { mapDatabaseError } from "../errors/map-database-error.js";
 
 export async function getUserByEmail(
@@ -17,6 +18,20 @@ export async function getUserByEmail(
       return undefined;
     }
     return user;
+  } catch (error: unknown) {
+    throw mapDatabaseError(error);
+  }
+}
+
+export async function createUser(
+  user: typeof users.$inferInsert,
+): Promise<{ id: string }> {
+  try {
+    const [created] = await db
+      .insert(users)
+      .values(user)
+      .returning({ id: users.id });
+    return created!;
   } catch (error: unknown) {
     throw mapDatabaseError(error);
   }
