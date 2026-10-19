@@ -1,0 +1,5 @@
+@import "tailwindcss";
+
+.textfield{
+  @apply bg-white border border-gray-200 rounded-xl placeholder-gray-400 w-full h-10 px-3;
+}

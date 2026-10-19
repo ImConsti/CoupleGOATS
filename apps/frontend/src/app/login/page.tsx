@@ -4,6 +4,8 @@ import {useState} from "react";
 import Link from "next/link";
 import {useRouter} from "next/navigation";
 import "../css/loginPage.css";
+import PasswordInput from "@/components/passwordInput";
+import EmailInput from "@/components/emailInput";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
 
@@ -13,17 +15,18 @@ export default function LoginPage() {
 
     const [isAdopterLoginVisible, setIsAdopterLoginVisible] = useState(false);
     const [isShelterLoginVisible, setIsShelterLoginVisible] = useState(false);
-    const [isEyeVisible, setIsEyeVisible] = useState(true);
     const [isLoginValid, setIsLoginValid] = useState(true);
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
 
     function showInputDiv(role : string){
         if(role == "adopter"){
+            setIsLoginValid(true);
             setIsShelterLoginVisible(false);
             setIsAdopterLoginVisible(true);
         }
         else{
+            setIsLoginValid(true);
             setIsAdopterLoginVisible(false);
             setIsShelterLoginVisible(true);
         }
@@ -45,10 +48,6 @@ export default function LoginPage() {
 
         localStorage.setItem("token", data.token);
         router.push(role === "shelter" ? "/dashboard" : "/swipe");
-    }
-
-    async function switchEye() {
-        setIsEyeVisible(!isEyeVisible);
     }
 
     return (
@@ -87,11 +86,11 @@ export default function LoginPage() {
                         <hr />
                         <br />
                         <h3 className="descriptionText">E-Mail:</h3>
-                        <input type="email" className="textfield" placeholder=" you@example.com"  onChange={(e) => setEmail(e.target.value)}></input>
+                        <EmailInput onChange={(e) => setEmail(e.target.value)}/>
                         <br />
                         <br />
                         <h3 className="descriptionText">Passwort:</h3>
-                        <div className="password-wrapper"><input type={isEyeVisible ? "password" : "text"} className="textfield" placeholder=" Enter your password" onChange={(e) => setPassword(e.target.value)}/><button className="password-toggle" onClick={switchEye}><img src={isEyeVisible ? "/showEye.svg" : "/hideEye.svg"} alt="showPW" /></button></div>
+                        <PasswordInput placeholder="Enter your password" onChange={(e) => setPassword(e.target.value)}/>
                         <br />
                         <br />
                         {!isLoginValid && (
@@ -107,11 +106,11 @@ export default function LoginPage() {
                         <hr />
                         <br />
                         <h3 className="descriptionText">E-Mail:</h3>
-                        <input type="email" className="textfield" placeholder=" team@your-shelter.org" onChange={(e) => setEmail(e.target.value)}></input>
+                        <EmailInput onChange={(e) => setEmail(e.target.value)}/>
                         <br />
                         <br />
                         <h3 className="descriptionText">Passwort:</h3>
-                        <input type="password" className="textfield" placeholder=" Enter your password" onChange={(e) => setPassword(e.target.value)}></input>
+                        <PasswordInput placeholder="Enter your password" onChange={(e) => setPassword(e.target.value)}/>
                         <br />
                         <br />
                         {!isLoginValid && (
