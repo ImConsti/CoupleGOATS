@@ -1,0 +1,51 @@
+@startuml UC-01_activity
+title UC-01 Tiere swipen
+
+|Nutzer|
+start
+:Discovery Page öffnen;
+
+|System|
+repeat
+  :Nächstes Tier ermitteln\n(Filter, Auswahlalgorithmus);
+
+  if (Tier\nvorhanden?) then ([kein Tier])
+    :Platzhalterkarte\n„Keine passenden Tiere“ anzeigen;
+    |Nutzer|
+    :Filter anpassen;
+    |System|
+    :Filter übernehmen;
+  else ([Tier verfügbar])
+    :Tierkarte anzeigen;
+
+    repeat
+      |Nutzer|
+      :Aktion wählen;
+
+      |System|
+      switch (Aktion?)
+      case ([Like / Dislike])
+        repeat
+          :Bewertung übermitteln;
+        backward :Fehlermeldung anzeigen;
+        repeat while (Fehler?) is ([Übermittlung fehlgeschlagen]) not ([else])
+        :Bewertung speichern\n(Duplikate verhindern);
+      case ([More info])
+        :Detailansicht anzeigen;
+        |Nutzer|
+        :Detailansicht schließen;
+        |System|
+      case ([Filter anpassen])
+        :Filter übernehmen;
+      endswitch
+    repeat while (More info\ngewählt?) is ([ja]) not ([else])
+
+  endif
+
+repeat while (Auf Seite\nbleiben?) is ([User bleibt auf Discovery Page]) not ([User verlässt Discovery Page])
+
+|Nutzer|
+:Discovery Page verlassen;
+stop
+
+@enduml
