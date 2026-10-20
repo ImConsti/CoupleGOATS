@@ -1,0 +1,111 @@
+@startuml
+title UCR-01 – Tiere swipen (Use-Case Realization)
+
+actor "Adoptierende Person" as User
+boundary ":DiscoveryPage" as Page
+control ":DiscoverAnimals" as Discover
+entity ":AnimalProfile" as Animal
+entity ":AnimalRating" as Rating
+
+User -> Page: openDiscovery()
+Page -> Discover: findNextAnimal(activeFilters)
+Discover -> Animal: findPublishedAvailable(activeFilters)
+Animal --> Discover: candidateProfiles
+Discover -> Rating: findRatingsForUser()
+Rating --> Discover: existingRatings
+Discover -> Discover: selectUnratedMatchingAnimal()
+
+alt Passendes Tier vorhanden
+    Discover --> Page: animalFound(profile)
+    Page --> User: Tierkarte anzeigen
+
+    loop Solange die Discovery-Page geöffnet ist
+        alt Weitere Informationen anfordern
+            User -> Page: requestDetails()
+            Page -> Discover: getAnimalDetails(animalId)
+            Discover -> Animal: getDetails(animalId)
+            Animal --> Discover: animalDetails
+            Discover --> Page: detailsAvailable(animalDetails)
+            Page --> User: Detailinformationen anzeigen
+            User -> Page: returnToDiscovery()
+            Page --> User: Bisherige Tierkarte anzeigen
+
+        else Filter ändern
+            User -> Page: changeFilters(newFilters)
+            Page -> Discover: findNextAnimal(newFilters)
+            Discover -> Animal: findPublishedAvailable(newFilters)
+            Animal --> Discover: candidateProfiles
+            Discover -> Rating: findRatingsForUser()
+            Rating --> Discover: existingRatings
+            Discover -> Discover: selectUnratedMatchingAnimal()
+            alt Passendes Tier gefunden
+                Discover --> Page: animalFound(profile)
+                Page --> User: Neue Tierkarte anzeigen
+            else Kein passendes Tier gefunden
+                Discover --> Page: noAnimalAvailable()
+                Page --> User: Keine passenden Tiere anzeigen
+            end
+
+        else Like oder Dislike
+            User -> Page: rateAnimal(animalId, likeOrDislike)
+            Page -> Discover: submitRating(animalId, likeOrDislike)
+            Discover -> Rating: findRating(userId, animalId)
+            Rating --> Discover: existingRatingOrNone
+
+            alt Bewertung bereits vorhanden
+                Discover -> Discover: Doppelte Speicherung verhindern
+            else Noch keine Bewertung vorhanden
+                Discover -> Rating: saveRating(userId, animalId, likeOrDislike)
+                alt Speicherung erfolgreich
+                    Rating --> Discover: ratingSaved
+                else Speicherung fehlgeschlagen
+                    Rating --> Discover: saveFailed
+                    Discover --> Page: ratingFailed()
+                    Page --> User: Fehler anzeigen, Tierkarte beibehalten
+                    loop Bis die Bewertung verarbeitet wurde
+                        User -> Page: retryRating()
+                        Page -> Discover: submitRating(animalId, likeOrDislike)
+                        Discover -> Rating: findRating(userId, animalId)
+                        Rating --> Discover: existingRatingOrNone
+                        alt Noch keine Bewertung vorhanden
+                            Discover -> Rating: saveRating(userId, animalId, likeOrDislike)
+                            Rating --> Discover: saveResult
+                        else Bewertung inzwischen vorhanden
+                            Discover -> Discover: Doppelte Speicherung verhindern
+                        end
+                    end
+                end
+            end
+
+            Discover -> Animal: findPublishedAvailable(activeFilters)
+            Animal --> Discover: candidateProfiles
+            Discover -> Rating: findRatingsForUser()
+            Rating --> Discover: existingRatings
+            Discover -> Discover: selectNextUnratedMatchingAnimal()
+            alt Weiteres passendes Tier vorhanden
+                Discover --> Page: nextAnimalFound(profile)
+                Page --> User: Nächste Tierkarte anzeigen
+            else Keine weiteren passenden Tiere
+                Discover --> Page: noMoreAnimalsAvailable()
+                Page --> User: Hinweis auf keine weiteren Tiere anzeigen
+            end
+        end
+    end
+
+else Kein passendes Tier vorhanden
+    Discover --> Page: noAnimalAvailable()
+    Page --> User: Hinweis auf keine passenden Tiere anzeigen
+    opt Nutzer passt Filter an
+        User -> Page: changeFilters(newFilters)
+        Page -> Discover: findNextAnimal(newFilters)
+        Discover -> Animal: findPublishedAvailable(newFilters)
+        Animal --> Discover: candidateProfiles
+        Discover -> Rating: findRatingsForUser()
+        Rating --> Discover: existingRatings
+        Discover -> Discover: selectUnratedMatchingAnimal()
+        Discover --> Page: searchResult
+        Page --> User: Ergebnis oder Hinweis anzeigen
+    end
+end
+
+@enduml
