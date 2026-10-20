@@ -3,7 +3,8 @@
 import {useState} from "react";
 import Link from "next/link";
 import {useRouter} from "next/navigation";
-import "../css/loginPage.css";
+import "./loginPage.css";
+import "../../globals.css";
 import PasswordInput from "@/components/passwordInput";
 import EmailInput from "@/components/emailInput";
 
@@ -47,7 +48,7 @@ export default function LoginPage() {
         const data = await response.json();
 
         localStorage.setItem("token", data.token);
-        router.push(role === "shelter" ? "/dashboard" : "/swipe");
+        router.push(role === "shelter" ? "/shelter/overview" : "/user/discover");
     }
 
     return (

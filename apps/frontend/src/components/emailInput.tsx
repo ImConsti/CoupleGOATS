@@ -3,9 +3,9 @@
 import "./emailInput.css";
 import {InputHTMLAttributes} from "react";
 
-type PasswordInputProps = Omit<InputHTMLAttributes<HTMLInputElement>, "type">;
+type EmailInputProps = Omit<InputHTMLAttributes<HTMLInputElement>, "type">;
 
-export default function EmailInput({...props}: PasswordInputProps) {
+export default function EmailInput({...props}: EmailInputProps) {
     return(
         <input type="email" className="textfield" placeholder=" you@example.com" {...props}></input>
     )
