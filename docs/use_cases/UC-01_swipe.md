@@ -90,6 +90,11 @@ Dieser Use Case beschreibt, wie ein angemeldeter Nutzer Tiere entdecken und hins
 
 ![Sequence diagram UC-01](</docs/diagrams/UC-01_sequence.png>)
 
+### 4.4 Activity diagram
+<!-- The flow of events as an activity diagram. Commit the source file next 
+to the image. -->
+![Activity diagram UC-[NN]](../diagrams/UC-01_activity.png)
+
 ## 5 Special requirements
 
 <!-- Quality requirements for this use case only, each with an ID that is unique in the
