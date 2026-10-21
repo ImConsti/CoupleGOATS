@@ -1,7 +1,11 @@
 @import "tailwindcss";
 
 .navbar {
-    @apply bg-[#FBFAF5] w-full h-20 border-b border-gray-200;
+    @apply bg-[#FBFAF5] w-full h-20 border-b border-gray-200 flex items-center;
+}
+
+.navbarLogo {
+    @apply h-full flex items-center gap-3 px-6 shrink-0;
 }
 
 .navbarContent {
@@ -22,4 +26,16 @@
 
 .iconDiv {
     @apply bg-emerald-900 p-3 rounded-xl flex items-center justify-center w-10 h-10 shrink-0 rotate-350;
+}
+
+.navbarItemGroup {
+    @apply flex-1 h-full flex items-center justify-evenly pr-24;
+}
+
+.navItem {
+    @apply cursor-pointer text-lg font-medium text-gray-800 hover:text-orange-600 transition-colors h-full;
+}
+
+.selectedTab{
+    @apply border-b-4 border-emerald-900;
 }
