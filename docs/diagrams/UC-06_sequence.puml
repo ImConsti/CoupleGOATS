@@ -30,19 +30,23 @@ else Berechtigt
             FE --> User: Fehlermeldung
 
     else Keine Tierprofile vorhanden
-        DB --> BE: Kennzahlen mit Wert 0, leere Tierliste
+        DB --> BE: leere Tierliste
         BE --> FE: Dashboard-Daten übermitteln
-        FE --> User: Dashboard mit Nullwerten anzeigen
+        FE --> User: Dashboard mit leerer Tierliste anzeigen
+        opt Optional: Wechsel zu Tierprofilen oder Terminverwaltung
+                    User -> FE: Navigationsziel wählen
+                    FE --> User: Weiterleitung zu UC-03 bzw. UC-05
+        end
 
     else Tierprofile vorhanden
         DB --> BE: Kennzahlen und Tierprofile
         BE --> FE: Dashboard-Daten übermitteln
         FE --> User: Dashboard anzeigen
+        opt Optional: Wechsel zu Tierprofilen oder Terminverwaltung
+            User -> FE: Navigationsziel wählen
+            FE --> User: Weiterleitung zu UC-03 bzw. UC-05
     end
 end
 
-opt Optional: Wechsel zu Tierprofilen oder Terminverwaltung
-    User -> FE: Navigationsziel wählen
-    FE --> User: Weiterleitung zu UC-03 bzw. UC-05
 end
 @enduml

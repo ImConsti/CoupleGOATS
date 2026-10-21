@@ -35,9 +35,9 @@ Nach dem Login oder über die Navigation gelangen Mitarbeitende eines Tierheims 
 
 **2b · Falsche Rolle.** In Schritt 2 besitzt der Mitarbeitende nicht die Rolle „Tierheim“. Das System lehnt die Anfrage ab, zeigt einen Hinweis und leitet anschließend zur Swipe-Ansicht (UC-01) weiter. Der Use Case endet.
 
-**3a · Technischer Fehler.** In Schritt 3 tritt ein technischer Fehler bei der Ermittlung der Kennzahlen auf. Das System bricht die Datenabfrage ab, zeigt eine Fehlermeldung an und stellt sicher, dass keine unvollständigen oder fremden Daten angezeigt werden. Der Mitarbeitende kann versuchen, das Dashboard erneut zu laden. Der Use Case endet, sofern die Daten nicht erfolgreich geladen werden können.
+**3a / 4a · Technischer Fehler.** In Schritt 3 oder Schritt 4 tritt ein technischer Fehler bei der Ermittlung der Kennzahlen oder bei der Ermittlung der zuletzt hinzugefügten Tierprofilen auf. Das System bricht die Datenabfrage ab, zeigt eine Fehlermeldung an und stellt sicher, dass keine unvollständigen oder fremden Daten angezeigt werden. Der Mitarbeitende kann versuchen, das Dashboard erneut zu laden. Der Use Case endet, sofern die Daten nicht erfolgreich geladen werden können.
 
-**3b · Tierheim hat noch keine Tierprofile.** In Schritt 3 stellt das System fest, dass keine Tierprofile existieren. Es zeigt bei allen Kennzahlen den Wert 0 an und lässt den Bereich der zuletzt hinzugefügten Tierprofile leer. Weiter geht es mit Schritt 5.
+**4b · Tierheim hat noch keine Tierprofile.** In Schritt 4 stellt das System fest, dass keine Tierprofile existieren. Es lässt den Bereich der zuletzt hinzugefügten Tierprofile leer. Weiter geht es mit Schritt 5.
 
 ### 4.3 Sequenzdiagramm
 
