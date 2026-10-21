@@ -1,6 +1,7 @@
 "use client";
 
 import {useRouter, usePathname } from "next/navigation";
+import Link from "next/link";
 import "./navigationBar.css";
 import { useState } from "react";
 import { logout } from "@/lib/logout";
@@ -39,18 +40,21 @@ export default function NavigationBar({userType}:NavBarAttributes) {
             </div>
 
             <div className="navbarItemGroup">
-                <div className={pathName === firstPath ? "navItem selectedTab" : "navItem"} onClick={()=>router.push(firstPath)}>
+                <Link href={firstPath} className={pathName === firstPath ? "navItem selectedTab" : "navItem"}>
                     <p className="navItemContent">{isUser ? <><img src="/compass.svg" alt="compass icon" className="navIcon"/> Entdecken</> : <><img src="/house.svg" alt="house icon" className="navIcon"/> Übersicht</>}</p>
-                </div>
-                <div className={pathName === secondPath ? "navItem selectedTab" : "navItem"} onClick={()=>router.push(secondPath)}>
+                </Link>
+
+                <Link href={secondPath} className={pathName === secondPath ? "navItem selectedTab" : "navItem"}>
                     <p className="navItemContent">{isUser ? <><img src="/heart.svg" alt="heart icon" className="navIcon"/> Matches</> : <><img src="/paw2.svg" alt="paw icon" className="navIcon"/> Tiere</>}</p>
-                </div>
-                <div className={pathName === basePath+"/appointments" ? "navItem selectedTab" : "navItem"} onClick={()=>router.push(`${basePath}/appointments`)}>
+                </Link>
+
+                <Link href={basePath+"/appointments"} className={pathName === basePath+"/appointments" ? "navItem selectedTab" : "navItem"}>
                     <p className="navItemContent"><img src="/calender.svg" alt="calender icon" className="navIcon"/> Termine</p>
-                </div>
-                <div className={pathName === basePath+"/profile" ? "navItem selectedTab" : "navItem"} onClick={()=>router.push(`${basePath}/profile`)}>
+                </Link>
+
+                <Link href={basePath+"/profile"} className={pathName === basePath+"/profile" ? "navItem selectedTab" : "navItem"}>
                     <p className="navItemContent"><img src="/person.svg" alt="person icon" className="navIcon"/> Profil</p>
-                </div>
+                </Link>
             </div>
 
             <div className="userMenu">
