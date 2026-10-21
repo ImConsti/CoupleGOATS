@@ -2,6 +2,7 @@
 
 import {useRouter, usePathname } from "next/navigation";
 import "./navigationBar.css";
+import { useState } from "react";
 
 type NavBarAttributes = {userType: "user" | "shelter"};
 
@@ -10,6 +11,7 @@ export default function NavigationBar({userType}:NavBarAttributes) {
     const router = useRouter();
     const pathName = usePathname();
     const isUser = userType === "user";
+    const [isLogoutDivVisible, setIsLogoutDivVisible] = useState(false)
 
     const basePath = isUser ? "/user" : "/shelter";
 
@@ -32,18 +34,31 @@ export default function NavigationBar({userType}:NavBarAttributes) {
 
             <div className="navbarItemGroup">
                 <div className={pathName === firstPath ? "navItem selectedTab" : "navItem"} onClick={()=>router.push(firstPath)}>
-                    <p>{isUser ? "Entdecken" : "Übersicht"}</p>
+                    <p className="navItemContent">{isUser ? <><img src="/compass.svg" alt="compass icon" className="navIcon"/> Entdecken</> : <><img src="/house.svg" alt="house icon" className="navIcon"/> Übersicht</>}</p>
                 </div>
                 <div className={pathName === secondPath ? "navItem selectedTab" : "navItem"} onClick={()=>router.push(secondPath)}>
-                    <p>{isUser ? "Matches" : "Tiere"}</p>
+                    <p className="navItemContent">{isUser ? <><img src="/heart.svg" alt="heart icon" className="navIcon"/> Matches</> : <><img src="/paw2.svg" alt="paw icon" className="navIcon"/> Tiere</>}</p>
                 </div>
                 <div className={pathName === basePath+"/appointments" ? "navItem selectedTab" : "navItem"} onClick={()=>router.push(`${basePath}/appointments`)}>
-                    <p>Termine</p>
+                    <p className="navItemContent"><img src="/calender.svg" alt="calender icon" className="navIcon"/> Termine</p>
                 </div>
                 <div className={pathName === basePath+"/profile" ? "navItem selectedTab" : "navItem"} onClick={()=>router.push(`${basePath}/profile`)}>
-                    <p>Profil</p>
+                    <p className="navItemContent"><img src="/person.svg" alt="person icon" className="navIcon"/> Profil</p>
                 </div>
             </div>
+
+            <div className="userMenu">
+                <div className="userIcon" onClick={()=>setIsLogoutDivVisible(!isLogoutDivVisible)}>
+                    <img src="/userIcon.svg" alt="User Icon" className="w-5 h-5 scale-200"/>
+                </div>
+
+                {isLogoutDivVisible && (
+                    <div className="logoutDiv">
+                        <div className="logoutItem">Logout<img src="/logout.svg" alt="logout icon"/></div>
+                    </div>
+                )}
+            </div>
+            
         </nav>
     );
-}
+}   
