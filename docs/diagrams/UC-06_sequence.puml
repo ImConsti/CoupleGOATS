@@ -30,9 +30,9 @@ else Berechtigt
             FE --> User: Fehlermeldung
 
     else Keine Tierprofile vorhanden
-        DB --> BE: leere Tierliste
+        DB --> BE: Kennzahlen, keine Tierprofile
         BE --> FE: Dashboard-Daten übermitteln
-        FE --> User: Dashboard mit leerer Tierliste anzeigen
+        FE --> User: Dashboard ohne Tierprofile anzeigen
         opt Optional: Wechsel zu Tierprofilen oder Terminverwaltung
                     User -> FE: Navigationsziel wählen
                     FE --> User: Weiterleitung zu UC-03 bzw. UC-05
