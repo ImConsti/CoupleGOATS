@@ -3,6 +3,7 @@
 import {useRouter, usePathname } from "next/navigation";
 import "./navigationBar.css";
 import { useState } from "react";
+import { logout } from "@/lib/logout";
 
 type NavBarAttributes = {userType: "user" | "shelter"};
 
@@ -18,11 +19,16 @@ export default function NavigationBar({userType}:NavBarAttributes) {
     const firstPath  = isUser ? `${basePath}/discover` : `${basePath}/overview`;
     const secondPath = isUser ? `${basePath}/matches`  : `${basePath}/animals`;
 
+    async function handleLogout() {
+        await logout();
+        router.push("/auth/login");
+    }
+
     return (
         <nav className="navbar">
 
             <div className="navbarLogo">
-                <div className="iconDiv">
+                <div className="iconDivLogo">
                     <img src="/paw.svg" alt="Paw Icon" className="w-6 h-6 scale-200"/>
                 </div>
 
@@ -54,7 +60,7 @@ export default function NavigationBar({userType}:NavBarAttributes) {
 
                 {isLogoutDivVisible && (
                     <div className="logoutDiv">
-                        <div className="logoutItem">Logout<img src="/logout.svg" alt="logout icon"/></div>
+                        <div className="logoutItem" onClick={handleLogout}>Logout<img src="/logout.svg" alt="logout icon"/></div>
                     </div>
                 )}
             </div>

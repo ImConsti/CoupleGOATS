@@ -24,7 +24,7 @@
     @apply text-emerald-900;
 }
 
-.iconDiv {
+.iconDivLogo {
     @apply bg-emerald-900 p-3 rounded-xl flex items-center justify-center w-10 h-10 shrink-0 rotate-350;
 }
 
