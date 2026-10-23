@@ -1,0 +1,62 @@
+@startuml UC-06_activity
+title UC-06 – Tierheim Dashboard ansehen
+
+|Tierheim-Mitarbeitender|
+start
+repeat
+  :Dashboard aufrufen;
+
+  |System|
+  :Authentifizierung, und Rollen prüfen, Tierheim aus Token ermitteln und prüfen;
+
+  if () then ([nicht authentifiziert /\nSitzung abgelaufen /\nTierheim existiert nicht])
+    :Anfrage ablehnen;
+    :Zum Login weiterleiten;
+    stop
+  elseif () then ([Rolle ≠ "Tierheim"])
+    :Anfrage ablehnen;
+    :Hinweis anzeigen;
+    :Zur Swipe-Ansicht (UC-01)
+    weiterleiten;
+    stop
+  else ([berechtigt])
+  endif
+
+  :Kennzahlen ermitteln (Anzahl der Tierprofile, Matches,\nanstehenden Kennenlerntermine und offenen Terminanfragen);
+  :Zuletzt hinzugefügte
+  Tierprofile ermitteln;
+
+  if () then ([technischer Fehler bei der\nDatenermittlung])
+    :Datenabfrage abbrechen;
+    :Fehlermeldung anzeigen;
+
+    |Tierheim-Mitarbeitender|
+    :Entscheiden, ob das Dashboard\nneu geladen wird;
+  else ([ohne Fehler])
+    |System|
+    if () then ([keine Tierprofile vorhanden])
+      :Tierprofil-Bereich leer lassen;
+    else ([Tierprofile vorhanden])
+    endif
+
+    :Daten aufbereiten
+    und Dashboard darstellen;
+
+    |Tierheim-Mitarbeitender|
+    :Dashboard ansehen;
+
+    if () then ([zu Tierprofilen wechseln])
+      :Zu Tierprofilen (UC-03)
+      wechseln;
+    elseif () then ([zur Terminverwaltung wechseln])
+      :Zur Terminverwaltung (UC-04)
+      wechseln;
+    else ([auf Dashboard bleiben])
+    endif
+
+    stop
+  endif
+repeat while (Dashboard neu laden?) is (ja) not (nein)
+
+stop
+@enduml

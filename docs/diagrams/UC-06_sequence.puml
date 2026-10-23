@@ -10,9 +10,9 @@ database "Datenbank" as DB
 
 User -> FE: Dashboard aufrufen
 FE -> BE: Dashboard-Daten anfordern
-BE -> BE: Anmeldung und Rolle prüfen, Tierheim aus Token ermitteln
+BE -> BE: Anmeldung und Rolle prüfen, Tierheim aus Token ermitteln und prüfen
 
-alt Nicht angemeldet oder Sitzung abgelaufen
+alt Nicht angemeldet, Sitzung abgelaufen oder Tierheim \nexistiert nicht
     BE --> FE: Anfrage ablehnen (nicht authentifiziert)
     FE --> User: Weiterleitung zum Login
 
@@ -35,7 +35,7 @@ else Berechtigt
         FE --> User: Dashboard ohne Tierprofile anzeigen
         opt Optional: Wechsel zu Tierprofilen oder Terminverwaltung
                     User -> FE: Navigationsziel wählen
-                    FE --> User: Weiterleitung zu UC-03 bzw. UC-05
+                    FE --> User: Weiterleitung zu UC-03 bzw. UC-04
         end
 
     else Tierprofile vorhanden
@@ -44,7 +44,7 @@ else Berechtigt
         FE --> User: Dashboard anzeigen
         opt Optional: Wechsel zu Tierprofilen oder Terminverwaltung
             User -> FE: Navigationsziel wählen
-            FE --> User: Weiterleitung zu UC-03 bzw. UC-05
+            FE --> User: Weiterleitung zu UC-03 bzw. UC-04
     end
 end
 
