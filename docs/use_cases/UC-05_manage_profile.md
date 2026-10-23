@@ -4,6 +4,8 @@
 | ------ | -------- | ------------ |
 | Constantin | 13 Story Points | [#15](https://github.com/ImConsti/CoupleGOATS/issues/15), [#27](https://github.com/ImConsti/CoupleGOATS/issues/27), [#30](https://github.com/ImConsti/CoupleGOATS/issues/30), [#33](https://github.com/ImConsti/CoupleGOATS/issues/33) |
 
+Realisierung: [UCR-05](../use_case_realizations/UCR-05_manage_profile.md)
+
 ## 1 Kurzbeschreibung
 
 Der Adoptierende kann sein Profil jederzeit ansehen und ändern. Zum Profil gehören Name, Adresse, ein Profilbild und die Angaben zur Wohnsituation: Haus oder Wohnung, Garten, Kinder im Haushalt, Raucher und ob ein Tier frei laufen kann. Diese Angaben nutzt das System, um passende Tiere vorzuschlagen, und das Tierheim sieht sie bei einer Meet-&-greet-Anfrage. Über das Profilbild erkennt das Tierheim den Adoptierenden beim Besuch. Außerdem kann der Adoptierende sein Konto hier endgültig löschen, wodurch alle seine personenbezogenen Daten entfernt werden.
@@ -43,6 +45,10 @@ Der Adoptierende kann sein Profil jederzeit ansehen und ändern. Zum Profil geh�
 ### 4.3 Sequenzdiagramm
 
 ![Sequenzdiagramm UC-05](../diagrams/UC-05_sequence.png)
+
+### 4.4 Activity diagram
+
+![Activity diagram UC-05](../diagrams/UC-05_activity.png)
 
 ## 5 Besondere Anforderungen
 

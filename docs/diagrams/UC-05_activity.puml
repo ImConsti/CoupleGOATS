@@ -1,0 +1,61 @@
+@startuml UC-05_activity
+title UC-05 – Nutzerprofil verwalten
+
+|Adoptierender|
+start
+:Profil öffnen;
+
+repeat
+  |System|
+  :Profilformular mit gespeicherten Angaben\nund aktuellem Profilbild anzeigen;
+
+  |Adoptierender|
+  :Aktion wählen;
+
+  |System|
+  if () then ([Konto löschen])
+    :Bestätigung anfordern;
+
+    |Adoptierender|
+    :Löschung bestätigen oder abbrechen;
+
+    |System|
+    if () then ([bestätigt])
+      :Konto mit Profil, Profilbild, Filtern,\nLikes und Meet-&-greet-Anfragen löschen;
+      :Adoptierenden abmelden;
+      stop
+    else ([abgebrochen])
+    endif
+  else ([Angaben ändern])
+    repeat
+      |Adoptierender|
+      :Angaben ändern, Profilbild auswählen\noder entfernen und speichern;
+
+      |System|
+      if () then ([nicht mehr angemeldet])
+        :Nichts speichern;
+        :Zum Login weiterleiten;
+        stop
+      else ([angemeldet])
+      endif
+      :Eingaben prüfen;
+    backward :Nichts speichern, betroffene Felder\nmarkieren, übrige Eingaben behalten;
+    repeat while () is ([Pflichtfeld fehlt, PLZ ungültig oder\nBild mit falschem Format / zu groß]) not ([gültig])
+
+    fork
+      :Geänderte Angaben speichern;
+    fork again
+      if () then ([neues Profilbild])
+        :Profilbild speichern und\nvorhandenes ersetzen;
+      elseif () then ([Profilbild entfernt])
+        :Profilbild löschen,\nPlatzhalter anzeigen;
+      else ([else])
+      endif
+    end fork
+    :Speicherung bestätigen;
+    :Neue Angaben bei Tiervorschlägen (UC-01)\nberücksichtigen;
+    stop
+  endif
+repeat while () is ([Löschung abgebrochen])
+
+@enduml

@@ -1,0 +1,69 @@
+@startuml UCR-05_sequence
+title UCR-05 – Nutzerprofil verwalten
+
+actor "Adoptierender" as User
+boundary ":ProfilePage" as Page
+control ":ManageProfile" as Ctrl
+entity ":User" as Profile
+entity ":UserFilter" as Filter
+entity ":Interest" as Interest
+
+User -> Page : openProfile()
+Page -> Ctrl : getProfile(token)
+Ctrl -> Profile : find(userId)
+Profile --> Ctrl : profile (inkl. Profilbild)
+Ctrl --> Page : profile
+Page --> User : Vorausgefülltes Formular anzeigen
+
+alt Angaben ändern (Schritte 3–6)
+    loop bis die Eingaben gültig sind
+        User -> Page : saveProfile(changes, picture?)
+        Page -> Ctrl : updateProfile(token, changes, picture?)
+
+        break Sitzung abgelaufen (4b)
+            Ctrl --> Page : unauthenticated
+            Page --> User : Weiterleitung zum Login
+        end
+
+        Ctrl -> Ctrl : validate(changes, picture?)
+        opt Eingaben ungültig (4a)
+            Ctrl --> Page : invalidFields
+            Page --> User : Felder markieren, Eingaben behalten
+        end
+    end
+
+    Ctrl -> Profile : update(changes)
+    Profile --> Ctrl : updatedProfile
+
+    opt Profilbild geändert
+        alt Neues Profilbild (3a)
+            Ctrl -> Profile : replacePicture(picture)
+            Profile --> Ctrl : pictureSaved
+        else Profilbild entfernt (3b)
+            Ctrl -> Profile : removePicture()
+            Profile --> Ctrl : pictureRemoved
+        end
+    end
+
+    Ctrl --> Page : profileSaved(updatedProfile)
+    Page --> User : Bestätigung anzeigen
+
+else Konto löschen (3c)
+    User -> Page : deleteAccount()
+    Page --> User : Bestätigung anfordern
+
+    alt Löschung bestätigt
+        User -> Page : confirmDeletion()
+        Page -> Ctrl : deleteAccount(token)
+        Ctrl -> Filter : removeAllOf(userId)
+        Ctrl -> Interest : removeAllOf(userId)
+        Ctrl -> Profile : remove(userId)
+        Profile --> Ctrl : removed
+        Ctrl --> Page : accountDeleted
+        Page --> User : Abmelden, Weiterleitung zur Startseite
+    else Löschung abgebrochen
+        User -> Page : cancelDeletion()
+        Page --> User : Unverändertes Formular anzeigen (Schritt 2)
+    end
+end
+@enduml
