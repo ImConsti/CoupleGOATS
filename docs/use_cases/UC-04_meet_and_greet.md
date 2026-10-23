@@ -4,6 +4,8 @@
 | ------ | -------- | ------------ |
 | Constantin | 21 Story Points | [#26](https://github.com/ImConsti/CoupleGOATS/issues/26), [#29](https://github.com/ImConsti/CoupleGOATS/issues/29), [#34](https://github.com/ImConsti/CoupleGOATS/issues/34), [#35](https://github.com/ImConsti/CoupleGOATS/issues/35), [#36](https://github.com/ImConsti/CoupleGOATS/issues/36) |
 
+Realisierung: [UCR-04](../use_case_realizations/UCR-04_meet_and_greet.md)
+
 ## 1 Kurzbeschreibung
 
 Hat ein Adoptierender ein Tier geliked, erscheint es auf seiner Matches-Seite. Von dort aus kann er beim zuständigen Tierheim ein Meet & greet anfragen, also einen Besuchstermin, um das Tier vor einer Adoption persönlich kennenzulernen. Dazu wählt er einen Wunschtermin und kann dem Tierheim optional eine Nachricht mitschicken. Das Tierheim sieht die Anfrage auf seiner Appointments-Seite und kann sie bestätigen, ablehnen oder einen anderen Termin vorschlagen. Beide Seiten sehen auf ihrer Appointments-Seite jederzeit den aktuellen Stand ihrer offenen, bestätigten und vergangenen Termine.
@@ -53,6 +55,10 @@ Hat ein Adoptierender ein Tier geliked, erscheint es auf seiner Matches-Seite. V
 ### 4.3 Sequenzdiagramm
 
 ![Sequenzdiagramm UC-04](../diagrams/UC-04_sequence.png)
+
+### 4.4 Activity diagram
+
+![Activity diagram UC-04](../diagrams/UC-04_activity.png)
 
 ## 5 Besondere Anforderungen
 

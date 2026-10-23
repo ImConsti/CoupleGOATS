@@ -1,0 +1,134 @@
+@startuml UCR-04_sequence
+title UCR-04 – Meet & greet buchen
+
+actor "Adoptierender" as User
+boundary ":UserAppointmentsPage" as UserPage
+control ":BookMeetAndGreet" as Ctrl
+entity ":Interest" as Interest
+entity ":Animal" as Animal
+entity ":User" as Profile
+boundary ":ShelterAppointmentsPage" as ShelterPage
+actor "Tierheim" as Shelter
+
+== Anfrage stellen (Schritte 1–4) ==
+
+User -> UserPage : openMatches()
+UserPage -> Ctrl : getMatches(userId)
+Ctrl -> Interest : findLikedWithoutRequest(userId)
+Interest --> Ctrl : likedInterests
+
+break Noch keine Matches (2a)
+    Ctrl --> UserPage : noMatches
+    UserPage --> User : Hinweis mit Link zur Discovery-Page (UC-01)
+end
+
+Ctrl --> UserPage : matches
+UserPage --> User : Matches anzeigen
+
+loop bis der Wunschtermin gültig ist
+    User -> UserPage : requestMeetAndGreet(animal, wishDate, message)
+    UserPage -> Ctrl : requestMeetAndGreet(userId, animalId, wishDate, message)
+    Ctrl -> Ctrl : checkWishDate(wishDate)
+    opt Wunschtermin fehlt oder liegt in der Vergangenheit (4a)
+        Ctrl --> UserPage : invalidWishDate
+        UserPage --> User : Feld markieren
+    end
+end
+
+Ctrl -> Animal : isAvailable(animalId)
+Animal --> Ctrl : available
+
+break Tier gelöscht oder nicht mehr veröffentlicht (4b)
+    Ctrl -> Interest : remove(userId, animalId)
+    Ctrl --> UserPage : animalUnavailable
+    UserPage --> User : Hinweis, Tier aus den Matches entfernen
+end
+
+Ctrl -> Interest : find(userId, animalId)
+Interest --> Ctrl : interest
+
+break Anfrage läuft bereits (4c)
+    Ctrl --> UserPage : requestExists
+    UserPage --> User : Verweis auf bestehenden Eintrag
+end
+
+Ctrl -> Interest : request(wishDate, message)
+Interest --> Ctrl : status = angefragt
+Ctrl --> UserPage : requestSent
+UserPage --> User : Bestätigung „Anfrage versendet“
+
+== Anfrage beantworten (Schritte 5–8) ==
+
+Shelter -> ShelterPage : openAppointments()
+ShelterPage -> Ctrl : getOpenRequests(shelterId)
+Ctrl -> Interest : findRequestedByShelter(shelterId)
+Interest --> Ctrl : requests
+Ctrl -> Animal : getCardData(animalIds)
+Animal --> Ctrl : animals
+Ctrl -> Profile : getRequesterProfiles(userIds)
+Profile --> Ctrl : requesters (inkl. Profilbild)
+Ctrl --> ShelterPage : openRequests
+ShelterPage --> Shelter : Anfragen mit Tier, Interessent und Wunschtermin
+
+alt Wunschtermin bestätigen (7)
+    Shelter -> ShelterPage : confirm(request)
+    ShelterPage -> Ctrl : confirm(shelterId, animalId, userId)
+    Ctrl -> Interest : confirm(appointment)
+    Interest --> Ctrl : status = bestätigt
+    Ctrl --> ShelterPage : confirmed
+    ShelterPage --> Shelter : Termin unter „Zukünftige Termine“
+
+else Anfrage ablehnen (7a)
+    Shelter -> ShelterPage : reject(request)
+    ShelterPage -> Ctrl : reject(shelterId, animalId, userId)
+    Ctrl -> Interest : reject()
+    Interest --> Ctrl : status = abgelehnt
+    Ctrl --> ShelterPage : rejected
+    ShelterPage --> Shelter : Anfrage als abgelehnt anzeigen
+
+else Anderen Termin vorschlagen (7b)
+    Shelter -> ShelterPage : proposeDate(request, date)
+    ShelterPage -> Ctrl : proposeDate(shelterId, animalId, userId, date)
+    Ctrl -> Interest : propose(date)
+    Interest --> Ctrl : status = vorgeschlagen
+    Ctrl --> ShelterPage : proposed
+
+    User -> UserPage : answerProposal(animal, accepted)
+    UserPage -> Ctrl : answerProposal(userId, animalId, accepted)
+    alt Vorschlag angenommen
+        Ctrl -> Interest : confirm(proposedDate)
+        Interest --> Ctrl : status = bestätigt
+        Ctrl --> UserPage : confirmed
+        UserPage --> User : Termin unter „Zukünftige Termine“
+    else Vorschlag abgelehnt
+        Ctrl --> UserPage : proposalDeclined
+        UserPage --> User : Neuen Wunschtermin angeben (weiter bei Schritt 3)
+    end
+end
+
+opt Verschiebung anfragen (8a)
+    User -> UserPage : requestReschedule(appointment, wishDate)
+    UserPage -> Ctrl : requestReschedule(userId, animalId, wishDate)
+    Ctrl -> Interest : request(wishDate)
+    Interest --> Ctrl : status = angefragt
+    Ctrl --> UserPage : requestSent
+    UserPage --> User : Anfrage erneut offen (weiter bei Schritt 5)
+end
+
+opt Anfrage zurückziehen (8b)
+    User -> UserPage : withdraw(appointment)
+    UserPage -> Ctrl : withdraw(userId, animalId)
+    Ctrl -> Interest : remove(userId, animalId)
+    Ctrl --> UserPage : withdrawn
+    UserPage --> User : Anfrage entfernt
+end
+
+opt Termin hat stattgefunden (8c)
+    Shelter -> ShelterPage : complete(appointment)
+    ShelterPage -> Ctrl : complete(shelterId, animalId, userId)
+    Ctrl -> Interest : complete()
+    Interest --> Ctrl : status = abgeschlossen
+    Ctrl --> ShelterPage : completed
+    ShelterPage --> Shelter : Eintrag unter „Vergangene Termine“
+end
+@enduml

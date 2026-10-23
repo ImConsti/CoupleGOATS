@@ -1,0 +1,88 @@
+@startuml UC-04_activity
+title UC-04 – Meet & greet buchen
+
+|Adoptierender|
+start
+:Matches-Seite öffnen;
+
+|System|
+:Gelikte Tiere ohne laufende Anfrage ermitteln;
+
+if () then ([keine Matches])
+  :Hinweis mit Link zur Discovery-Page (UC-01) anzeigen;
+  stop
+else ([Matches vorhanden])
+  :Matches anzeigen;
+endif
+
+repeat
+  |Adoptierender|
+  :Wunschtermin und optional Nachricht angeben\nund Anfrage absenden;
+
+  |System|
+  :Wunschtermin prüfen;
+backward :Feld markieren, nichts speichern;
+repeat while () is ([Wunschtermin fehlt oder liegt in der Vergangenheit]) not ([gültig])
+
+if () then ([Tier gelöscht oder nicht mehr veröffentlicht])
+  :Anfrage ablehnen;
+  :Tier von der Matches-Seite entfernen\nund Adoptierenden informieren;
+  stop
+elseif () then ([Anfrage existiert bereits])
+  :Auf bestehenden Eintrag\nin der Appointments-Seite verweisen;
+  stop
+else ([else])
+  :Anfrage mit Status „angefragt“ speichern;
+  :Versand der Anfrage bestätigen;
+endif
+
+repeat
+  repeat
+    |Tierheim|
+    :Appointments-Seite öffnen;
+
+    |System|
+    :Offene Anfragen zu eigenen Tieren\nmit Tier, Interessent und Wunschtermin anzeigen;
+
+    |Tierheim|
+    :Anfrage beantworten;
+
+    |System|
+    switch (Antwort?)
+    case ([ablehnen])
+      :Status auf „abgelehnt“ setzen;
+      :Ablehnung beim Adoptierenden anzeigen;
+      stop
+    case ([anderen Termin vorschlagen])
+      :Vorschlag speichern und\ndem Adoptierenden anzeigen;
+      |Adoptierender|
+      :Vorschlag annehmen oder\nneuen Wunschtermin senden;
+      |System|
+      :Antwort speichern;
+    case ([Wunschtermin bestätigen])
+    endswitch
+  repeat while (Neuer Wunschtermin?) is ([ja]) not ([else])
+
+  :Termin speichern, Status auf „bestätigt“ setzen;
+  :Termin bei beiden Seiten unter\n„Zukünftige Termine“ anzeigen;
+
+  |Adoptierender|
+  if () then ([Anfrage zurückziehen])
+    |System|
+    :Anfrage löschen;
+    stop
+  elseif () then ([Verschiebung anfragen])
+    |System|
+    :Status mit neuem Wunschtermin\nauf „angefragt“ setzen;
+  else ([else])
+  endif
+repeat while (Verschiebung angefragt?) is ([ja]) not ([else])
+
+|Tierheim|
+:Termin nach dem Besuch\nals abgeschlossen markieren;
+
+|System|
+:Eintrag bei beiden Seiten nach\n„Vergangene Termine“ verschieben;
+stop
+
+@enduml
