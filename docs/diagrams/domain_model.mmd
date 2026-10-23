@@ -1,0 +1,153 @@
+---
+title: CoupleGOATS – Domain Model
+config:
+  theme: base
+  themeVariables:
+    fontFamily: "arial"
+    fontSize: 15px
+    lineColor: "#64748b"
+    primaryTextColor: "#1e293b"
+  class:
+    hideEmptyMembersBox: true
+---
+classDiagram
+    direction LR
+
+    namespace Tierheim {
+        class AnimalShelter {
+            name: String
+            email: String
+            password: String
+            streetAddress: String
+            postalCode: String
+            city: String
+            createdAt: DateTime
+            updatedAt: DateTime
+        }
+        class Animal {
+            name: String
+            birthYear: Integer
+            gender: Gender
+            requiredExperience: ExperienceLevel
+            description: String
+            createdAt: DateTime
+            updatedAt: DateTime
+        }
+        class AnimalPicture {
+            picture: Image
+            showOnCard: Boolean
+            createdAt: DateTime
+            updatedAt: DateTime
+        }
+    }
+
+    namespace Stammdaten {
+        class Species {
+            name: String
+            createdAt: DateTime
+            updatedAt: DateTime
+        }
+        class Breed {
+            name: String
+            createdAt: DateTime
+            updatedAt: DateTime
+        }
+        class Tag {
+            name: String
+            createdAt: DateTime
+            updatedAt: DateTime
+        }
+    }
+
+    namespace Adoptierende {
+        class User {
+            firstName: String
+            lastName: String
+            email: String
+            password: String
+            picture: Image [0..1]
+            streetAddress: String
+            postalCode: String
+            city: String
+            isAdmin: Boolean
+            houseType: HouseType
+            hasGarden: Boolean
+            hasChildren: Boolean
+            roamingPossible: Boolean
+            createdAt: DateTime
+            updatedAt: DateTime
+        }
+        class UserFilter {
+            animalMinAge: Integer [0..1]
+            animalMaxAge: Integer [0..1]
+            animalGender: Gender [0..1]
+            experienceLevel: ExperienceLevel [0..1]
+            createdAt: DateTime
+            updatedAt: DateTime
+        }
+        class Interest {
+            status: InterestStatus
+            appointmentAt: DateTime [0..1]
+            message: String [0..1]
+            createdAt: DateTime
+            updatedAt: DateTime
+        }
+    }
+
+    namespace Aufzählungen {
+        class InterestStatus {
+            <<enumeration>>
+            user_liked
+            user_disliked
+            user_requested
+            shelter_accepted
+            shelter_rejected
+        }
+        class Gender {
+            <<enumeration>>
+            male
+            female
+            unknown
+        }
+        class ExperienceLevel {
+            <<enumeration>>
+            beginner
+            experienced
+            expert
+        }
+        class HouseType {
+            <<enumeration>>
+            apartment
+            house
+        }
+    }
+
+    %% Tierheim-Seite
+    AnimalShelter "1" *-- "0..*" Animal : betreut
+    Animal "1" *-- "1..*" AnimalPicture : hat
+    Animal "0..*" --> "1" Species : gehört zu
+    Animal "0..*" --> "1" Breed : ist
+    Species "1" -- "0..*" Breed : umfasst
+    Animal "0..*" -- "0..*" Tag : trägt
+
+    %% Adoptierenden-Seite
+    User "1" -- "0..*" Interest : äußert
+    Interest "0..*" --> "1" Animal : betrifft
+    User "1" *-- "0..*" UserFilter : setzt
+    UserFilter "0..*" --> "0..1" Species : filtert nach
+    UserFilter "0..*" --> "0..1" Breed : filtert nach
+
+    %% Farben: Tierheim = grün, Adoptierende = blau, Interest = rosa, Stammdaten = gelb, Aufzählungen = grau
+    style AnimalShelter fill:#dcfce7,stroke:#16a34a,stroke-width:2px,color:#14532d
+    style Animal fill:#dcfce7,stroke:#16a34a,stroke-width:2px,color:#14532d
+    style AnimalPicture fill:#dcfce7,stroke:#16a34a,stroke-width:2px,color:#14532d
+    style User fill:#dbeafe,stroke:#2563eb,stroke-width:2px,color:#1e3a8a
+    style UserFilter fill:#dbeafe,stroke:#2563eb,stroke-width:2px,color:#1e3a8a
+    style Interest fill:#fce7f3,stroke:#db2777,stroke-width:2px,color:#831843
+    style Species fill:#fef9c3,stroke:#ca8a04,stroke-width:2px,color:#713f12
+    style Breed fill:#fef9c3,stroke:#ca8a04,stroke-width:2px,color:#713f12
+    style Tag fill:#fef9c3,stroke:#ca8a04,stroke-width:2px,color:#713f12
+    style InterestStatus fill:#f1f5f9,stroke:#94a3b8,stroke-width:2px,color:#334155
+    style Gender fill:#f1f5f9,stroke:#94a3b8,stroke-width:2px,color:#334155
+    style ExperienceLevel fill:#f1f5f9,stroke:#94a3b8,stroke-width:2px,color:#334155
+    style HouseType fill:#f1f5f9,stroke:#94a3b8,stroke-width:2px,color:#334155
