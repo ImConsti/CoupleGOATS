@@ -4,19 +4,22 @@ title UCR-01 – Tiere swipen (Use-Case Realization)
 actor "Adoptierende Person" as User
 boundary ":DiscoveryPage" as Page
 control ":DiscoverAnimals" as Discover
-entity ":AnimalProfile" as Animal
-entity ":AnimalRating" as Rating
+entity ":Animal" as Animal
+entity ":Interest" as Interest
+entity ":UserFilter" as UserFilter
 
 User -> Page: openDiscovery()
-Page -> Discover: findNextAnimal(activeFilters)
-Discover -> Animal: findPublishedAvailable(activeFilters)
-Animal --> Discover: candidateProfiles
-Discover -> Rating: findRatingsForUser()
-Rating --> Discover: existingRatings
+Page -> Discover: findNextAnimal(userId)
+Discover -> UserFilter: findFilters(userId)
+UserFilter --> Discover: activeFilters
+Discover -> Animal: findMatching(activeFilters)
+Animal --> Discover: candidateAnimals
+Discover -> Interest: findInterestsForUser(userId)
+Interest --> Discover: existingInterests
 Discover -> Discover: selectUnratedMatchingAnimal()
 
 alt Passendes Tier vorhanden
-    Discover --> Page: animalFound(profile)
+    Discover --> Page: animalFound(animal)
     Page --> User: Tierkarte anzeigen
 
     loop Solange die Discovery-Page geöffnet ist
@@ -32,14 +35,16 @@ alt Passendes Tier vorhanden
 
         else Filter ändern
             User -> Page: changeFilters(newFilters)
-            Page -> Discover: findNextAnimal(newFilters)
-            Discover -> Animal: findPublishedAvailable(newFilters)
-            Animal --> Discover: candidateProfiles
-            Discover -> Rating: findRatingsForUser()
-            Rating --> Discover: existingRatings
+            Page -> Discover: changeFilters(userId, newFilters)
+            Discover -> UserFilter: saveFilters(userId, newFilters)
+            UserFilter --> Discover: filtersSaved
+            Discover -> Animal: findMatching(newFilters)
+            Animal --> Discover: candidateAnimals
+            Discover -> Interest: findInterestsForUser(userId)
+            Interest --> Discover: existingInterests
             Discover -> Discover: selectUnratedMatchingAnimal()
             alt Passendes Tier gefunden
-                Discover --> Page: animalFound(profile)
+                Discover --> Page: animalFound(animal)
                 Page --> User: Neue Tierkarte anzeigen
             else Kein passendes Tier gefunden
                 Discover --> Page: noAnimalAvailable()
@@ -47,43 +52,43 @@ alt Passendes Tier vorhanden
             end
 
         else Like oder Dislike
-            User -> Page: rateAnimal(animalId, likeOrDislike)
-            Page -> Discover: submitRating(animalId, likeOrDislike)
-            Discover -> Rating: findRating(userId, animalId)
-            Rating --> Discover: existingRatingOrNone
+            User -> Page: rateAnimal(animalId, status)
+            Page -> Discover: submitRating(userId, animalId, status)
+            Discover -> Interest: findInterest(userId, animalId)
+            Interest --> Discover: existingInterestOrNone
 
-            alt Bewertung bereits vorhanden
+            alt Interest bereits vorhanden
                 Discover -> Discover: Doppelte Speicherung verhindern
-            else Noch keine Bewertung vorhanden
-                Discover -> Rating: saveRating(userId, animalId, likeOrDislike)
+            else Noch kein Interest vorhanden
+                Discover -> Interest: saveInterest(userId, animalId, status)
                 alt Speicherung erfolgreich
-                    Rating --> Discover: ratingSaved
+                    Interest --> Discover: interestSaved
                 else Speicherung fehlgeschlagen
-                    Rating --> Discover: saveFailed
+                    Interest --> Discover: saveFailed
                     Discover --> Page: ratingFailed()
                     Page --> User: Fehler anzeigen, Tierkarte beibehalten
                     loop Bis die Bewertung verarbeitet wurde
                         User -> Page: retryRating()
-                        Page -> Discover: submitRating(animalId, likeOrDislike)
-                        Discover -> Rating: findRating(userId, animalId)
-                        Rating --> Discover: existingRatingOrNone
-                        alt Noch keine Bewertung vorhanden
-                            Discover -> Rating: saveRating(userId, animalId, likeOrDislike)
-                            Rating --> Discover: saveResult
-                        else Bewertung inzwischen vorhanden
+                        Page -> Discover: submitRating(userId, animalId, status)
+                        Discover -> Interest: findInterest(userId, animalId)
+                        Interest --> Discover: existingInterestOrNone
+                        alt Noch kein Interest vorhanden
+                            Discover -> Interest: saveInterest(userId, animalId, status)
+                            Interest --> Discover: saveResult
+                        else Interest inzwischen vorhanden
                             Discover -> Discover: Doppelte Speicherung verhindern
                         end
                     end
                 end
             end
 
-            Discover -> Animal: findPublishedAvailable(activeFilters)
-            Animal --> Discover: candidateProfiles
-            Discover -> Rating: findRatingsForUser()
-            Rating --> Discover: existingRatings
+            Discover -> Animal: findMatching(activeFilters)
+            Animal --> Discover: candidateAnimals
+            Discover -> Interest: findInterestsForUser(userId)
+            Interest --> Discover: existingInterests
             Discover -> Discover: selectNextUnratedMatchingAnimal()
             alt Weiteres passendes Tier vorhanden
-                Discover --> Page: nextAnimalFound(profile)
+                Discover --> Page: nextAnimalFound(animal)
                 Page --> User: Nächste Tierkarte anzeigen
             else Keine weiteren passenden Tiere
                 Discover --> Page: noMoreAnimalsAvailable()
@@ -97,11 +102,13 @@ else Kein passendes Tier vorhanden
     Page --> User: Hinweis auf keine passenden Tiere anzeigen
     opt Nutzer passt Filter an
         User -> Page: changeFilters(newFilters)
-        Page -> Discover: findNextAnimal(newFilters)
-        Discover -> Animal: findPublishedAvailable(newFilters)
-        Animal --> Discover: candidateProfiles
-        Discover -> Rating: findRatingsForUser()
-        Rating --> Discover: existingRatings
+        Page -> Discover: changeFilters(userId, newFilters)
+        Discover -> UserFilter: saveFilters(userId, newFilters)
+        UserFilter --> Discover: filtersSaved
+        Discover -> Animal: findMatching(newFilters)
+        Animal --> Discover: candidateAnimals
+        Discover -> Interest: findInterestsForUser(userId)
+        Interest --> Discover: existingInterests
         Discover -> Discover: selectUnratedMatchingAnimal()
         Discover --> Page: searchResult
         Page --> User: Ergebnis oder Hinweis anzeigen
