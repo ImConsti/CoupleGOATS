@@ -35,11 +35,12 @@ Diese Use-Case-Realization konkretisiert UC-01 „Tiere swipen“ für das Entde
      Entity:   information that must be stored. -->
 
 | Object | Stereotype | Responsibility |
-| ------ | ---------- | -------------- |
-| `:DiscoveryPage` | `<<boundary>>` | Vermittelt zwischen Adoptierendem und Anwendung: übermittelt Such- und Bewertungsaktionen und zeigt Tierkarten, Detailansichten sowie Status- und Fehlermeldungen an. |
-| `:DiscoverAnimals` | `<<control>>` | Koordiniert die Tierermittlung, berücksichtigt Filter und bereits vorhandene Bewertungen und steuert die Verarbeitung einer Bewertung sowie die Suche nach dem nächsten Tier. |
-| `:AnimalProfile` | `<<entity>>` | Stellt gespeicherte Tierprofildaten bereit und liefert veröffentlichte, verfügbare Tierprofile für die Suche. |
-| `:AnimalRating` | `<<entity>>` | Stellt gespeicherte Like-/Dislike-Bewertungen bereit und ermöglicht die Prüfung sowie Speicherung einer Bewertung pro Nutzer und Tier. |
+|---|---|---|
+| :DiscoveryPage | <<boundary>> | Vermittelt zwischen Adoptierendem und Anwendung: übermittelt Such- und Bewertungsaktionen und zeigt Tierkarten (Bild mit `show_on_card`), Detailansichten sowie Status- und Fehlermeldungen an. |
+| :DiscoverAnimals | <<control>> | Koordiniert die Tierermittlung, lädt die Filter des Nutzers (`user_filters`), schließt Tiere aus, für die bereits ein `interests`-Eintrag existiert, steuert die Verarbeitung einer Bewertung und die Suche nach dem nächsten Tier. |
+| :Animal | <<entity>> | Stellt gespeicherte Tierdaten aus `animals` bereit (inkl. `animal_pictures`, `animals_tags`/`tags`, `species`, `breeds` und Tierheim aus `animal_shelters`) und liefert passende Tierprofile für die Suche, gefiltert nach Art, Rasse, Alter (aus `birth_year`), Geschlecht und `required_experience`. |
+| :Interest | <<entity>> | Stellt gespeicherte Bewertungen aus `interests` bereit (Schlüssel: `user_id` + `animal_id`, Feld `status`) und ermöglicht die Prüfung sowie Speicherung einer Bewertung pro Nutzer und Tier. |
+| :UserFilter | <<entity>> | Stellt die gespeicherten Suchfilter des Nutzers aus `user_filters` bereit (`animal_species`, `animal_breed`, `animal_min_age`, `animal_max_age`, `animal_gender`, `experience_level`). |
 
 ### 2.2 Sequence diagrams
 
