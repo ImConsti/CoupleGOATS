@@ -1,7 +1,7 @@
 # Domain model
 
-| Authors | Constantin |
-| ------- | ---------- |
+| Authors | Carolin, Mika, Aaron, Constantin |
+| ------- | -------------------------------- |
 
 ![Domain model](diagrams/domain_model.png)
 
