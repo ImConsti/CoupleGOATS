@@ -56,6 +56,19 @@ Dieser Use Case beschreibt, wie ein Tierheim-Mitarbeiter Tierprofile erstellen, 
 
 <img alt="Sequenzdiagramm UC-03" src="../diagrams/UC-03_sequence.png" />
 
+## 4.4 Activity diagram
+
+Das Aktivitätsdiagramm stellt den Basisablauf und die Alternativabläufe des Use Cases UC-03 „Tierprofil verwalten“ dar. Die Swimlanes unterscheiden zwischen den Aktionen des Tierheim-Mitarbeiters und den Aktivitäten des Systems.
+
+Der Ablauf beginnt mit dem Aufruf der Tierprofilverwaltung und der Prüfung der Berechtigung. Anschließend kann der Mitarbeiter ein neues Tierprofil anlegen, ein vorhandenes Profil bearbeiten oder ein Profil löschen. Bei der Bearbeitung und Löschung wird zusätzlich geprüft, ob das ausgewählte Profil zum zuständigen Tierheim gehört und der Mitarbeiter zur jeweiligen Aktion berechtigt ist.
+
+Beim Erstellen und Bearbeiten werden die Tierdaten sowie die zugehörigen Fotos geprüft. Die Prüfung der Tierdaten und der Foto-Uploads ist als paralleler Ablauf mit Fork und Join dargestellt. Ungültige Eingaben und fehlgeschlagene Uploads führen zu einer Fehlermeldung und ermöglichen eine Korrektur, einen erneuten Upload oder das Entfernen eines fehlgeschlagenen Fotos.
+
+Nach erfolgreicher Validierung prüft das System die Vollständigkeit des Tierprofils. Vollständige Profile können veröffentlicht werden; unvollständige Profile bleiben unveröffentlicht und werden als Entwurf gespeichert, sofern das Speichern erfolgreich ist. Fehlgeschlagene Speichervorgänge werden gemeldet und können erneut versucht werden. Bei der Löschung wird das Profil erst nach ausdrücklicher Bestätigung entfernt. Wird die Löschung abgebrochen, bleiben das Tierprofil und die zugehörigen Fotos erhalten.
+
+![Aktivitätsdiagramm UC-03](../diagrams/UC-03_activity.png)
+
+
 ## 5 Besondere Anforderungen
 
 - **NFR-UC03-01 – Zugriffskontrolle:** Nur authentifizierte und für das jeweilige Tierheim autorisierte Mitarbeiter dürfen Tierprofile dieses Tierheims erstellen, anzeigen, bearbeiten oder löschen. Unberechtigte Zugriffe und Änderungen müssen abgewiesen werden.
