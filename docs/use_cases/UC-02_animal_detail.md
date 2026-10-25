@@ -54,6 +54,12 @@ Dieser Use Case beschreibt, wie ein Adoptierender über die Discovery-Page das P
 
 <img alt="Sequenzdiagramm UC-02" src="../diagrams/UC-02_sequence.png" />
 
+### 4.4 Activity diagram
+
+Das Aktivitätsdiagramm beschreibt den Basisablauf von UC-02 sowie sämtliche alternativen Abläufe bei fehlenden Tierprofilen, nicht verfügbaren oder unveröffentlichten Profilen, technischen Ladefehlern, fehlenden Bildern und der Navigation zum Tierheimprofil.
+
+![Aktivitätsdiagramm UC-02](../diagrams/UC-02_activity.png)
+
 ## 5 Besondere Anforderungen
 
 - **NFR-UC02-01 – Zugriff auf veröffentlichte Profile:** Adoptierende dürfen nur Tierprofile ansehen, die für die öffentliche Anzeige freigegeben sind.
