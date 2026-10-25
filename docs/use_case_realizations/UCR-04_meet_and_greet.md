@@ -66,6 +66,23 @@ stateDiagram-v2
     abgeschlossen --> [*]
 ```
 
+### 2.5 Design-Klassen
+
+| Analyseobjekt (2.1) | Design-Klasse(n) |
+| ------------------- | ---------------- |
+| `:UserAppointmentsPage` | `UserInterestsRouter` (`/users/me/interests`) mit `authenticationHandler` und `checkRole("user")` |
+| `:ShelterAppointmentsPage` | `ShelterInterestsRouter` (`/shelters/me/interests`) mit `authenticationHandler` und `checkRole("shelter")` |
+| `:BookMeetAndGreet` | `InterestService`, `ShelterAnswer` |
+| `:Interest` | `Interest`, `InterestStatus`, `InterestRepository` (Tabelle `interests`) |
+| `:Animal` | `Animal`, `AnimalRepository` (Tabelle `animals`) |
+| `:User` | `User`, `UserRepository` (Tabelle `users`, `repositories/userRepository.ts`) |
+
+![Class diagram UCR-04](../diagrams/UCR-04_classes.png)
+
+Die Router halten eine Referenz auf `InterestService`, der Service auf die drei Repositories (durchgezogene Linien). Die Repositories erzeugen die Modelle nur als Rückgabewert (gestrichelt). Fehler werden wie im übrigen Backend als `ValidationError` (400), `ForbiddenError` (403), `NotFoundError` (404) und `ConflictError` (409) geworfen und vom `errorHandler` beantwortet.
+
+![Sequence diagram UCR-04 design](../diagrams/UCR-04_sequence_design.png)
+
 ## 3 Abgeleitete Anforderungen
 
 - DR-04-01 - `interestStatus` wird um `shelter_proposed` (Gegenvorschlag, 7b) und `shelter_completed` (Termin hat stattgefunden, 8c) erweitert; `shelter_accepted` steht für „bestätigt“.

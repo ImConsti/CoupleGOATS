@@ -1,0 +1,105 @@
+@startuml UCR-04_classes
+title UCR-04 – Meet & greet buchen (Design-Klassen)
+
+!pragma layout smetana
+hide empty members
+skinparam classAttributeIconSize 0
+
+class UserInterestsRouter <<controller>> {
+  + getUserInterests(req, res, next)
+  + requestMeetAndGreet(req, res, next)
+  + answerProposal(req, res, next)
+  + deleteUserInterest(req, res, next)
+}
+
+class ShelterInterestsRouter <<controller>> {
+  + getShelterInterests(req, res, next)
+  + updateShelterInterest(req, res, next)
+}
+
+class InterestService <<service>> {
+  + getMatches(userId: string): Interest[]
+  + requestMeetAndGreet(userId: string, animalId: string, wishDate: Date, message?: string): Interest
+  + answerProposal(userId: string, animalId: string, accepted: boolean): Interest
+  + withdrawRequest(userId: string, animalId: string): void
+  + getOpenRequests(shelterId: string): Interest[]
+  + answerRequest(shelterId: string, animalId: string, userId: string, answer: ShelterAnswer, date?: Date): Interest
+  + completeAppointment(shelterId: string, animalId: string, userId: string): Interest
+}
+
+class InterestRepository <<repository>> {
+  + getInterestsByUser(userId: string, status: InterestStatus[]): Interest[]
+  + getInterestsByShelter(shelterId: string, status: InterestStatus[]): Interest[]
+  + getInterest(userId: string, animalId: string): Interest | undefined
+  + updateInterest(userId: string, animalId: string, changes: Partial<Interest>): Interest
+  + deleteInterest(userId: string, animalId: string): void
+}
+
+class AnimalRepository <<repository>> {
+  + getAnimalById(animalId: string): Animal | undefined
+}
+
+class UserRepository <<repository>> {
+  + getUsersByIds(userIds: string[]): User[]
+}
+
+class Interest <<model>> {
+  userId: string
+  animalId: string
+  status: InterestStatus
+  appointmentAt: Date
+  message: string
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+class Animal <<model>> {
+  id: string
+  animalShelterId: string
+  name: string
+  isPublished: boolean
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+class User <<model>> {
+  id: string
+  firstName: string
+  lastName: string
+  picture: Blob
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+enum InterestStatus <<enumeration>> {
+  user_liked
+  user_disliked
+  user_requested
+  shelter_proposed
+  shelter_accepted
+  shelter_rejected
+  shelter_completed
+}
+
+enum ShelterAnswer <<enumeration>> {
+  confirm
+  reject
+  propose
+  complete
+}
+
+UserInterestsRouter --> "1" InterestService
+ShelterInterestsRouter --> "1" InterestService
+InterestService --> "1" InterestRepository
+InterestService --> "1" AnimalRepository
+InterestService --> "1" UserRepository
+InterestService ..> ShelterAnswer : <<use>>
+
+InterestRepository ..> Interest : <<create>>
+AnimalRepository ..> Animal : <<create>>
+UserRepository ..> User : <<create>>
+
+Interest "0..*" --> "1" Animal
+Interest "0..*" --> "1" User
+Interest --> "1" InterestStatus
+@enduml

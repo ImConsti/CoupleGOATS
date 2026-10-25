@@ -1,0 +1,127 @@
+@startuml UCR-04_sequence_design
+title UCR-04 – Meet & greet buchen (Design)
+
+actor "Adoptierender" as User
+participant ":UserInterestsRouter" as UserRouter
+participant ":InterestService" as Service
+participant ":InterestRepository" as InterestRepo
+participant ":AnimalRepository" as AnimalRepo
+participant ":UserRepository" as UserRepo
+participant ":ShelterInterestsRouter" as ShelterRouter
+actor "Tierheim" as Shelter
+
+== Anfrage stellen (Schritte 1–4) ==
+
+User -> UserRouter : GET /users/me/interests?status=user_liked
+UserRouter -> UserRouter : authenticationHandler(), checkRole("user")
+UserRouter -> Service : getMatches(userId)
+Service -> InterestRepo : getInterestsByUser(userId, ["user_liked"])
+InterestRepo --> Service : interests
+Service --> UserRouter : interests
+UserRouter --> User : 200 interests
+
+note over User, UserRouter : Ist interests leer, zeigt das Frontend einen\nHinweis mit Link zur Discovery-Page (UC-01) (2a).
+
+User -> UserRouter : POST /users/me/interests/{animalId}/request\n{ wishDate, message }
+UserRouter -> UserRouter : zodValidation(requestInterestSchema, req.body)
+
+break wishDate fehlt oder liegt in der Vergangenheit (4a)
+    UserRouter --> User : 400 ValidationError
+end
+
+UserRouter -> Service : requestMeetAndGreet(userId, animalId, wishDate, message)
+Service -> AnimalRepo : getAnimalById(animalId)
+AnimalRepo --> Service : animal | undefined
+
+break Tier gelöscht oder nicht veröffentlicht (4b)
+    Service -> InterestRepo : deleteInterest(userId, animalId)
+    Service --> UserRouter : throw NotFoundError
+    UserRouter --> User : 404
+end
+
+Service -> InterestRepo : getInterest(userId, animalId)
+InterestRepo --> Service : interest
+
+break interest.status ist user_requested, shelter_proposed oder shelter_accepted (4c)
+    Service --> UserRouter : throw ConflictError
+    UserRouter --> User : 409
+end
+
+Service -> InterestRepo : updateInterest(userId, animalId,\n{ status: "user_requested", appointmentAt: wishDate, message })
+InterestRepo --> Service : interest
+Service --> UserRouter : interest
+UserRouter --> User : 200 interest
+
+== Anfrage beantworten (Schritte 5–8) ==
+
+Shelter -> ShelterRouter : GET /shelters/me/interests?status=user_requested
+ShelterRouter -> ShelterRouter : authenticationHandler(), checkRole("shelter")
+ShelterRouter -> Service : getOpenRequests(shelterId)
+Service -> InterestRepo : getInterestsByShelter(shelterId, ["user_requested"])
+InterestRepo --> Service : interests (inkl. Tier)
+Service -> UserRepo : getUsersByIds(userIds)
+UserRepo --> Service : users (inkl. Profilbild)
+Service --> ShelterRouter : requests
+ShelterRouter --> Shelter : 200 requests
+
+Shelter -> ShelterRouter : PATCH /shelters/me/interests/{animalId}/{userId}\n{ answer, date? }
+ShelterRouter -> ShelterRouter : zodValidation(updateShelterInterestSchema, req.body)
+ShelterRouter -> Service : answerRequest(shelterId, animalId, userId, answer, date)
+Service -> InterestRepo : getInterest(userId, animalId)
+InterestRepo --> Service : interest (inkl. Tier)
+
+break Tier gehört nicht zum Tierheim
+    Service --> ShelterRouter : throw ForbiddenError
+    ShelterRouter --> Shelter : 403
+end
+
+alt answer = confirm (7)
+    Service -> InterestRepo : updateInterest(userId, animalId,\n{ status: "shelter_accepted" })
+else answer = reject (7a)
+    Service -> InterestRepo : updateInterest(userId, animalId,\n{ status: "shelter_rejected" })
+else answer = propose (7b)
+    Service -> InterestRepo : updateInterest(userId, animalId,\n{ status: "shelter_proposed", appointmentAt: date })
+end
+InterestRepo --> Service : interest
+Service --> ShelterRouter : interest
+ShelterRouter --> Shelter : 200 interest
+
+opt Vorschlag beantworten (7b)
+    User -> UserRouter : PATCH /users/me/interests/{animalId} { accepted }
+    UserRouter -> Service : answerProposal(userId, animalId, accepted)
+    alt accepted
+        Service -> InterestRepo : updateInterest(userId, animalId,\n{ status: "shelter_accepted" })
+    else abgelehnt
+        Service -> InterestRepo : updateInterest(userId, animalId,\n{ status: "user_liked", appointmentAt: null })
+    end
+    InterestRepo --> Service : interest
+    Service --> UserRouter : interest
+    UserRouter --> User : 200 interest
+end
+
+opt Verschiebung anfragen (8a)
+    User -> UserRouter : POST /users/me/interests/{animalId}/request\n{ wishDate }
+    UserRouter -> Service : requestMeetAndGreet(userId, animalId, wishDate)
+    Service -> InterestRepo : updateInterest(userId, animalId,\n{ status: "user_requested", appointmentAt: wishDate })
+    InterestRepo --> Service : interest
+    Service --> UserRouter : interest
+    UserRouter --> User : 200 interest
+end
+
+opt Anfrage zurückziehen (8b)
+    User -> UserRouter : DELETE /users/me/interests/{animalId}
+    UserRouter -> Service : withdrawRequest(userId, animalId)
+    Service -> InterestRepo : deleteInterest(userId, animalId)
+    Service --> UserRouter : void
+    UserRouter --> User : 204
+end
+
+opt Termin hat stattgefunden (8c)
+    Shelter -> ShelterRouter : PATCH /shelters/me/interests/{animalId}/{userId}\n{ answer: "complete" }
+    ShelterRouter -> Service : completeAppointment(shelterId, animalId, userId)
+    Service -> InterestRepo : updateInterest(userId, animalId,\n{ status: "shelter_completed" })
+    InterestRepo --> Service : interest
+    Service --> ShelterRouter : interest
+    ShelterRouter --> Shelter : 200 interest
+end
+@enduml
