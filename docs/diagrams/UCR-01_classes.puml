@@ -1,0 +1,90 @@
+@startuml UCR-01_classes
+skinparam classAttributeIconSize 0
+skinparam linetype ortho
+hide empty members
+
+class DiscoveryPage {
+  +showAnimalCard(animal : Animal)
+  +showDetails(animal : Animal)
+  +showNoMatch()
+  +showError(message : String)
+}
+
+class DiscoveryController {
+  +openDiscovery(userId : Long)
+  +showDetails(animalId : Long)
+  +updateFilters(userId : Long, filter : UserFilter)
+  +rate(userId : Long, animalId : Long, status : InterestStatus)
+}
+
+class DiscoveryService {
+  +findNextAnimal(userId : Long) : Animal
+  +getAnimalDetails(animalId : Long) : Animal
+  +saveFilters(userId : Long, filter : UserFilter)
+  +rateAnimal(userId : Long, animalId : Long, status : InterestStatus)
+}
+
+class Animal {
+  -id : Long
+  -birthYear : int
+  -gender : String
+  -requiredExperience : String
+}
+
+class Interest {
+  -userId : Long
+  -animalId : Long
+  -status : InterestStatus
+}
+
+class UserFilter {
+  -userId : Long
+  -animalSpecies : String
+  -animalBreed : String
+  -animalMinAge : Integer
+  -animalMaxAge : Integer
+  -animalGender : String
+  -experienceLevel : String
+}
+
+enum InterestStatus {
+  LIKE
+  DISLIKE
+}
+
+class AnimalRepository {
+  +findMatching(filter : UserFilter, ratedAnimalIds : List<Long>) : Animal
+  +findById(animalId : Long) : Animal
+}
+
+class InterestRepository {
+  +findByUserId(userId : Long) : List<Interest>
+  +findByUserIdAndAnimalId(userId : Long, animalId : Long) : Interest
+  +save(interest : Interest)
+}
+
+class UserFilterRepository {
+  +findByUserId(userId : Long) : UserFilter
+  +save(filter : UserFilter)
+}
+
+' gehaltene Referenzen (durchgezogen, mit Richtung)
+DiscoveryPage --> DiscoveryController : "leitet Aktionen weiter an"
+DiscoveryController --> DiscoveryService : "delegiert an"
+DiscoveryService --> AnimalRepository : "sucht Tiere über"
+DiscoveryService --> InterestRepository : "prüft/speichert Bewertungen über"
+DiscoveryService --> UserFilterRepository : "lädt/speichert Filter über"
+Interest --> "1" InterestStatus : "hat Status"
+
+' kurzzeitige Nutzung (gestrichelt)
+DiscoveryPage ..> Animal : "zeigt an"
+DiscoveryController ..> UserFilter : "übergibt Filter"
+DiscoveryController ..> InterestStatus : "übergibt Bewertung"
+DiscoveryService ..> Animal : "liefert"
+DiscoveryService ..> UserFilter : "verwendet für Suche"
+DiscoveryService ..> Interest : "erzeugt"
+AnimalRepository ..> Animal : "liefert"
+InterestRepository ..> Interest : "liefert/speichert"
+UserFilterRepository ..> UserFilter : "liefert/speichert"
+
+@enduml
