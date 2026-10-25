@@ -1,0 +1,110 @@
+
+@startuml
+title UCR-02 - Design-Sequenzdiagramm: Tierprofil ansehen
+
+autonumber
+
+actor "Interessierter Nutzer" as User
+participant "controller:AnimalDetailController" as Controller
+participant "service:AnimalDetailService" as Service
+participant "animalRepository:AnimalRepository" as AnimalRepo
+participant "pictureRepository:AnimalPictureRepository" as PictureRepo
+participant "shelterRepository:AnimalShelterRepository" as ShelterRepo
+
+== Discovery-Page öffnen ==
+
+User -> Controller : showDiscoveryPage()
+Controller -> Service : getPublishedAnimals()
+Service -> AnimalRepo : findPublished()
+AnimalRepo --> Service : animals
+
+alt Keine veröffentlichten Tierprofile vorhanden
+    Service --> Controller : empty list
+    Controller --> User : showNoAnimalsAvailable()
+else Tierprofile vorhanden
+    Service --> Controller : animals
+    Controller --> User : showAnimalCards(animals)
+
+    == Tierprofil auswählen ==
+
+    User -> Controller : selectAnimal(animalId)
+    Controller -> Service : getPublicAnimalDetails(animalId)
+    Service -> AnimalRepo : findPublicById(animalId)
+    AnimalRepo --> Service : animal or not found
+
+    alt Tierprofil nicht verfügbar oder nicht veröffentlicht
+        Service --> Controller : unavailable
+        Controller --> User : showAnimalUnavailable()
+        User -> Controller : returnToDiscovery()
+        Controller --> User : showAnimalCards(animals)
+    else Tierprofil gefunden
+        Service -> Service : isPubliclyDisplayable(animal)
+
+        alt Tierprofil unvollständig oder nicht öffentlich
+            Service --> Controller : unavailable
+            Controller --> User : showAnimalUnavailable()
+            User -> Controller : returnToDiscovery()
+            Controller --> User : showAnimalCards(animals)
+        else Tierprofil öffentlich verfügbar
+            Service -> PictureRepo : findByAnimal(animalId)
+            PictureRepo --> Service : pictures
+
+            Service -> ShelterRepo : findPublicById(shelterId)
+            ShelterRepo --> Service : shelter or not found
+
+            alt Tierheimprofil öffentlich verfügbar
+                Service --> Controller : animal, pictures, shelter
+                Controller --> User : showAnimalDetails(animal, pictures, shelter)
+            else Tierheimprofil nicht verfügbar
+                Service --> Controller : animal, pictures, no public shelter
+                Controller --> User : showAnimalDetails(animal, pictures, no shelter)
+                Controller --> User : showShelterUnavailable()
+            end
+
+            opt Fotos können nicht geladen werden
+                Controller --> User : showAnimalDetailsWithPlaceholders(animal, shelter)
+            end
+
+            opt Nutzer möchte das Tierheimprofil öffnen
+                User -> Controller : openShelterProfile(shelterId)
+                Controller -> Service : getPublicShelterProfile(shelterId)
+                Service -> ShelterRepo : findPublicById(shelterId)
+                ShelterRepo --> Service : shelter or not found
+
+                alt Tierheimprofil verfügbar und öffentlich
+                    Service --> Controller : shelter
+                    Controller --> User : show public shelter profile
+                else Tierheimprofil nicht verfügbar
+                    Service --> Controller : unavailable
+                    Controller --> User : showShelterUnavailable()
+                end
+            end
+
+            opt Nutzer kehrt zur Discovery-Page zurück
+                User -> Controller : returnToDiscovery()
+                Controller --> User : showDiscoveryPage()
+            end
+        end
+    end
+end
+
+== Technischer Fehler beim Laden der Tierdetails ==
+
+opt Fehler beim Laden oder Abrufen der Tierdetails
+    Service --> Controller : load error
+    Controller --> User : showLoadError()
+
+    alt Nutzer versucht es erneut
+        User -> Controller : retryLoading(animalId)
+        Controller -> Service : getPublicAnimalDetails(animalId)
+        Service -> AnimalRepo : findPublicById(animalId)
+        AnimalRepo --> Service : result
+        Service --> Controller : result
+        Controller --> User : show details or unavailable message
+    else Nutzer bricht ab
+        User -> Controller : returnToDiscovery()
+        Controller --> User : showDiscoveryPage()
+    end
+end
+
+@enduml
