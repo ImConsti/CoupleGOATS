@@ -1,0 +1,69 @@
+@startuml UCR-05_sequence_design
+title UCR-05 – Nutzerprofil verwalten (Design)
+
+actor "Adoptierender" as User
+participant ":UsersRouter" as Router
+participant ":authenticationHandler" as Auth
+participant ":UserService" as Service
+participant ":UserRepository" as Repo
+
+User -> Router : GET /users/me
+Router -> Auth : authenticationHandler(req, res, next)
+Auth --> Router : req.auth.sub = userId
+Router -> Service : getProfile(userId)
+Service -> Repo : getUserById(userId)
+Repo --> Service : user
+Service --> Router : user
+Router --> User : 200 user
+
+alt Angaben ändern (Schritte 3–6)
+    opt Neues Profilbild (3a)
+        User -> Router : PUT /users/me/picture (Datei)
+        Router -> Auth : authenticationHandler(req, res, next)
+        Router -> Service : uploadPicture(userId, file)
+        break Format nicht JPEG/PNG/WebP oder größer als 5 MB (4a)
+            Service --> Router : throw ValidationError
+            Router --> User : 400
+        end
+        Service -> Repo : updateUserPicture(userId, picture)
+        Router --> User : 204
+    end
+    opt Profilbild entfernen (3b)
+        User -> Router : DELETE /users/me/picture
+        Router -> Auth : authenticationHandler(req, res, next)
+        Router -> Service : removePicture(userId)
+        Service -> Repo : updateUserPicture(userId, null)
+        Router --> User : 204
+    end
+
+    User -> Router : PATCH /users/me { changes }
+    Router -> Auth : authenticationHandler(req, res, next)
+
+    break Token fehlt oder abgelaufen (4b)
+        Auth --> Router : next(AuthenticationError)
+        Router --> User : 401, Weiterleitung zum Login
+    end
+
+    Router -> Router : zodValidation(updateUserSchema, req.body)
+
+    break Pflichtfeld leer oder PLZ ungültig (4a)
+        Router --> User : 400 ValidationError mit fehlerhaften Feldern
+    end
+
+    Router -> Service : updateProfile(userId, changes)
+    Service -> Repo : updateUser(userId, changes)
+    Repo --> Service : user
+    Service --> Router : user
+    Router --> User : 200 user
+
+else Konto löschen (3c)
+    note over User, Router : Das Frontend fragt vorher nach einer Bestätigung;\nbei Abbruch wird keine Anfrage gesendet.
+    User -> Router : DELETE /users/me
+    Router -> Auth : authenticationHandler(req, res, next)
+    Router -> Service : deleteAccount(userId)
+    Service -> Repo : deleteUser(userId)
+    note right of Repo : user_filters und interests werden\nper onDelete: "cascade" mitgelöscht
+    Service --> Router : void
+    Router --> User : 204, Token verwerfen und abmelden
+end
+@enduml

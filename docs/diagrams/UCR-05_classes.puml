@@ -1,0 +1,87 @@
+@startuml UCR-05_classes
+title UCR-05 – Nutzerprofil verwalten (Design-Klassen)
+
+!pragma layout smetana
+hide empty members
+skinparam classAttributeIconSize 0
+
+class UsersRouter <<controller>> {
+  + getMe(req, res, next)
+  + patchMe(req, res, next)
+  + deleteMe(req, res, next)
+  + putMePicture(req, res, next)
+  + deleteMePicture(req, res, next)
+}
+
+class authenticationHandler <<middleware>> {
+  + authenticationHandler(req, res, next)
+}
+
+class zodValidation <<utility>> {
+  + zodValidation(schema, body)
+}
+
+class UserService <<service>> {
+  + getProfile(userId: string): User
+  + updateProfile(userId: string, changes: Partial<User>): User
+  + uploadPicture(userId: string, file: File): void
+  + removePicture(userId: string): void
+  + deleteAccount(userId: string): void
+}
+
+class UserRepository <<repository>> {
+  + getUserById(userId: string): User | undefined
+  + updateUser(userId: string, changes: Partial<User>): User
+  + updateUserPicture(userId: string, picture: Blob | null): void
+  + deleteUser(userId: string): void
+}
+
+class User <<model>> {
+  id: string
+  firstName: string
+  lastName: string
+  email: string
+  streetAddress: string
+  postalCode: string
+  city: string
+  picture: Blob
+  houseType: HouseType
+  hasGarden: boolean
+  hasChildren: boolean
+  isSmoker: boolean
+  roamingPossible: boolean
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+class UserFilter <<model>> {
+  animalSpecies: string
+  animalBreed: string
+  animalMinAge: number
+  animalMaxAge: number
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+class Interest <<model>> {
+  status: InterestStatus
+  appointmentAt: Date
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+enum HouseType <<enumeration>> {
+  apartment
+  house
+}
+
+UsersRouter ..> authenticationHandler : <<use>>
+UsersRouter ..> zodValidation : <<use>>
+UsersRouter --> "1" UserService
+UserService --> "1" UserRepository
+UserRepository ..> User : <<create>>
+
+User *-- "0..*" UserFilter
+User "1" -- "0..*" Interest
+User --> "1" HouseType
+@enduml

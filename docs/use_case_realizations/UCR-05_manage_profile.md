@@ -42,6 +42,23 @@ Bestätigt er, löscht `:ManageProfile` die Filter bei `:UserFilter`, die Likes 
 
 Nicht zutreffend
 
+### 2.5 Design-Klassen
+
+| Analyseobjekt (2.1) | Design-Klasse(n) |
+| ------------------- | ---------------- |
+| `:ProfilePage` | `UsersRouter` (`/users/me`, `/users/me/picture`) mit `authenticationHandler` und `zodValidation(updateUserSchema, …)` |
+| `:ManageProfile` | `UserService` |
+| `:User` | `User`, `HouseType`, `UserRepository` (Tabelle `users`, `repositories/userRepository.ts`) |
+| `:UserFilter` | `UserFilter` (Tabelle `user_filters`) – wird per `onDelete: "cascade"` mit dem `User` gelöscht, keine eigene Operation nötig |
+| `:Interest` | `Interest` (Tabelle `interests`) – wird per `onDelete: "cascade"` mit dem `User` gelöscht, keine eigene Operation nötig |
+
+![Class diagram UCR-05](../diagrams/UCR-05_classes.png)
+
+`UsersRouter` hält eine Referenz auf `UserService`, der Service auf `UserRepository` (durchgezogene Linien). `authenticationHandler` und `zodValidation` nutzt der Router nur während eines Requests (gestrichelt). `UserRepository` ergänzt die bestehenden Funktionen `getUserByEmail` und `createUser` aus `repositories/userRepository.ts` um die Operationen dieses Use Cases.
+Im Unterschied zur Analyse lädt das Frontend das Profilbild über eigene Endpunkte (`PUT`/`DELETE /users/me/picture`) hoch bzw. entfernt es, getrennt von den übrigen Angaben (`PATCH /users/me`).
+
+![Sequence diagram UCR-05 design](../diagrams/UCR-05_sequence_design.png)
+
 ## 3 Abgeleitete Anforderungen
 
 - DR-05-01 - Alle Endpunkte arbeiten ausschließlich mit der `userId` aus dem Token (`req.auth.sub`), nie mit einer ID aus dem Request.
