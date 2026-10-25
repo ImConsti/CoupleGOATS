@@ -4,6 +4,8 @@
 | ------ | -------- | ------------ |
 | brdly06 | 34–55 Story Points | [#19](https://github.com/ImConsti/CoupleGOATS/issues/19) |
 
+**Realization:** [UCR-02 Tierprofil ansehen](../use_case_realizations/UCR-02_animal_detail.md)
+
 ## 1 Kurzbeschreibung
 
 Dieser Use Case beschreibt, wie ein Adoptierender über die Discovery-Page das Profil eines Tieres aufrufen und dessen Informationen ansehen kann. Auf jeder Tierkarte befindet sich ein Button, über den der Adoptierende zum zugehörigen Tierprofil gelangt. Das Tierprofil zeigt die Bilder, den Namen, die Tierart, die Rasse, das Alter, das Geschlecht, die Tags und die Beschreibung des Tieres sowie den Namen des zuständigen Tierheims. Über einen weiteren Button kann der Adoptierende das Profil des Tierheims aufrufen. Dadurch erhält er einen umfassenden Eindruck vom Tier und kann sich über das zuständige Tierheim informieren.
