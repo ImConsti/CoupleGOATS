@@ -1,3 +1,4 @@
+
 @startuml
 title UC-02 – Tierprofil ansehen
 
@@ -11,27 +12,82 @@ database "Datenbank" as DB
 User -> FE: Discovery-Page öffnen
 FE -> BE: Verfügbare Tierprofile anfordern
 BE -> DB: Veröffentlichte Profile abfragen
-DB --> BE: Liste der Tierprofile
-BE --> FE: Tierprofile übermitteln
-FE --> User: Discovery-Page anzeigen
+DB --> BE: Ergebnis der Profilabfrage
 
-User -> FE: Tierprofil auswählen
-FE -> BE: Detailinformationen anfordern
-BE -> DB: Profil anhand der ID abrufen
-
-alt Tierprofil verfügbar und veröffentlicht
-    DB --> BE: Profildaten und Fotoreferenzen
-    BE --> FE: Tierdetails übermitteln
-    FE --> User: Tierprofil mit Tags und Fotos anzeigen
-    User -> FE: Profil ansehen
-    User -> FE: Zur Discovery-Page zurückkehren
-    FE --> User: Discovery-Page anzeigen
-
-else Tierprofil nicht verfügbar
-    DB --> BE: Kein verfügbares Profil
-    BE --> FE: Profil nicht verfügbar melden
-    FE --> User: Hinweis anzeigen
-    User -> FE: Zur Discovery-Page zurückkehren
-    FE --> User: Discovery-Page anzeigen
+alt Veröffentlichte Tierprofile vorhanden
+    BE --> FE: Liste der Tierprofile übermitteln
+    FE --> User: Discovery-Page mit Tierkarten anzeigen
+else Keine veröffentlichten Tierprofile vorhanden
+    BE --> FE: Leere Ergebnisliste übermitteln
+    FE --> User: Hinweis auf fehlende Tierprofile anzeigen
+    note over User
+        Der Nutzer kann später erneut suchen.
+    end note
 end
+
+opt Mindestens ein Tierprofil ist verfügbar
+    User -> FE: Tierprofil auswählen
+    FE -> BE: Detailinformationen anfordern
+    BE -> DB: Profil anhand der ID abrufen
+    DB --> BE: Profildaten und Fotoreferenzen
+
+    alt Tierprofil verfügbar und veröffentlicht
+        BE -> DB: Zugehörige Tierheimdaten abrufen
+        DB --> BE: Tierheimdaten oder keine öffentlichen Daten
+        BE --> FE: Tierdetails und Tierheimdaten übermitteln
+
+        alt Fotos erfolgreich geladen
+            FE --> User: Tierprofil mit Fotos und Informationen anzeigen
+        else Fotos nicht verfügbar
+            FE --> User: Tierprofil mit Text und Platzhaltern anzeigen
+        end
+
+        opt Nutzer möchte das Tierheimprofil öffnen
+            User -> FE: Tierheimprofil öffnen
+            FE -> BE: Öffentliches Tierheimprofil anfordern
+            BE -> DB: Tierheimprofil anhand der ID abrufen
+            DB --> BE: Ergebnis der Abfrage
+
+            alt Tierheimprofil verfügbar und öffentlich
+                BE --> FE: Tierheimdaten übermitteln
+                FE --> User: Tierheimprofil anzeigen
+            else Tierheimprofil nicht verfügbar
+                BE --> FE: Tierheimprofil nicht verfügbar melden
+                FE --> User: Hinweis anzeigen
+                note over User
+                    Das Tierprofil kann weiterhin angesehen werden.
+                end note
+            end
+        end
+
+        opt Nutzer kehrt zur Discovery-Page zurück
+            User -> FE: Zur Discovery-Page zurückkehren
+            FE --> User: Discovery-Page anzeigen
+        end
+
+    else Tierprofil nicht verfügbar oder nicht veröffentlicht
+        BE --> FE: Profil nicht verfügbar melden
+        FE --> User: Hinweis anzeigen
+        User -> FE: Zur Discovery-Page zurückkehren
+        FE --> User: Discovery-Page anzeigen
+    end
+end
+
+alt Technischer Fehler beim Laden der Tierdetails
+    BE --> FE: Fehler beim Abrufen der Profildaten
+    FE --> User: Fehlermeldung mit erneuter Ladeoption anzeigen
+
+    alt Nutzer versucht es erneut
+        User -> FE: Erneut laden
+        FE -> BE: Tierdetails erneut anfordern
+        BE -> DB: Profildaten erneut abrufen
+        DB --> BE: Ergebnis der erneuten Abfrage
+        BE --> FE: Ergebnis übermitteln
+        FE --> User: Tierprofil oder Fehlermeldung anzeigen
+    else Nutzer bricht ab
+        User -> FE: Zur Discovery-Page zurückkehren
+        FE --> User: Discovery-Page anzeigen
+    end
+end
+
 @enduml
