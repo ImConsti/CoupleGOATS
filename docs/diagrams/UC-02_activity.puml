@@ -1,0 +1,135 @@
+
+@startuml
+title UC-02: Tierprofil ansehen
+
+skinparam backgroundColor white
+skinparam activity {
+  BackgroundColor #F8FAFC
+  BorderColor #475569
+  DiamondBackgroundColor #FEF3C7
+  DiamondBorderColor #B45309
+  ArrowColor #475569
+  FontSize 12
+}
+skinparam shadowing false
+
+start
+
+partition "Adoptierender" {
+  :Discovery-Page öffnen;
+}
+
+partition "System" {
+  :Veröffentlichte Tierkarten ermitteln und anzeigen;
+
+  if (Tierprofile verfügbar?) then ([ja])
+  else ([else])
+    :Meldung anzeigen,\ndass keine Tierprofile verfügbar sind;
+    stop
+  endif
+}
+
+partition "Adoptierender" {
+  :Tierprofil auswählen;
+}
+
+partition "System" {
+  :Detailinformationen des ausgewählten Tieres anfordern;
+
+  if (Tierprofil noch verfügbar?) then ([ja])
+  else ([else])
+    :Meldung anzeigen,\ndass das Tierprofil nicht mehr verfügbar ist;
+    :Rückkehr zur Discovery-Page ermöglichen;
+    stop
+  endif
+
+  :Veröffentlichungsstatus und öffentliche\nAnzeigeberechtigung prüfen;
+
+  if (Tierprofil veröffentlicht und vollständig genug?) then ([ja])
+  else ([else])
+    :Profildaten nicht öffentlich bereitstellen;
+    :Meldung anzeigen,\ndass das Tierprofil nicht verfügbar ist;
+    :Rückkehr zur Discovery-Page ermöglichen;
+    stop
+  endif
+
+  :Tierprofil und Tierheimdaten aus der Datenbank abrufen;
+
+  if (Daten erfolgreich abgerufen?) then ([ja])
+  else ([else])
+    :Fehlermeldung anzeigen;
+  endif
+}
+
+partition "Adoptierender" {
+  if (Daten erfolgreich abgerufen?) then ([erneut versuchen])
+    partition "System" {
+      :Profildaten erneut anfordern;
+      :Tierprofil und Tierheimdaten erneut abrufen;
+
+      if (Erneuter Abruf erfolgreich?) then ([ja])
+      else ([else])
+        :Fehlermeldung anzeigen;
+      endif
+    }
+
+    if (Daten jetzt verfügbar?) then ([ja])
+    else ([else])
+      :Ladevorgang abbrechen;
+      stop
+    endif
+  else ([Abbruch])
+    stop
+  endif
+}
+
+partition "System" {
+  :Verfügbare Profilbilder laden;
+
+  if (Alle benötigten Bilder verfügbar?) then ([ja])
+    :Bilder für die Anzeige bereitstellen;
+  else ([else])
+    :Fehlende Bilder durch Platzhalter ersetzen;
+  endif
+
+  :Tierprofil mit verfügbaren Angaben anzeigen;
+  note right
+    Name, Tierart, Rasse, Alter,
+    Geschlecht, Tags, Beschreibung,
+    Bilder und Name des Tierheims
+  end note
+
+  :Navigation zum Tierheimprofil bereitstellen;
+}
+
+partition "Adoptierender" {
+  if (Tierheimprofil aufrufen?) then ([ja])
+    partition "System" {
+      :Tierheimprofil anfordern;
+
+      if (Tierheimprofil öffentlich verfügbar?) then ([ja])
+        :Tierheimprofil anzeigen;
+        stop
+      else ([else])
+        :Meldung anzeigen,\ndass das Tierheimprofil nicht verfügbar ist;
+      endif
+    }
+
+    partition "Adoptierender" {
+      if (Weiteres Vorgehen?) then ([Tierprofil ansehen])
+        :Tierprofil weiter ansehen;
+        stop
+      else ([else])
+        :Discovery-Page erneut aufrufen;
+        stop
+      endif
+    }
+
+  else ([else])
+    :Tierprofil verlassen;
+    :Zur Discovery-Page zurückkehren;
+    stop
+  endif
+}
+
+@enduml
