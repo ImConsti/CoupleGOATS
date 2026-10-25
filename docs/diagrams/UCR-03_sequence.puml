@@ -1,0 +1,244 @@
+
+@startuml UCR-03_sequence
+
+title UCR-03 – Tierprofil verwalten\nVerfeinertes Sequenzdiagramm
+
+autonumber
+hide footbox
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam sequenceMessageAlign center
+skinparam responseMessageBelowArrow true
+
+actor "Tierheim-Mitarbeiter" as Employee
+boundary ":AnimalProfileUI" as UI
+control ":ManageAnimalProfiles" as Control
+entity ":AnimalProfile" as Animal
+entity ":AnimalPhoto" as Photo
+entity ":PhotoStorage" as Storage
+
+== Tierprofilverwaltung öffnen ==
+
+Employee -> UI: openAnimalManagement()
+UI -> Control: loadAnimalProfiles()
+Control -> Control: checkAuthenticationAndAuthorization()
+
+alt Mitarbeiter nicht berechtigt
+    Control --> UI: accessDenied()
+    UI --> Employee: Fehlermeldung anzeigen
+    break Zugriff verweigert
+        note over Employee, UI
+            Keine geschützten Tierprofildaten
+            werden angezeigt oder verändert.
+        end note
+    end
+else Mitarbeiter berechtigt
+    Control -> Animal: findByShelter(shelterId)
+    Animal --> Control: profileList
+    Control --> UI: showAnimalProfiles(profileList)
+    UI --> Employee: Tierprofilübersicht anzeigen
+end
+
+== Verwaltungsaktion auswählen ==
+
+alt Neues Tierprofil erstellen
+
+    Employee -> UI: createAnimalProfile()
+    UI -> Control: startProfileCreation()
+    Control --> UI: provideEmptyProfileForm()
+    UI --> Employee: Formular anzeigen
+
+    Employee -> UI: submitAnimalData(data, photos, mainPhoto)
+    UI -> Control: createProfile(data, photos, mainPhoto)
+
+else Bestehendes Tierprofil bearbeiten
+
+    Employee -> UI: selectAnimalProfile(animalId)
+    UI -> Control: loadProfileForEditing(animalId)
+    Control -> Animal: findById(animalId)
+    Animal --> Control: profile
+
+    alt Profil fehlt oder gehört nicht zum Tierheim
+        Control --> UI: accessDeniedOrProfileUnavailable()
+        UI --> Employee: Hinweis anzeigen
+        break Bearbeitung nicht möglich
+            note over Employee, UI
+                Das Profil wird nicht offengelegt
+                oder verändert.
+            end note
+        end
+    else Profil darf bearbeitet werden
+        Control --> UI: showEditableProfile(profile)
+        UI --> Employee: Gespeicherte Daten anzeigen
+        Employee -> UI: updateAnimalData(data, photoChanges, mainPhoto)
+        UI -> Control: updateProfile(animalId, data, photoChanges, mainPhoto)
+    end
+
+else Tierprofil löschen
+
+    Employee -> UI: requestProfileDeletion(animalId)
+    UI -> Control: requestDeletion(animalId)
+    Control -> Animal: findById(animalId)
+    Animal --> Control: profile
+
+    alt Profil fehlt oder gehört nicht zum Tierheim
+        Control --> UI: accessDeniedOrProfileUnavailable()
+        UI --> Employee: Hinweis anzeigen
+        break Löschung nicht möglich
+            note over Employee, UI
+                Es werden keine Daten gelöscht.
+            end note
+        end
+    else Löschung zulässig
+        Control --> UI: requestDeletionConfirmation(profile)
+        UI --> Employee: Löschbestätigung anzeigen
+
+        alt Mitarbeiter bestätigt die Löschung
+            Employee -> UI: confirmDeletion()
+            UI -> Control: deleteProfile(animalId)
+            Control -> Animal: delete(animalId)
+            Animal --> Control: deletionResult
+
+            opt Zugehörige Fotos vorhanden
+                Control -> Photo: findByAnimal(animalId)
+                Photo --> Control: photos
+                Control -> Storage: deletePhotos(photos)
+                Storage --> Control: photoDeletionResult
+                Control -> Photo: removePhotoReferences(animalId)
+                Photo --> Control: referencesRemoved
+            end
+
+            alt Löschung erfolgreich
+                Control --> UI: deletionSucceeded()
+                UI --> Employee: Löschung bestätigen
+            else Fehler beim Löschen
+                Control --> UI: deletionFailed()
+                UI --> Employee: Löschfehler anzeigen
+            end
+
+            break Löschvorgang abgeschlossen
+                note over Employee, UI
+                    Das Profil darf nach erfolgreicher
+                    Löschung nicht mehr öffentlich
+                    angezeigt werden.
+                end note
+            end
+
+        else Mitarbeiter bricht die Löschung ab
+            Employee -> UI: cancelDeletion()
+            UI -> Control: cancelDeletion()
+            Control --> UI: deletionCancelled()
+            UI --> Employee: Profilübersicht anzeigen
+            break Löschung abgebrochen
+                note over Employee, UI
+                    Profil und Fotos bleiben erhalten.
+                end note
+            end
+        end
+    end
+end
+
+== Tierdaten und Fotos validieren und speichern ==
+
+opt Erstellen oder Bearbeiten wurde ausgewählt
+    loop Solange Eingaben oder Foto-Uploads fehlerhaft sind
+        Control -> Animal: validateProfileData(data)
+        Animal --> Control: validationResult
+
+        Control -> Photo: validatePhotoSelection(photos, mainPhoto)
+        Photo --> Control: photoValidationResult
+
+        alt Tierdaten ungültig oder unvollständig
+            Control --> UI: showValidationErrors(validationResult)
+            UI --> Employee: Fehler und betroffene Felder anzeigen
+            Employee -> UI: correctProfileData(data)
+            UI -> Control: submitCorrectedData(data)
+        else Foto-Upload fehlgeschlagen
+            Control -> Storage: storePhotos(photos)
+
+            alt Upload erfolgreich
+                Storage --> Control: storedPhotoReferences
+            else Upload fehlgeschlagen
+                Storage --> Control: uploadError
+                Control --> UI: showPhotoUploadError()
+                UI --> Employee: Uploadfehler anzeigen
+
+                alt Mitarbeiter versucht den Upload erneut
+                    Employee -> UI: retryPhotoUpload()
+                    UI -> Control: retryUpload(photos)
+                else Mitarbeiter entfernt das fehlgeschlagene Foto
+                    Employee -> UI: removeFailedPhoto(photoId)
+                    UI -> Control: removePhoto(photoId)
+                    Control -> Photo: removePhotoReference(photoId)
+                    Photo --> Control: photoReferenceRemoved
+                end
+            end
+
+            Control -> Animal: validateProfileData(data)
+            Animal --> Control: validationResult
+        end
+    end
+
+    Control -> Animal: checkProfileCompleteness(data, photos)
+    Animal --> Control: completenessResult
+
+    alt Profil vollständig
+        Control -> Animal: setPublicationStatus(PUBLISHED)
+        Animal --> Control: statusUpdated
+    else Profil unvollständig
+        Control -> Animal: setPublicationStatus(DRAFT)
+        Animal --> Control: statusUpdated
+        Control --> UI: showMissingRequirements(completenessResult)
+        UI --> Employee: Fehlende Angaben anzeigen
+
+        opt Mitarbeiter möchte das Profil direkt vervollständigen
+            Employee -> UI: continueEditing()
+            UI -> Control: reopenProfileForm()
+            Control --> UI: provideEditableProfile()
+            UI --> Employee: Bearbeitungsformular anzeigen
+        end
+    end
+
+    Control -> Animal: saveProfile(data)
+    Animal --> Control: saveResult
+
+    alt Speichern fehlgeschlagen
+        Control --> UI: showSaveError()
+        UI --> Employee: Speicherfehler anzeigen
+
+        opt Erneuter Speicherversuch
+            Employee -> UI: retrySave()
+            UI -> Control: saveProfileAgain(data)
+            Control -> Animal: saveProfile(data)
+            Animal --> Control: retrySaveResult
+
+            alt Erneutes Speichern erfolgreich
+                Control --> UI: saveSucceeded()
+                UI --> Employee: Speicherung bestätigen
+            else Erneutes Speichern fehlgeschlagen
+                Control --> UI: saveFailed()
+                UI --> Employee: Fehler anzeigen und Eingaben erhalten
+            end
+        end
+
+    else Speichern erfolgreich
+        opt Fotos müssen separat gespeichert werden
+            Control -> Storage: storePhotos(photos)
+            Storage --> Control: photoStorageResult
+        end
+
+        alt Profil vollständig und alle erforderlichen Daten gespeichert
+            Control -> Animal: publishProfile(animalId)
+            Animal --> Control: publicationResult
+            Control --> UI: showSavedProfileStatus(PUBLISHED)
+            UI --> Employee: Speicherung und Veröffentlichung bestätigen
+        else Profil unvollständig oder erforderliche Daten fehlen
+            Control -> Animal: keepUnpublished(animalId)
+            Animal --> Control: unpublishedStatus
+            Control --> UI: showSavedProfileStatus(DRAFT)
+            UI --> Employee: Speicherung als unveröffentlichten Entwurf bestätigen
+        end
+    end
+end
+
+@enduml
