@@ -10,11 +10,11 @@ import {
   roles,
 } from "../validation/schemas.js";
 import { zodValidation } from "../validation/zod-validation.js";
-import { createUser, getUserByEmail } from "../repositories/users.js";
+import { createUser, getUserByEmail } from "../repositories/userRepository.js";
 import { hashPassword, verifyPassword } from "../utils/bcrypt.js";
 import { generateToken } from "../utils/jwt.js";
 import { AuthenticationError, InternalServerError } from "../errors/errors.js";
-import { createShelter, getShelterByEmail } from "../repositories/shelters.js";
+import { createShelter, getShelterByEmail } from "../repositories/shelterRepository.js";
 import {
   authenticationHandler,
   type AuthRequest,

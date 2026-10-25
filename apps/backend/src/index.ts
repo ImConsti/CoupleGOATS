@@ -8,7 +8,7 @@ import swaggerUi from "swagger-ui-express";
 import {parse} from "yaml";
 import {routeNotFoundHandler} from "./middleware/routeNotFoundHandler.js";
 import {errorHandler} from "./middleware/errorHandler.js";
-import { router as authRouter } from "./router/auth-router.js";
+import { router as authRouter } from "./router/authController.js";
 
 async function runMigration() {
     const db = drizzle({
