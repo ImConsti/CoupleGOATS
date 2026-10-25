@@ -44,6 +44,36 @@ Beim Löschen eines Tierprofils wird zunächst eine ausdrückliche Bestätigung 
 
 Ein separater Zustandsautomat ist für diese Realization nicht erforderlich. Der Veröffentlichungsstatus eines Tierprofils wird jedoch durch die Steuerung anhand seiner Vollständigkeit verwaltet. Ein Profil kann unveröffentlicht bleiben, als Entwurf gespeichert oder nach Erfüllung aller Anforderungen veröffentlicht werden. Beim Löschen wird das Profil aus der öffentlichen Discovery-Page entfernt.
 
+
+### 2.5 Design classes
+
+Die Analyseobjekte aus Abschnitt 2.1 werden den folgenden Designklassen zugeordnet. Die Benutzeroberfläche wird durch einen Controller angebunden, der Service koordiniert den Ablauf und die Repositories übernehmen den Zugriff auf die gespeicherten Daten. Die fachlichen Informationen bleiben in den Domain-Model-Klassen `Animal` und `AnimalPicture`.
+
+#### Mapping der Analyseobjekte
+
+| Analyseobjekt aus 2.1 | Designklasse(n) | Begründung |
+|---|---|---|
+| `Tierheim-Mitarbeiter` | Actor, keine Designklasse | Der Mitarbeiter löst die Aktionen aus und interagiert mit der Benutzeroberfläche. |
+| `:AnimalProfileUI` | `AnimalProfileController` | Nimmt Aktionen entgegen und gibt Ergebnisse, Statusmeldungen und Fehler an die Benutzeroberfläche weiter. |
+| `:ManageAnimalProfiles` | `AnimalProfileService` | Koordiniert Berechtigungsprüfung, Validierung, Vollständigkeitsprüfung, Veröffentlichung und Löschung. |
+| `:AnimalProfile` | `Animal` und `AnimalRepository` | `Animal` repräsentiert das Tierprofil; das Repository lädt, speichert und löscht es. |
+| `:AnimalPhoto` | `AnimalPicture` und `AnimalPictureRepository` | `AnimalPicture` repräsentiert ein Tierfoto; das Repository verwaltet die gespeicherten Zuordnungen. |
+| `:PhotoStorage` | `PhotoStorageService` | Speichert Fotos und entfernt sie bei einem entsprechenden Löschvorgang. |
+
+#### Klassendiagramm
+
+Das Klassendiagramm zeigt nur die am Use Case beteiligten Designklassen. Durchgezogene gerichtete Linien kennzeichnen gehaltene Referenzen. Gestrichelte Pfeile kennzeichnen die kurzzeitige Verwendung von Domain-Objekten durch den Service.
+
+Die Klassendiagramm-Quelldatei liegt unter `../diagrams/UCR-03_classes.puml`; die gerenderte Grafik unter `../diagrams/UCR-03_classes.png`.
+
+![Klassendiagramm UCR-03](../diagrams/UCR-03_classes.png)
+
+#### Sequenzdiagramm mit Designklassen
+
+Das Design-Sequenzdiagramm verwendet dieselben Klassennamen und die unten dargestellten Methoden. Es konkretisiert das ursprüngliche Analyse-Sequenzdiagramm für das Anzeigen, Erstellen, Bearbeiten und Löschen von Tierprofilen. Das ursprüngliche Diagramm `UCR-03_sequence.puml` bleibt als Analyseversion erhalten.
+
+Die Quelldatei der Designversion liegt unter `../diagrams/UCR-03_sequence_design.puml`; die gerenderte Grafik unter `../diagrams/UCR-03_sequence_design.png`.
+
 ## 3 Derived requirements
 
 Keine. Die Use-Case-Realization konkretisiert die bestehenden Abläufe und fachlichen Regeln aus UC-03. Sie führt keine zusätzlichen fachlichen Anforderungen ein. Technische Einzelheiten wie konkrete Datenbankklassen, Frameworks, Transaktionsmechanismen und die tatsächliche Implementierung des Bildspeichers werden erst im Rahmen der späteren Implementierung festgelegt.
