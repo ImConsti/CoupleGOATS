@@ -18,7 +18,7 @@ export const genders = ["male", "female", "unknown"] as const;
 
 export const roles = ["admin", "user", "shelter"] as const;
 
-export const tagsCategories = [
+export const tagCategories = [
   "personality",
   "energy level",
   "training & experience",
@@ -65,7 +65,7 @@ export const updateAnimalSchema = createAnimalSchema.partial();
 
 export const createTagSchema = z.object({
   name: z.string(),
-  category: z.enum(tagsCategories),
+  category: z.enum(tagCategories),
   affects_matching: z.boolean(),
   is_critical: z.boolean(),
 });

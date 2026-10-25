@@ -54,6 +54,9 @@ classDiagram
         }
         class Tag {
             name: String
+            category: TagCategories
+            affectsMatching: Boolean
+            isCritical: Boolean
             createdAt: DateTime
             updatedAt: DateTime
         }
@@ -82,6 +85,7 @@ classDiagram
             animalMaxAge: Integer [0..1]
             animalGender: Gender [0..1]
             experienceLevel: ExperienceLevel [0..1]
+            energyLevel: EnergyLevel [0..1]
             createdAt: DateTime
             updatedAt: DateTime
         }
@@ -114,10 +118,27 @@ classDiagram
             experienced
             expert
         }
+        class EnergyLevel {
+            <<enumeration>>
+            low
+            medium
+            high
+        }
         class HouseType {
             <<enumeration>>
             apartment
             house
+        }
+        class TagCategories{
+            <<enumeration>>
+            personality
+            energy level
+            training & experience
+            living environment
+            social behavior
+            time & attention
+            special needs
+            lifestyle
         }
     }
 
@@ -149,4 +170,6 @@ classDiagram
     style InterestStatus fill:#f1f5f9,stroke:#94a3b8,stroke-width:2px,color:#334155
     style Gender fill:#f1f5f9,stroke:#94a3b8,stroke-width:2px,color:#334155
     style ExperienceLevel fill:#f1f5f9,stroke:#94a3b8,stroke-width:2px,color:#334155
+    style EnergyLevel fill:#f1f5f9,stroke:#94a3b8,stroke-width:2px,color:#334155
     style HouseType fill:#f1f5f9,stroke:#94a3b8,stroke-width:2px,color:#334155
+    style TagCategories fill:#f1f5f9,stroke:#94a3b8,stroke-width:2px,color:#334155
