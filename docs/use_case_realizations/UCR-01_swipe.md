@@ -69,6 +69,28 @@ Wählt der Nutzer Like oder Dislike, übergibt die Boundary die Tierkennung und 
 
 Not applicable
 
+### 2.5 Design classes
+<!-- The classes of your code that realize this use case. Commit the source 
+files next to
+the images. -->
+| Analysis object (2.1) | Design class(es) |
+| --------------------- | ---------------- |
+| :DiscoveryPage  | DiscoveryPage, DiscoveryController |
+| :DiscoverAnimals  | DiscoveryService |
+| :Animal  | Animal, AnimalRepository |
+| :Interest | Interest, InterestRepository |
+| :UserFilter | UserFilter, UserFilterRepository |
+
+
+Klassendiagramm
+
+![Class diagram UCR-01](../diagrams/UCR-01_classes.png)
+
+
+Sequenzdiagramm
+
+![Sequence diagram UCR-01, design classes](../diagrams/UCR-01_sequence_design.png)
+
 ## 3 Derived requirements
 
 <!-- Requirements the design adds and the implementation must handle, each with an ID that is
