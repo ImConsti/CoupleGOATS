@@ -1,0 +1,171 @@
+@startuml
+title UCR-03 - Design-Sequenzdiagramm: Tierprofil verwalten
+
+actor "Tierheim-Mitarbeiter" as Employee
+participant "controller:AnimalProfileController" as Controller
+participant "service:AnimalProfileService" as Service
+participant "animalRepository:AnimalRepository" as AnimalRepo
+participant "pictureRepository:AnimalPictureRepository" as PictureRepo
+participant "photoStorage:PhotoStorageService" as PhotoStorage
+
+== Tierprofilverwaltung öffnen ==
+
+Employee -> Controller : showProfiles(shelterId)
+Controller -> Service : checkShelterAccess(shelterId)
+
+alt Zugriff verweigert
+    Service --> Controller : access denied
+    Controller --> Employee : showAccessDenied()
+else Zugriff erlaubt
+    Controller -> Service : getProfiles(shelterId)
+    Service -> AnimalRepo : findByShelter(shelterId)
+    AnimalRepo --> Service : animals
+    Service --> Controller : animals
+    Controller --> Employee : showProfiles(shelterId)
+
+    alt Neues Tierprofil erstellen
+        Employee -> Controller : createProfile(data, photos)
+        Controller -> Service : createProfile(data, shelterId)
+        Service -> Service : validateProfileData(data)
+
+        alt Ungültige Tierdaten
+            Service --> Controller : validation errors
+            Controller --> Employee : showValidationErrors(errors)
+        else Tierdaten gültig
+            Service -> Service : validatePhotoSelection(photos, mainPhoto)
+
+            alt Fotoauswahl ungültig
+                Service --> Controller : photo selection error
+                Controller --> Employee : showValidationErrors(errors)
+            else Fotoauswahl gültig
+                Service -> PhotoStorage : storePhotos(photos)
+
+                alt Foto-Upload fehlgeschlagen
+                    PhotoStorage --> Service : upload error
+                    Service --> Controller : upload error
+                    Controller --> Employee : showPhotoUploadError(message)
+                else Fotos gespeichert
+                    Service -> AnimalRepo : save(animal)
+                    alt Speichern fehlgeschlagen
+                        AnimalRepo --> Service : save error
+                        Service --> Controller : save error
+                        Controller --> Employee : showSavedStatus("Speichern fehlgeschlagen")
+                    else Profil gespeichert
+                        AnimalRepo --> Service : animal
+                        Service -> Service : checkProfileCompleteness(animal, photos)
+
+                        alt Profil vollständig
+                            Service -> Service : publishProfile(animalId)
+                            Service -> AnimalRepo : save(animal)
+                            AnimalRepo --> Service : saved
+                            Service --> Controller : success
+                            Controller --> Employee : showSavedStatus("Profil veröffentlicht")
+                        else Profil unvollständig
+                            Service -> Service : keepUnpublished(animalId)
+                            Service -> AnimalRepo : save(animal)
+                            AnimalRepo --> Service : saved
+                            Service --> Controller : incomplete profile
+                            Controller --> Employee : showProfileIncomplete(message)
+                        end
+                    end
+                end
+            end
+        end
+
+    else Bestehendes Tierprofil bearbeiten
+        Employee -> Controller : editProfile(animalId, data, photos)
+        Controller -> Service : getProfile(animalId)
+        Service -> AnimalRepo : findById(animalId)
+        AnimalRepo --> Service : animal
+        Service --> Controller : animal
+
+        Controller -> Service : updateProfile(animalId, data)
+        Service -> Service : validateProfileData(data)
+
+        alt Ungültige Tierdaten
+            Service --> Controller : validation errors
+            Controller --> Employee : showValidationErrors(errors)
+        else Tierdaten gültig
+            Service -> Service : validatePhotoSelection(photos, mainPhoto)
+
+            alt Fotoauswahl ungültig
+                Service --> Controller : photo selection error
+                Controller --> Employee : showValidationErrors(errors)
+            else Fotoauswahl gültig
+                Service -> PhotoStorage : storePhotos(photos)
+
+                alt Foto-Upload fehlgeschlagen
+                    PhotoStorage --> Service : upload error
+                    Service --> Controller : upload error
+                    Controller --> Employee : showPhotoUploadError(message)
+                else Fotos gespeichert
+                    Service -> PictureRepo : findByAnimal(animalId)
+                    PictureRepo --> Service : pictures
+                    Service -> PictureRepo : saveAll(pictures)
+                    PictureRepo --> Service : saved
+                    Service -> AnimalRepo : save(animal)
+
+                    alt Speichern fehlgeschlagen
+                        AnimalRepo --> Service : save error
+                        Service --> Controller : save error
+                        Controller --> Employee : showSavedStatus("Speichern fehlgeschlagen")
+                    else Profil gespeichert
+                        AnimalRepo --> Service : saved
+                        Service -> Service : checkProfileCompleteness(animal, photos)
+
+                        alt Profil vollständig
+                            Service -> Service : publishProfile(animalId)
+                            Service -> AnimalRepo : save(animal)
+                            AnimalRepo --> Service : saved
+                            Service --> Controller : success
+                            Controller --> Employee : showSavedStatus("Profil veröffentlicht")
+                        else Profil unvollständig
+                            Service -> Service : keepUnpublished(animalId)
+                            Service -> AnimalRepo : save(animal)
+                            AnimalRepo --> Service : saved
+                            Service --> Controller : incomplete profile
+                            Controller --> Employee : showProfileIncomplete(message)
+                        end
+                    end
+                end
+            end
+        end
+
+    else Tierprofil löschen
+        Employee -> Controller : deleteProfile(animalId)
+        Controller --> Employee : showDeletionConfirmation(animalId)
+        Employee -> Controller : confirm deletion
+
+        alt Löschung abgebrochen
+            Controller --> Employee : showDeletionResult(false)
+        else Löschung bestätigt
+            Controller -> Service : deleteProfile(animalId)
+            Service -> AnimalRepo : findById(animalId)
+            AnimalRepo --> Service : animal
+            Service -> PictureRepo : findByAnimal(animalId)
+            PictureRepo --> Service : pictures
+            Service -> PhotoStorage : deletePhotos(pictures)
+            PhotoStorage --> Service : deletion result
+
+            alt Foto-Löschung fehlgeschlagen
+                Service --> Controller : deletion error
+                Controller --> Employee : showDeletionResult(false)
+            else Fotos entfernt
+                Service -> PictureRepo : deleteByAnimal(animalId)
+                PictureRepo --> Service : deleted
+                Service -> AnimalRepo : delete(animalId)
+                AnimalRepo --> Service : deletion result
+
+                alt Profil-Löschung fehlgeschlagen
+                    Service --> Controller : deletion error
+                    Controller --> Employee : showDeletionResult(false)
+                else Profil gelöscht
+                    Service --> Controller : success
+                    Controller --> Employee : showDeletionResult(true)
+                end
+            end
+        end
+    end
+end
+
+@enduml
