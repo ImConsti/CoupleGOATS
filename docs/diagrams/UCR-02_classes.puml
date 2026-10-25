@@ -1,0 +1,93 @@
+
+@startuml
+title UCR-02 - Designklassen: Tierprofil ansehen
+
+class AnimalDetailController {
+  showDiscoveryPage()
+  selectAnimal(animalId)
+  openShelterProfile(shelterId)
+  returnToDiscovery()
+  showAnimalCards(animals)
+  showAnimalDetails(animal, pictures, shelter)
+  showNoAnimalsAvailable()
+  showAnimalUnavailable()
+  showShelterUnavailable()
+  showLoadError()
+  showAnimalDetailsWithPlaceholders(animal, shelter)
+  retryLoading(animalId)
+}
+
+class AnimalDetailService {
+  getPublishedAnimals()
+  getPublicAnimalDetails(animalId)
+  getPublicShelterProfile(shelterId)
+  isPubliclyDisplayable(animal)
+}
+
+class AnimalRepository {
+  findPublished()
+  findPublicById(animalId)
+}
+
+class AnimalPictureRepository {
+  findByAnimal(animalId)
+}
+
+class AnimalShelterRepository {
+  findPublicById(shelterId)
+}
+
+class Animal {
+  id
+  name
+  birthYear
+  description
+  gender
+  publicationStatus
+  isPublished()
+  isComplete()
+}
+
+class AnimalPicture {
+  id
+  imageUrl
+  showOnCard
+}
+
+class AnimalShelter {
+  id
+  name
+}
+
+class Species {
+  name
+}
+
+class Breed {
+  name
+}
+
+class Tag {
+  name
+}
+
+AnimalDetailController --> AnimalDetailService : held reference
+AnimalDetailService --> AnimalRepository : held reference
+AnimalDetailService --> AnimalPictureRepository : held reference
+AnimalDetailService --> AnimalShelterRepository : held reference
+
+AnimalDetailService ..> Animal : temporary use
+AnimalDetailService ..> AnimalPicture : temporary use
+AnimalDetailService ..> AnimalShelter : temporary use
+
+AnimalRepository "1" o-- "*" Animal : retrieves
+AnimalPictureRepository ..> AnimalPicture : retrieves
+AnimalShelterRepository ..> AnimalShelter : retrieves
+
+Animal "1" *-- "0..*" AnimalPicture : pictures
+Animal --> AnimalShelter : belongs to
+Animal --> Species : species
+Animal --> Breed : breed
+Animal "*" -- "*" Tag : tags
+
+@enduml
