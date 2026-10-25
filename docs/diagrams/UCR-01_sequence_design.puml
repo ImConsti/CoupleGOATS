@@ -1,0 +1,104 @@
+@startuml UCR-01_sequence_design
+title UCR-01 – Tiere swipen (Design-Klassen)
+
+actor "Adoptierende Person" as User
+participant ":DiscoveryPage" as Page
+participant ":DiscoveryController" as Controller
+participant ":DiscoveryService" as Service
+participant ":UserFilterRepository" as FilterRepo
+participant ":AnimalRepository" as AnimalRepo
+participant ":InterestRepository" as InterestRepo
+
+== Discovery-Page öffnen ==
+User -> Page: öffnet Discovery-Page
+Page -> Controller: openDiscovery(userId)
+Controller -> Service: findNextAnimal(userId)
+Service -> FilterRepo: findByUserId(userId)
+FilterRepo --> Service: filter
+Service -> InterestRepo: findByUserId(userId)
+InterestRepo --> Service: interests
+Service -> AnimalRepo: findMatching(filter, ratedAnimalIds)
+AnimalRepo --> Service: animal
+Service --> Controller: animal
+Controller --> Page: animal
+
+alt Passendes Tier vorhanden
+    Page -> Page: showAnimalCard(animal)
+    Page --> User: Tierkarte anzeigen
+
+    loop Solange die Discovery-Page geöffnet ist
+        alt Weitere Informationen anfordern
+            User -> Page: Details anfordern
+            Page -> Controller: showDetails(animalId)
+            Controller -> Service: getAnimalDetails(animalId)
+            Service -> AnimalRepo: findById(animalId)
+            AnimalRepo --> Service: animal
+            Service --> Controller: animal
+            Controller --> Page: animal
+            Page -> Page: showDetails(animal)
+            Page --> User: Detailinformationen anzeigen
+            User -> Page: zurück zur Discovery
+            Page -> Page: showAnimalCard(animal)
+
+        else Filter ändern
+            User -> Page: Filter ändern
+            Page -> Controller: updateFilters(userId, filter)
+            Controller -> Service: saveFilters(userId, filter)
+            Service -> FilterRepo: save(filter)
+            Controller -> Service: findNextAnimal(userId)
+            note right: Ablauf wie beim Öffnen\n(Filter laden, bewertete Tiere laden,\nfindMatching)
+            Service --> Controller: animal
+            Controller --> Page: animal
+            alt Passendes Tier gefunden
+                Page -> Page: showAnimalCard(animal)
+            else Kein passendes Tier gefunden
+                Page -> Page: showNoMatch()
+            end
+
+        else Like oder Dislike
+            User -> Page: Like / Dislike
+            Page -> Controller: rate(userId, animalId, status)
+            Controller -> Service: rateAnimal(userId, animalId, status)
+            Service -> InterestRepo: findByUserIdAndAnimalId(userId, animalId)
+            InterestRepo --> Service: interest oder null
+
+            alt Interest bereits vorhanden
+                note over Service: nicht erneut speichern (DR-01-01)
+            else Noch kein Interest vorhanden
+                Service -> InterestRepo: save(interest)
+                alt Speicherung erfolgreich
+                    InterestRepo --> Service: ok
+                else Speicherung fehlgeschlagen
+                    InterestRepo --> Service: Fehler
+                    Service --> Controller: Fehler
+                    Controller --> Page: Fehler
+                    Page -> Page: showError(message)
+                    Page --> User: Fehler anzeigen, Tierkarte beibehalten
+                    note over User, Page: Nutzer kann erneut Like/Dislike wählen\n(gleicher Ablauf wie oben, DR-01-02)
+                end
+            end
+
+            Service -> Service: findNextAnimal(userId)
+            Service --> Controller: nextAnimal
+            Controller --> Page: nextAnimal
+            alt Weiteres passendes Tier vorhanden
+                Page -> Page: showAnimalCard(nextAnimal)
+                Page --> User: Nächste Tierkarte anzeigen
+            else Keine weiteren passenden Tiere
+                Page -> Page: showNoMatch()
+                Page --> User: Hinweis anzeigen
+            end
+        end
+    end
+
+else Kein passendes Tier vorhanden
+    Page -> Page: showNoMatch()
+    Page --> User: Hinweis anzeigen
+    opt Nutzer passt Filter an
+        User -> Page: Filter ändern
+        Page -> Controller: updateFilters(userId, filter)
+        note right: Ablauf wie in „Filter ändern“
+    end
+end
+
+@enduml
