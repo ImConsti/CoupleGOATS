@@ -82,6 +82,35 @@ Wenn der Nutzer das Tierprofil nicht weiter ansehen möchte oder das Tierheimpro
 
 Nicht anwendbar. Für diese Use-Case-Realization wird kein eigener Zustandsautomat definiert, da der Ablauf hauptsächlich durch die Interaktion zwischen Nutzer, Frontend, Backend und Datenbank bestimmt wird. Der Veröffentlichungsstatus eines Tierprofils wird bei der Datenabfrage geprüft, begründet in dieser Realization jedoch keinen eigenständigen Zustandsautomaten.
 
+
+### 2.5 Design classes
+
+Die Analyseobjekte aus Abschnitt 2.1 werden den folgenden Designklassen zugeordnet. Der Controller bildet die Schnittstelle zwischen Frontend und Anwendungslogik. Der Service koordiniert die Abfragen und prüft, ob Tierprofile und Tierheimdaten öffentlich angezeigt werden dürfen. Die Repositories greifen auf die gespeicherten Domain-Objekte zu.
+
+#### Mapping der Analyseobjekte
+
+| Analyseobjekt aus 2.1 | Designklasse(n) | Begründung |
+|---|---|---|
+| `Interessierter Nutzer` | Actor, keine Designklasse | Der Nutzer löst die Aktionen aus und interagiert mit dem Frontend. |
+| `Frontend` | `AnimalDetailController` | Nimmt Anfragen zur Discovery-Page und zu Tierdetails entgegen und stellt Ergebnisse, Statusmeldungen und Fehler dar. |
+| `Backend` | `AnimalDetailService` | Koordiniert das Laden der Tierprofile, prüft die öffentliche Verfügbarkeit und ruft Fotos sowie Tierheimdaten ab. |
+| `Datenbank` | `AnimalRepository`, `AnimalPictureRepository`, `AnimalShelterRepository` sowie `Animal`, `AnimalPicture` und `AnimalShelter` | Die Repositories laden die benötigten Daten. Die Domain-Klassen repräsentieren Tierprofile, Fotos und Tierheime. |
+
+#### Klassendiagramm
+
+Das Klassendiagramm zeigt die am Use Case beteiligten Designklassen und die für das Sequenzdiagramm benötigten Operationen. Durchgezogene gerichtete Linien kennzeichnen gehaltene Referenzen. Gestrichelte Pfeile kennzeichnen die kurzzeitige Verwendung von Domain-Objekten.
+
+Die PlantUML-Quelldatei liegt unter `../diagrams/UCR-02_classes.puml`. Das gerenderte Diagramm wird unter `../diagrams/UCR-02_classes.png` abgelegt.
+
+![Klassendiagramm UCR-02](../diagrams/UCR-02_classes.png)
+
+#### Sequenzdiagramm mit Designklassen
+
+Das Design-Sequenzdiagramm konkretisiert das ursprüngliche Analyse-Sequenzdiagramm mit einem Controller, einem Service und den benötigten Repositories. Es bildet das Laden der Discovery-Page, die Anzeige eines ausgewählten Tierprofils sowie die relevanten Alternativabläufe ab. Das ursprüngliche Diagramm `UCR-02_sequence.puml` bleibt unverändert erhalten.
+
+Die Quelldatei der Designversion liegt unter `../diagrams/UCR-02_sequence_design.puml`. Das gerenderte Diagramm wird unter `../diagrams/UCR-02_sequence_design.png` abgelegt.
+
+
 ## 3 Abgeleitete Anforderungen
 
 Keine. Die Use-Case-Realization konkretisiert den bestehenden Use Case UC-02 und beschreibt die Zusammenarbeit der beteiligten Objekte sowie die vorgesehenen Alternativabläufe. Es werden keine zusätzlichen fachlichen Anforderungen eingeführt.
