@@ -35,11 +35,11 @@ end
 
 Ctrl -> Animal : countAnimalsByShelter(shelterId)
 Animal --> Ctrl : animalCount
-Ctrl -> Interest : countMatchesByShelterId(shelterId)
+Ctrl -> Interest : countMatchesByShelter(shelterId)
 Interest --> Ctrl : matchCount
-Ctrl -> Interest : countOpenRequests(shelterId)
+Ctrl -> Interest : countOpenRequestsByShelter(shelterId)
 Interest --> Ctrl : openRequestCount
-Ctrl -> Interest : countUpcomingMeetings(shelterId)
+Ctrl -> Interest : countUpcomingMeetingsByShelter(shelterId)
 Interest --> Ctrl : upcomingMeetingCount
 
 break Fehler bei der Ermittlung der Kennzahlen

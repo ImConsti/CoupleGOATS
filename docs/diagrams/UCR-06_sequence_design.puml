@@ -1,0 +1,98 @@
+@startuml UCR-06_sequence_design
+title UCR-06 – Tierheim Dashboard ansehen: Design classes
+actor "Tierheim-Mitarbeitender" as Employee
+participant ":ShelterDashboardPage" as Page
+participant ":ShelterDashboardController" as Ctrl
+participant ":errorHandler" as Err
+participant ":authenticationHandler" as Auth
+participant ":jwt" as Jwt
+participant ":roleHandler" as Role
+participant ":ShelterDashboardService" as Service
+participant ":AnimalShelterRepository" as ShR
+participant ":AnimalRepository" as AnR
+participant ":InterestRepository" as InR
+participant ":AnimalPictureRepository" as PicR
+
+Employee -> Page : openDashboard()
+Page -> Ctrl : GET/dashboard(Bearer-Token)
+
+Ctrl -> Auth : authenticationHandler(req, res, next)
+Auth -> Jwt : verifyToken(token)
+
+
+break Token ungültig oder Sitzung abgelaufen
+    Jwt --> Auth : wirft Fehler
+    Auth -> Err : errorHandler(err, req, res, next)
+    Err --> Page : 401 unauthenticated
+    Page --> Employee : Weiterleitung zum Login
+end
+Jwt --> Auth : JwtPayloadOutput
+note left of Auth : Erfolg: next() übergibt \nan den nächsten Handler
+Ctrl -> Role : checkRole([shelter])
+
+break Rolle ist nicht "Tierheim"
+    Role -> Err : errorHandler(err, req, res, next)
+    Err --> Page : 403 forbidden
+    Page --> Employee : Hinweis, Weiterleitung zur Swipe-Ansicht (UC-01)
+end
+
+note left of Role : Erfolg: next() übergibt \nan den nächsten Handler
+Ctrl -> Service : getDashboard(shelterId)
+Service -> ShR : exists(shelterId)
+
+ShR --> Service : Boolean
+
+break Tierheim existiert nicht mehr
+    Service --> Ctrl : wirft Fehler
+    Ctrl -> Err : errorHandler(err, req, res, next)
+    Err --> Page : 401 unauthenticated
+    Page --> Employee : Weiterleitung zum Login
+end
+
+
+Service -> AnR : countAnimalsByShelter(shelterId)
+AnR --> Service : animalCount
+Service -> InR : countMatchesByShelter(shelterId)
+InR --> Service : matchCount
+Service -> InR : countOpenRequestsByShelter(shelterId)
+InR --> Service : openRequestCount
+Service -> InR : countUpcomingMeetingsByShelter(shelterId)
+InR --> Service : upcomingMeetingCount
+
+break Fehler bei der Ermittlung der Kennzahlen
+    Service --> Ctrl : wirft Fehler
+    Ctrl -> Err : errorHandler(err, req, res, next)
+    Err --> Page : 500 error
+    Page --> Employee : Fehlermeldung, erneutes Laden möglich
+end
+
+Service -> AnR : getLatestAnimalsByShelter(shelterId)
+AnR --> Service : latestAnimals
+
+alt Tierprofile vorhanden
+    Service -> PicR : getCardPictures(animalIds)
+    PicR --> Service : cardPictures
+else Keine Tierprofile vorhanden
+    note right of Service: Bildabfrage entfällt, Liste bleibt leer
+end
+
+break Fehler bei der Ermittlung der Tierprofile
+    Service --> Ctrl : wirft Fehler
+    Ctrl -> Err : errorHandler(err, req, res, next)
+    Err --> Page : 500 error
+    Page --> Employee : Fehlermeldung, erneutes Laden möglich
+end
+
+Service --> Ctrl : ShelterDashboard
+Ctrl --> Page : 200 ShelterDashboard
+Page --> Employee : Dashboard anzeigen
+
+opt Wechsel zu Tierprofilen
+    Employee -> Page : openAnimalProfiles()
+    Page --> Employee : Weiterleitung zum UC-03
+end
+opt Wechsel zu Terminverwaltung
+    Employee -> Page : openMeetingManagement()
+    Page --> Employee : Weiterleitung zum UC-04
+end
+@enduml

@@ -86,6 +86,21 @@ Die Boundary zeigt eine Fehlermeldung, und der Mitarbeitende kann das Dashboard 
 
 Nicht zutreffend
 
+### 2.5 Design classes
+<!-- The classes of your code that realize this use case. Commit the source
+files next to
+the images. -->
+| Analyseobjekt (2.1) | Designklassen |
+| --------------------- | ---------------- |
+| `:ShelterDashboardPage` | `ShelterDashboardPage`, `ShelterDashboardController` |
+| `:ShelterDashboardController` | `ShelterDashboardService`,`ShelterDashboard`,`authenticationHandler`, `jwt`, `roleHandler`, `Role`, `errorHandler` |
+| `:AnimalShelter` | `AnimalShelter`, `AnimalShelterRepository` |
+| `:Animal` | `Animal`, `Gender`, `AnimalRepository` |
+| `:AnimalPicture` | `AnimalPicture`, `AnimalPictureRepository` |
+| `:Interest` | `Interest`, `InterestStatus`, `InterestRepository` |
+![Class diagram UCR-06](../diagrams/UCR-06_classes.png)
+![Sequence diagram UCR-06, design classes](../diagrams/UCR-06_sequence_design.png)
+
 ## 3 Abgeleitete Anforderungen
 
 <!-- Requirements the design adds and the implementation must handle, each with an ID that is

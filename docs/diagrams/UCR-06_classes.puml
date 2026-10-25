@@ -1,0 +1,137 @@
+@startuml UCR-06_classes
+title UCR-06 – Tierheim Dashboard ansehen: Design classes
+hide empty members
+skinparam classAttributeIconSize 0
+
+class ShelterDashboardPage {
+  openDashboard()
+  openAnimalProfiles()
+  openMeetingManagement()
+}
+
+class ShelterDashboardController <<route>> {
+GET/dashboard(Bearer-Token): void
+}
+
+
+class authenticationHandler <<module>> {
+  authenticationHandler(req: AuthRequest, res: Response, next: NextFunction): void
+}
+
+class roleHandler <<module>> {
+  checkRole(allowed: Role[*]): void
+}
+
+class jwt <<module>> {
+  verifyToken(token: String): JwtPayloadOutput
+}
+
+class errorHandler <<module>> {
+  errorHandler(err: Error, req: AuthRequest, res: Response, next: NextFunction): void
+}
+
+
+class ShelterDashboardService <<module>> {
+  getDashboard(shelterId: String): ShelterDashboard
+}
+
+class ShelterDashboard <<dataType>> {
+  animalCount: Integer
+  matchCount: Integer
+  openRequestCount: Integer
+  upcomingMeetingCount: Integer
+}
+
+class AnimalShelterRepository <<module>> {
+   exists(shelterId: String): Boolean
+}
+
+class AnimalRepository <<module>> {
+  countAnimalsByShelter(shelterId: String): Integer
+  getLatestAnimalsByShelter(shelterId: String): Animal[*]
+}
+
+class InterestRepository <<module>> {
+  countMatchesByShelter(shelterId: String): Integer
+  countOpenRequestsByShelter(shelterId: String): Integer
+  countUpcomingMeetingsByShelter(shelterId: String): Integer
+}
+
+class AnimalPictureRepository <<module>> {
+  getCardPictures(animalIds: String[*]): AnimalPicture[*]
+}
+
+class AnimalShelter <<type>> {
+
+}
+
+class Animal <<type>> {
+  - name: String
+  - birthYear: Integer
+  - gender: Gender
+}
+
+class AnimalPicture <<type>> {
+  - picture: Image
+  - showOnCard: Boolean
+}
+
+class Interest <<type>> {
+  - status: InterestStatus
+  - appointmentAt: DateTime [0..1]
+}
+
+enum InterestStatus <<enumeration>> {
+  user_liked
+  user_disliked
+  user_requested
+  shelter_accepted
+  shelter_rejected
+}
+
+enum Gender <<enumeration>> {
+  male
+  female
+  unknown
+}
+
+enum Role <<enumeration>> {
+  shelter
+  user
+  admin
+}
+
+ShelterDashboardController ..> authenticationHandler : <<use>>
+ShelterDashboardController ..> roleHandler : <<use>>
+ShelterDashboardController --> ShelterDashboardService : service
+
+Animal ..> Gender
+roleHandler ..> Role
+
+
+ShelterDashboardPage ..> ShelterDashboardController : <<HTTP GET /dashboard>>
+authenticationHandler ..> jwt : <<use>>
+
+authenticationHandler ..> errorHandler : <<next(error)>>
+roleHandler ..> errorHandler : <<next(error)>>
+ShelterDashboardController ..> errorHandler : <<next(error)>>
+
+ShelterDashboardService --> AnimalShelterRepository : shelters
+ShelterDashboardService --> AnimalRepository : animals
+ShelterDashboardService --> InterestRepository : interests
+ShelterDashboardService --> AnimalPictureRepository : pictures
+ShelterDashboardService ..> ShelterDashboard : <<create>>
+
+AnimalShelterRepository ..> AnimalShelter : <<use>>
+AnimalRepository ..> Animal : <<use>>
+InterestRepository ..> Interest : <<use>>
+AnimalPictureRepository ..> AnimalPicture : <<use>>
+
+AnimalShelter "1" *-- "0..*" Animal : animals
+Animal "1" *-- "1..*" AnimalPicture : pictures
+Interest "0..*" --> "1" Animal : animal
+Interest ..> InterestStatus
+ShelterDashboard --> "0..*" Animal : latestAnimals
+ShelterDashboard --> "0..*" AnimalPicture : cardPictures
+
+@enduml
