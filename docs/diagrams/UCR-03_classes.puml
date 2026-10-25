@@ -1,0 +1,85 @@
+
+@startuml
+title UCR-03 - Designklassen: Tierprofil verwalten
+
+class AnimalProfileController {
+  showProfiles(shelterId)
+  showProfile(animalId)
+  createProfile(data, photos)
+  editProfile(animalId, data, photos)
+  deleteProfile(animalId)
+  showDeletionConfirmation(animalId)
+  showValidationErrors(errors)
+  showPhotoUploadError(message)
+  showProfileIncomplete(message)
+  showSavedStatus(message)
+  showDeletionResult(success)
+  showAccessDenied()
+}
+
+class AnimalProfileService {
+  checkShelterAccess(shelterId)
+  getProfiles(shelterId)
+  getProfile(animalId)
+  createProfile(data, shelterId)
+  updateProfile(animalId, data)
+  deleteProfile(animalId)
+  validateProfileData(data)
+  validatePhotoSelection(photos, mainPhoto)
+  checkProfileCompleteness(animal, photos)
+  publishProfile(animalId)
+  keepUnpublished(animalId)
+}
+
+class Animal {
+  id
+  name
+  species
+  breed
+  birthYear
+  gender
+  description
+  publicationStatus
+  updateData(data)
+  isComplete()
+  publish()
+  keepUnpublished()
+}
+
+class AnimalPicture {
+  id
+  imageUrl
+  showOnCard
+  setAsCardPicture()
+}
+
+class AnimalRepository {
+  findByShelter(shelterId)
+  findById(animalId)
+  save(animal)
+  delete(animalId)
+}
+
+class AnimalPictureRepository {
+  findByAnimal(animalId)
+  saveAll(pictures)
+  deleteByAnimal(animalId)
+}
+
+class PhotoStorageService {
+  storePhotos(photos)
+  deletePhotos(pictures)
+}
+
+AnimalProfileController --> AnimalProfileService : held reference
+AnimalProfileService --> AnimalRepository : held reference
+AnimalProfileService --> AnimalPictureRepository : held reference
+AnimalProfileService --> PhotoStorageService : held reference
+
+AnimalProfileService ..> Animal : temporary use
+AnimalProfileService ..> AnimalPicture : temporary use
+AnimalRepository "1" o-- "*" Animal : stores
+AnimalPictureRepository ..> AnimalPicture : stores
+Animal "1" *-- "0..*" AnimalPicture : pictures
+
+@enduml
