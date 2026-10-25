@@ -12,9 +12,22 @@ export const houseTypes = ["apartment", "house"] as const;
 
 export const experienceLevels = ["beginner", "experienced", "expert"] as const;
 
+export const energyLevels = ["low", "medium", "high"] as const;
+
 export const genders = ["male", "female", "unknown"] as const;
 
 export const roles = ["admin", "user", "shelter"] as const;
+
+export const tagsCategories = [
+  "personality",
+  "energy level",
+  "training & experience",
+  "living environment",
+  "social behavior",
+  "time & attention",
+  "special needs",
+  "lifestyle",
+] as const;
 
 export const emailSchema = z.string().trim().toLowerCase().pipe(z.email());
 
@@ -50,7 +63,12 @@ export const createAnimalSchema = z.object({
 
 export const updateAnimalSchema = createAnimalSchema.partial();
 
-export const createTagSchema = z.object({ name: z.string() });
+export const createTagSchema = z.object({
+  name: z.string(),
+  category: z.enum(tagsCategories),
+  affects_matching: z.boolean(),
+  is_critical: z.boolean(),
+});
 
 export const updateTagSchema = createTagSchema;
 
@@ -83,6 +101,7 @@ export const createUserFilterSchema = z.object({
   animalMaxAge: z.int().nullish(),
   animalGender: z.enum(genders).nullish(),
   experienceLevel: z.enum(experienceLevels).nullish(),
+  energyLevel: z.enum(energyLevels).nullish(),
 });
 
 export const updateUserFilterSchema = createUserFilterSchema.partial();
@@ -97,7 +116,6 @@ export const createUserSchema = z.object({
   postalCode: z.string().regex(/^\d{5}$/),
   city: z.string(),
   isAdmin: z.boolean().optional(),
-  isSmoker: z.boolean(),
   houseType: z.enum(houseTypes),
   hasGarden: z.boolean(),
   hasChildren: z.boolean(),
