@@ -43,9 +43,23 @@ export const animals = sqliteTable("animals", {
 export const tags = sqliteTable("tags", {
     id: text().primaryKey().notNull().$default(() => crypto.randomUUID()),
     name: text().notNull().unique(),
+    category: text().notNull(),
+    affectsMatching: integer("affects_matching", {mode: "boolean"}).default(false).notNull(),
+    isCritical: integer("is_critical", {mode: "boolean"}).default(false).notNull(),
     createdAt: text("created_at").$default(() => new Date().toISOString()).notNull(),
     updatedAt: text("updated_at").$default(() => new Date().toISOString()).$onUpdate(() => new Date().toISOString()).notNull(),
-});
+},
+  () => [
+    check("check_category",
+      sql`category 
+      IN ('personality', 'energy level', 'training & experience', 'living environment', 'social behavior', 'time & attention', 'special needs', 'lifestyle')`),
+    check("check_boolean_fields",
+      sql`affects_matching IN (0, 1) 
+      AND is_critical IN (0, 1)`),
+    check("critical_requires_affects_matching",
+      sql `is_critical = 0 OR affects_matching = 1`),
+  ]
+);
 
 export const species = sqliteTable("species", {
     id: text().primaryKey().notNull().$default(() => crypto.randomUUID()),
@@ -89,7 +103,6 @@ export const users = sqliteTable("users", {
         postalCode: text("postal_code").notNull(),
         city: text().notNull(),
         isAdmin: integer("is_admin", {mode: "boolean"}).default(false).notNull(),
-        isSmoker: integer("is_smoker", {mode: "boolean"}).notNull(),
         houseType: text("house_type").notNull(),
         hasGarden: integer("has_garden", {mode: "boolean"}).notNull(),
         hasChildren: integer("has_children", {mode: "boolean"}).notNull(),
@@ -107,7 +120,6 @@ export const users = sqliteTable("users", {
             "check_boolean_fields",
             sql`is_admin
             IN (0, 1)
-        AND is_smoker IN (0, 1)
         AND has_garden IN (0, 1)
         AND has_children IN (0, 1)
         AND roaming_possible IN (0, 1)`
@@ -140,6 +152,7 @@ export const userFilters = sqliteTable("user_filters", {
         animalMaxAge: integer("animal_max_age"),
         animalGender: text("animal_gender"),
         experienceLevel: text("experience_level"),
+        energyLevel: text("energy_level"),
         createdAt: text("created_at").$default(() => new Date().toISOString()).notNull(),
         updatedAt: text("updated_at").$default(() => new Date().toISOString()).$onUpdate(() => new Date().toISOString()).notNull(),
     },
@@ -153,6 +166,10 @@ export const userFilters = sqliteTable("user_filters", {
             "check_experience_level",
             sql`experience_level
             IN ('beginner', 'experienced', 'expert')`
+        ),
+        check("check_energy_level",
+          sql`energy_level 
+          IN ('low', 'medium', 'high')`
         ),
         check(
             "check_animal_gender",
