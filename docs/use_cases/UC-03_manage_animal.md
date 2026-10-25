@@ -4,6 +4,8 @@
 | ------ | -------- | ------------ |
 | brdly06 | 34 – 55 Story Points | [#20](https://github.com/ImConsti/CoupleGOATS/issues/20), [#17](https://github.com/ImConsti/CoupleGOATS/issues/17), [#25](https://github.com/ImConsti/CoupleGOATS/issues/25), [#28](https://github.com/ImConsti/CoupleGOATS/issues/28), [#31](https://github.com/ImConsti/CoupleGOATS/issues/31) |
 
+**Realization:** [UCR-03 Tierprofil verwalten](../use_case_realizations/UCR-03_manage_animal.md)
+
 ## 1 Kurzbeschreibung
 
 Dieser Use Case beschreibt, wie ein Tierheim-Mitarbeiter Tierprofile erstellen, bearbeiten und löschen sowie die zugehörigen Fotos verwalten kann. Ein Tierprofil enthält den Namen, die Tierart, die Rasse, das Geburtsjahr, das Geschlecht, eine Beschreibung, verschiedene Tags und Fotos des Tieres. Es können mehrere Fotos hochgeladen und ein Hauptbild ausgewählt werden. Ein Tierprofil wird erst dann auf der Discovery-Page angezeigt, wenn es alle festgelegten Anforderungen an die Vollständigkeit erfüllt. Dadurch können Nutzende geeignete Tiere entdecken und sich über mögliche Adoptionen informieren.
