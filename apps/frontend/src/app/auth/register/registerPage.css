@@ -1,0 +1,21 @@
+@import "tailwindcss";
+
+.registerRow{
+  @apply grid grid-cols-2 gap-3;
+}
+
+.registerRowPostal{
+  grid-template-columns: 1fr 2fr;
+}
+
+.checkboxRow{
+  @apply flex items-center gap-3 text-sm text-gray-700 mb-2 cursor-pointer;
+}
+
+.checkboxRow input{
+  @apply w-4 h-4 accent-emerald-900;
+}
+
+.submitButton:disabled{
+  @apply opacity-60 cursor-not-allowed;
+}
