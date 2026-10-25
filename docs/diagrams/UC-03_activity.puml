@@ -1,0 +1,180 @@
+
+@startuml UC-03_activity
+
+title UC-03 – Tierprofil verwalten\nAktivitätsdiagramm
+
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam activity {
+    BackgroundColor white
+    BorderColor #444444
+    DiamondBackgroundColor #F5F5F5
+    DiamondBorderColor #444444
+    StartColor #333333
+    EndColor #333333
+}
+skinparam ArrowColor #444444
+
+|Tierheim-Mitarbeiter|
+start
+:Tierprofilverwaltung des eigenen Tierheims aufrufen;
+
+|System|
+:Authentifizierung und Berechtigung prüfen;
+
+if (Zugriff erlaubt?) then ([ja])
+    :Vorhandene Tierprofile des Tierheims abrufen;
+
+    if (Tierprofile vorhanden?) then ([ja])
+        :Vorhandene Tierprofile und Verwaltungsoptionen anzeigen;
+    else ([else])
+        :Hinweis anzeigen, dass noch keine Tierprofile existieren;
+        :Möglichkeit zum Anlegen des ersten Tierprofils anbieten;
+    endif
+
+else ([else])
+    :Zugriff verweigern;
+    :Hinweis auf fehlende Berechtigung anzeigen;
+    stop
+endif
+
+|Tierheim-Mitarbeiter|
+:Gewünschte Verwaltungsaktion auswählen;
+
+if (Neues Tierprofil anlegen?) then ([ja])
+
+    |System|
+    :Formular für ein neues Tierprofil bereitstellen;
+
+else ([else])
+
+    |Tierheim-Mitarbeiter|
+    if (Bestehendes Tierprofil bearbeiten?) then ([ja])
+
+        :Tierprofil zur Bearbeitung auswählen;
+
+        |System|
+        :Berechtigung und Zugehörigkeit zum Tierheim prüfen;
+
+        if (Bearbeitung erlaubt?) then ([ja])
+            :Gespeicherte Tierdaten und Fotoreferenzen abrufen;
+            :Gespeicherte Daten und Verwaltungsformular anzeigen;
+        else ([else])
+            :Zugriff verweigern;
+            :Hinweis auf fehlende Berechtigung oder nicht verfügbares Profil anzeigen;
+            stop
+        endif
+
+    else ([else])
+
+        :Tierprofil zur Löschung auswählen;
+
+        |System|
+        :Berechtigung und Zugehörigkeit zum Tierheim prüfen;
+
+        if (Löschung erlaubt?) then ([ja])
+            :Löschbestätigung anfordern;
+
+            |Tierheim-Mitarbeiter|
+            if (Löschung bestätigen?) then ([ja])
+
+                |System|
+                :Tierprofil und zugehörige Fotos gemäß Löschregeln löschen;
+                :Tierprofil von der Discovery-Page entfernen;
+                :Erfolgreiche Löschung bestätigen;
+                stop
+
+            else ([else])
+
+                |System|
+                :Tierprofil und Fotos unverändert erhalten;
+                :Löschabbruch bestätigen;
+                :Tierprofilübersicht anzeigen;
+                stop
+
+            endif
+
+        else ([else])
+            :Zugriff verweigern;
+            :Hinweis auf fehlende Berechtigung oder nicht verfügbares Profil anzeigen;
+            stop
+        endif
+
+    endif
+
+endif
+
+repeat
+
+    |Tierheim-Mitarbeiter|
+    :Tierdaten eingeben oder bearbeiten;
+    :Fotos hinzufügen, entfernen oder hochladen;
+    :Hauptbild auswählen;
+
+    |System|
+    fork
+        :Pflichtangaben und Werte der Tierdaten prüfen;
+    fork again
+        :Dateianforderungen und Foto-Uploads prüfen;
+    end fork
+
+    while (Ungültige Eingaben oder Uploadfehler?) is ([ja])
+
+        :Betroffene Felder oder Fotos kennzeichnen;
+        :Korrekturen und mögliche Uploadfehler verständlich erklären;
+
+        |Tierheim-Mitarbeiter|
+        :Eingaben korrigieren, Upload erneut versuchen oder fehlgeschlagenes Foto entfernen;
+
+        |System|
+        fork
+            :Tierdaten erneut validieren;
+        fork again
+            :Dateianforderungen und Foto-Uploads erneut prüfen;
+        end fork
+
+    endwhile ([else])
+
+    :Vollständigkeit des Tierprofils prüfen;
+
+    if (Alle Vollständigkeitsanforderungen erfüllt?) then ([ja])
+        :Profil zur Veröffentlichung vormerken;
+    else ([else])
+        :Fehlende Angaben oder Anforderungen ermitteln;
+        :Profil als unveröffentlichten Entwurf vormerken;
+        :Mitarbeiter über fehlende Anforderungen informieren;
+    endif
+
+    :Tierprofil und zugehörige Fotos speichern;
+
+    while (Speichern fehlgeschlagen?) is ([ja])
+        :Fehler verständlich melden;
+        :Eingegebene Daten nach Möglichkeit erhalten;
+
+        |Tierheim-Mitarbeiter|
+        :Erneuten Speicherversuch auslösen;
+
+        |System|
+        :Tierprofil und Fotos erneut speichern;
+    endwhile ([else])
+
+    if (Profil vollständig?) then ([ja])
+        :Tierprofil auf der Discovery-Page veröffentlichen;
+    else ([else])
+        :Tierprofil unveröffentlicht als Entwurf speichern;
+    endif
+
+    :Speicherung bestätigen und aktuellen Profilstatus anzeigen;
+
+    if (Profil vollständig?) then ([ja])
+        :Verwaltung erfolgreich abgeschlossen;
+    else ([else])
+        |Tierheim-Mitarbeiter|
+        :Entscheiden, ob das Profil sofort vervollständigt werden soll;
+    endif
+
+repeat while (Profil unvollständig und sofortige Vervollständigung gewünscht?) is ([ja]) not ([else])
+
+stop
+
+@enduml
