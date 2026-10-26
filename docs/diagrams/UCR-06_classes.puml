@@ -14,24 +14,24 @@ GET/dashboard(Bearer-Token): void
 }
 
 
-class authenticationHandler <<module>> {
+class authenticationHandler <<middleware>> {
   authenticationHandler(req: AuthRequest, res: Response, next: NextFunction): void
 }
 
-class roleHandler <<module>> {
+class roleHandler <<middleware>> {
   checkRole(allowed: Role[*]): void
 }
 
-class jwt <<module>> {
+class jwt <<utility>> {
   verifyToken(token: String): JwtPayloadOutput
 }
 
-class errorHandler <<module>> {
+class errorHandler <<middleware>> {
   errorHandler(err: Error, req: AuthRequest, res: Response, next: NextFunction): void
 }
 
 
-class ShelterDashboardService <<module>> {
+class ShelterDashboardService <<service>> {
   getDashboard(shelterId: String): ShelterDashboard
 }
 
@@ -42,22 +42,22 @@ class ShelterDashboard <<dataType>> {
   upcomingMeetingCount: Integer
 }
 
-class AnimalShelterRepository <<module>> {
+class AnimalShelterRepository <<repository>> {
    exists(shelterId: String): Boolean
 }
 
-class AnimalRepository <<module>> {
+class AnimalRepository <<repository>> {
   countAnimalsByShelter(shelterId: String): Integer
   getLatestAnimalsByShelter(shelterId: String): Animal[*]
 }
 
-class InterestRepository <<module>> {
+class InterestRepository <<repository>> {
   countMatchesByShelter(shelterId: String): Integer
   countOpenRequestsByShelter(shelterId: String): Integer
   countUpcomingMeetingsByShelter(shelterId: String): Integer
 }
 
-class AnimalPictureRepository <<module>> {
+class AnimalPictureRepository <<repository>> {
   getCardPictures(animalIds: String[*]): AnimalPicture[*]
 }
 
