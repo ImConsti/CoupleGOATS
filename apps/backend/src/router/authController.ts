@@ -6,19 +6,19 @@ import express, {
 import {
   createAnimalShelterSchema,
   loginSchema,
-  registerUserSchema,
-  roles,
+  registerUserSchema
 } from "../validation/schemas.js";
 import { zodValidation } from "../validation/zod-validation.js";
-import { createUser, getUserByEmail } from "../repositories/userRepository.js";
-import { hashPassword, verifyPassword } from "../utils/bcrypt.js";
+import { createUser } from "../repositories/userRepository.js";
+import { hashPassword } from "../utils/bcrypt.js";
 import { generateToken } from "../utils/jwt.js";
-import { AuthenticationError, InternalServerError } from "../errors/errors.js";
-import { createShelter, getShelterByEmail } from "../repositories/shelterRepository.js";
+import { InternalServerError } from "../errors/errors.js";
+import { createShelter } from "../repositories/shelterRepository.js";
 import {
   authenticationHandler,
   type AuthRequest,
 } from "../middleware/authenticationHandler.js";
+import { login } from "../services/authService.js";
 
 export const router = express.Router({ mergeParams: true });
 
@@ -73,36 +73,8 @@ router.post(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const request = zodValidation(loginSchema, req.body);
-      let id: string;
-      let role: (typeof roles)[number];
-      switch (request.role) {
-        case "user": {
-          const user = await getUserByEmail(request.email);
-          if (!user) {
-            throw new AuthenticationError("Invalid credentials");
-          }
-          await verifyPassword(request.password, user.passwordHash);
-          id = user.id;
-          role = user.isAdmin ? "admin" : "user";
-          break;
-        }
-
-        case "shelter": {
-          const shelter = await getShelterByEmail(request.email);
-          if (!shelter) {
-            throw new AuthenticationError("Invalid credentials");
-          }
-          await verifyPassword(request.password, shelter.passwordHash);
-          id = shelter.id;
-          role = "shelter";
-          break;
-        }
-
-        default: {
-          throw new InternalServerError("An internal server error occurred");
-        }
-      }
-      res.status(200).json({ token: generateToken(id, role), role, id });
+      const result = await login(request);
+      res.status(200).json({ id: result.id, role: result.role, token: result.token });
     } catch (error: unknown) {
       next(error);
     }

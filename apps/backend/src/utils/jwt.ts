@@ -2,12 +2,12 @@ import jwt, { type SignOptions } from "jsonwebtoken";
 import { roles } from "../validation/schemas.js";
 import { AuthenticationError, InternalServerError } from "../errors/errors.js";
 
-export interface JwtPayloadInput {
+export type JwtPayloadInput = {
   sub: string;
   role: typeof roles[number];
 }
 
-interface JwtPayloadOutput extends JwtPayloadInput {
+type JwtPayloadOutput = JwtPayloadInput & {
   exp: number;
   iat: number;
 }
