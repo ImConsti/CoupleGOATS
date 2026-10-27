@@ -1,91 +1,66 @@
 
-@startuml components
-title CoupleGOATS – UML Component Diagram\nAuthor: Aaron
+flowchart LR
+    title["CoupleGOATS – UML Component Diagram<br/>Author: Aaron"]
 
-skinparam componentStyle uml2
-skinparam linetype ortho
-skinparam shadowing false
-skinparam defaultTextAlignment center
-skinparam wrapWidth 200
-skinparam maxMessageSize 70
-skinparam component {
-  BackgroundColor #F5F7FA
-  BorderColor #34495E
-  FontColor #1F2937
-}
-skinparam database {
-  BackgroundColor #EAF2F8
-  BorderColor #34495E
-}
-skinparam interface {
-  BackgroundColor #FFFFFF
-  BorderColor #2563EB
-}
+    User["Adoptierende /<br/>Tierheim-Mitarbeitende"]
 
-left to right direction
+    Frontend["Frontend<br/><br/>Next.js 16<br/>React 19<br/>TypeScript"]
 
-actor "Adoptierende /\nTierheim-Mitarbeitende" as User
+    subgraph Backend["Backend – Node.js 22 / Express 5"]
+        direction LR
 
-component "Frontend\n\nNext.js 16\nReact 19\nTypeScript" as Frontend
+        API["API & Auth<br/><br/>REST-Routen<br/>Authentifizierung<br/>Autorisierung<br/>Zod-Validierung"]
 
-package "Backend – Node.js 22 / Express 5" {
-  component "API & Auth\n\nREST-Routen\nAuthentifizierung\nAutorisierung\nZod-Validierung" as API
+        Services["Application Services<br/><br/>Discovery & Swipes<br/>Tierprofile<br/>Interessen & Termine<br/>Nutzerprofile<br/>Dashboard"]
 
-  component "Application Services\n\nDiscovery & Swipes\nTierprofile\nInteressen & Termine\nNutzerprofile\nDashboard" as Services
+        Persistence["Persistence<br/><br/>Repositories<br/>Drizzle ORM<br/>Datenzugriff"]
 
-  component "Persistence\n\nRepositories\nDrizzle ORM\nDatenzugriff" as Persistence
+        Media["Media Handling<br/><br/>Foto-Upload<br/>Foto-Verwaltung<br/>PhotoStorageService"]
+    end
 
-  component "Media Handling\n\nFoto-Upload\nFoto-Verwaltung\nPhotoStorageService" as Media
-}
+    DB[("SQLite / libSQL<br/><br/>Persistente Daten<br/>inkl. Tierbilder")]
 
-database "SQLite\nlibSQL\n\nPersistente Daten\ninkl. Tierbilder" as DB
+    IREST(["REST API<br/>HTTPS / JSON<br/>/api/v1"])
+    IDB(["Repository-Zugriff<br/>Drizzle / libSQL"])
+    IMEDIA(["Foto-Verarbeitung"])
 
-() "REST API\nHTTPS / JSON\n/api/v1" as IREST
-() "Repository-Zugriff\nDrizzle / libSQL" as IDB
-() "Foto-Verarbeitung" as IMEDIA
+    User -->|"Browser / HTTPS"| Frontend
 
-User --> Frontend : Browser / HTTPS
+    Frontend -.->|"benötigt"| IREST
+    API ---|"bietet an"| IREST
 
-Frontend ..> IREST : benötigt
-API - IREST : bietet an
+    API -->|"validierte Anfragen"| Services
+    Services -->|"Daten lesen/schreiben"| Persistence
+    Services -->|"Fotos verwalten"| Media
 
-API --> Services : validierte Anfragen
-Services --> Persistence : Daten lesen/schreiben
-Services --> Media : Fotos verwalten
+    Persistence -.->|"benötigt"| IDB
+    DB ---|"bietet an"| IDB
 
-Persistence ..> IDB : benötigt
-DB - IDB : bietet an
+    Media -.->|"interne Funktion"| IMEDIA
+    Services -.->|"benötigt"| IMEDIA
 
-Media ..> IMEDIA : interne Funktion
-Services ..> IMEDIA : benötigt
+    FrontendNote["Browser-Frontend<br/>Keine direkte DB-Verbindung"]
+    DBNote["Zugriff ausschließlich<br/>über das Backend"]
+    MediaNote["Bildspeicherung gemäß SRS:<br/>SQLite-Datei<br/>Kein externer Storage-Dienst"]
+    ServicesNote["Fachliche Logik aus Task 5<br/>und UC-01 bis UC-06"]
 
-note bottom of Frontend
-  Browser-Frontend
-  Keine direkte DB-Verbindung
-end note
+    Frontend -.- FrontendNote
+    DB -.- DBNote
+    Media -.- MediaNote
+    Services -.- ServicesNote
 
-note bottom of DB
-  Zugriff ausschließlich
-  über das Backend
-end note
+    Legend["Legende<br/>Gestrichelt: benötigte Schnittstelle<br/>Durchgezogen: Datenfluss / Verbindung<br/>Externe Services: keine laut SRS 3.9.3"]
 
-note right of Media
-  Bildspeicherung gemäß SRS:
-  SQLite-Datei.
-  Kein externer Storage-Dienst
-  im SRS spezifiziert.
-end note
+    classDef component fill:#F5F7FA,stroke:#34495E,color:#1F2937
+    classDef database fill:#EAF2F8,stroke:#34495E,color:#1F2937
+    classDef interface fill:#FFFFFF,stroke:#2563EB,color:#1F2937
+    classDef note fill:#FFF9E6,stroke:#B7950B,color:#1F2937
+    classDef heading fill:#FFFFFF,stroke:#FFFFFF,color:#1F2937
 
-note bottom of Services
-  Fachliche Logik aus Task 5
-  und den Use Cases UC-01 bis UC-06
-end note
+    class Frontend,API,Services,Persistence,Media component
+    class DB database
+    class IREST,IDB,IMEDIA interface
+    class FrontendNote,DBNote,MediaNote,ServicesNote,Legend note
+    class title heading
 
-legend bottom
-  Author: Aaron
-  Ball = angebotene Schnittstelle
-  Socket = benötigte Schnittstelle
-  Externe Services: keine laut SRS 3.9.3
-endlegend
-
-@enduml
+    style Backend fill:#FFFFFF,stroke:#34495E,stroke-width:2px
