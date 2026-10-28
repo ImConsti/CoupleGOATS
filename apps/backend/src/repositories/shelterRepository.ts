@@ -23,6 +23,20 @@ export async function getShelterByEmail(
   }
 }
 
+export async function shelterExistsById(id: string): Promise<boolean> {
+  try {
+    const shelter = await db.query.animalShelters.findFirst({
+      where: (shelter, { eq }) => eq(shelter.id, id),
+      columns: {
+        id: true,
+      },
+    });
+    return shelter !== undefined;
+  } catch (error: unknown) {
+    throw mapDatabaseError(error);
+  }
+}
+
 export async function createShelter(
   shelter: typeof animalShelters.$inferInsert,
 ): Promise<{ id: string }> {
