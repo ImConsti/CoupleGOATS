@@ -1,4 +1,4 @@
-# [Project Name] — Software Architecture Document
+# CoupleGOATS — Software Architecture Document
 
 <!--
 HOW TO USE THIS TEMPLATE
@@ -16,7 +16,7 @@ HOW TO USE THIS TEMPLATE
 
 | Team | Version | Last change |
 | ---- | ------- | ----------- |
-| [Team name] | [0.1] | [dd.mm.yyyy] |
+| CoupleGOATS | 0.1 | 28.10.2026 |
 
 The Git history of this file is the revision history.
 
@@ -38,26 +38,30 @@ The Git history of this file is the revision history.
 
 ### 1.1 Purpose
 
-*Author: [first name]*
+*Author: Mika*
 
 <!-- One paragraph: what this document describes and who reads it — your team, the developer
      who takes the project over, and the lecturer as investor. -->
 
-This document describes the architecture of [project name]: the parts the application is made
-of, how they are connected, and where they run. […]
+Dieses Dokument beschreibt die Architektur der Webanwendung CoupleGOATS: aus welchen Teilen die Anwendung besteht, wie diese miteinander verbunden sind und wo sie laufen.
+
+Es richtet sich an das Entwicklungsteam als gemeinsame Grundlage für Entwurfsentscheidungen, an Entwickelnde, die das Projekt später übernehmen und sich schnell einen Überblick über den Aufbau verschaffen müssen, sowie an den Dozenten als Investor, der die Architektur nachvollziehen und bewerten möchte. Die Anforderungen, aus denen sich die Architektur ableitet, stehen in der [SRS](SRS.md); dieses Dokument beschreibt, wie sie technisch umgesetzt werden.
+
+
 
 ### 1.2 Scope
 
-*Author: [first name]*
+*Author: Mika*
 
 <!-- One or two sentences: which software this document covers, e.g., the whole application
      with frontend, backend, and database. The functional scope is in SRS 1.2 — link it. -->
 
-[…] The functional scope is described in [SRS 1.2](SRS.md#12-scope).
+Dieses Dokument umfasst die gesamte Anwendung CoupleGOATS: das Frontend (Next.js), das Backend (Express) mit seiner REST-API und die SQLite-Datenbank, die gemeinsam im Monorepo unter `apps/frontend` und `apps/backend` liegen. Nicht Teil dieses Dokuments sind externe Softwaredienste, da die Anwendung derzeit keine nutzt (siehe [SRS 3.9.3](SRS.md#393-software-interfaces)). Der funktionale Umfang ist in [SRS 1.2](SRS.md#12-scope) beschrieben.
+
 
 ### 1.3 Definitions, acronyms and abbreviations
 
-*Author: [first name]*
+*Author: Mika*
 
 <!-- Terms of the domain are in the SRS and in your domain model. Add only the technical terms
      a reader of this document needs. -->
@@ -67,18 +71,42 @@ of, how they are connected, and where they run. […]
 | SAD | Software Architecture Document |
 | SRS | Software Requirements Specification |
 | UCR | Use-case realization |
-| [term] | [meaning] |
+| UML | Unified Modeling Language, Notation für die Architekturdiagramme dieses Dokuments |
+| REST | Representational State Transfer, Architekturstil der HTTP-Schnittstelle zwischen Frontend und Backend |
+| JSON | JavaScript Object Notation, Datenformat, in dem Frontend und Backend Nutzdaten austauschen |
+| HTTPS | HTTP über TLS, verschlüsselter Übertragungsweg zwischen Browser und Server |
+| JWT | JSON Web Token, signiertes Token, mit dem sich ein angemeldetes Konto gegenüber geschützten Endpunkten ausweist |
+| Next.js | React-Framework, mit dem das Frontend gebaut wird (App Router) |
+| Express | Web-Framework für Node.js, auf dem das Backend und seine REST-API aufbauen |
+| Zod | TypeScript-Bibliothek zur Validierung eingehender Anfragen im Backend |
+| ORM | Object-Relational Mapping; im Projekt Drizzle ORM für Datenzugriff, Schema und Migrationen |
+| SQLite / libSQL | Dateibasierte relationale Datenbank bzw. der Client, über den das Backend darauf zugreift |
+| OpenAPI | Standardformat zur Beschreibung von REST-Schnittstellen, hier in `openapi.yaml` |
+| Repository (Entwurfsmuster) | Klasse, die den Datenzugriff auf eine Datenbankentität kapselt; nicht zu verwechseln mit dem Git-Repository |
+| Service | Backend-Klasse, die die fachliche Logik eines Anwendungsfalls enthält |
+| Docker | Container-Technik, mit der Frontend und Backend als Images ausgeliefert werden |
+| GitHub Actions | CI/CD-Dienst von GitHub, der bei jedem Push auf `main` die Docker-Images baut |
+| Monorepo | Ein Git-Repository, das mehrere Anwendungen enthält, hier Frontend und Backend |
+
+Begriffe der Fachdomäne stehen in [SRS 1.3](SRS.md#13-definitions-acronyms-and-abbreviations) und im [Domain model](domain_model.md).
+
+
 
 ### 1.4 References
 
-*Author: [first name]*
+*Author: Mika*
 
 | Title | Link |
 | ----- | ---- |
 | SRS | [SRS.md](SRS.md) |
 | Domain model | [domain_model.md](domain_model.md) |
-| Repository | [link] |
-| Board | [link to your GitHub Projects board] |
+| Repository | [ImConsti/CoupleGOATS](https://github.com/ImConsti/CoupleGOATS) |
+| Board | [CoupleGoats Board](https://github.com/users/ImConsti/projects/1) |
+| Laufende Anwendung | [couplegoats.85.215.100.89.nip.io](https://couplegoats.85.215.100.89.nip.io/) |
+| Use-Case-Realisierungen | [use_case_realizations/](use_case_realizations/) |
+| API-Endpunkte | [api-endpoints.md](api-endpoints.md) |
+| OpenAPI-Spezifikation | [openapi.yaml](../apps/backend/openapi.yaml) |
+| RUP-Vorlage SAD | [rup_sad.htm](https://cin.ufpe.br/~if682/RUP/webtmpl/templates/a_and_d/rup_sad.htm) |
 
 ### 1.5 Overview
 
@@ -87,19 +115,22 @@ by view, following the RUP template.
 
 ## 2 Architectural representation
 
-*Author: [first name]*
+*Author: Mika*
 
 <!-- Which views you use and which diagram shows each. The table is prefilled with the views of
      Lecture 6 — adjust it if you add or drop a view. Later lectures add your architectural
      style and your architecture decisions here. -->
 
+Die Architektur von CoupleGOATS wird in fünf Sichten beschrieben, die den Sichten der RUP-Vorlage entsprechen. Jede Sicht beantwortet eine eigene Frage und stützt sich auf die Diagramme, die das Team im Repository unter `docs/diagrams/` ablegt, jeweils als Bild zusammen mit seiner Quelldatei. Ein Paketdiagramm verwendet das Projekt nicht; die Aufteilung des Codes zeigt stattdessen das Komponentendiagramm. Die Process view wird durch eine Kurzbeschreibung abgedeckt. Die Sequenzdiagramme der Use-Case-Realisierungen ergänzen sie um den zeitlichen Ablauf einzelner Anwendungsfälle.
+
 | View | Question it answers | Diagram | Section |
 | ---- | ------------------- | ------- | ------- |
-| Use-case view | What does the system do, and for whom? | Use case diagram, use-case realizations | 4 |
-| Logical view | Which classes, and how are they linked? | Class diagrams | 5 |
-| Process view | What runs at the same time? | Short description | 6 |
-| Deployment view | What runs where, and how is it connected? | Deployment diagram | 7 |
-| Implementation view | Which parts is the code made of? | Component diagram, package diagram | 8 |
+| Use-case view | Was leistet das System, und für wen? | [Use-Case-Diagramm](diagrams/use-case-diagram.png) ([Quelle](diagrams/use-case-diagram.puml)), [Use-Case-Realisierungen UCR-01 bis UCR-06](use_case_realizations/) | 4 |
+| Logical view | Welche Klassen gibt es, und wie hängen sie zusammen? | [Domain model](diagrams/domain_model.png) ([Quelle](diagrams/domain_model.mmd)), Klassendiagramme der Realisierungen (`diagrams/UCR-01_classes.png` bis `diagrams/UCR-06_classes.png`) | 5 |
+| Process view | Was läuft gleichzeitig ab? | Kurzbeschreibung; Sequenzdiagramme der Realisierungen (`diagrams/UCR-01_sequence_design.png` bis `diagrams/UCR-06_sequence_design.png`) | 6 |
+| Deployment view | Was läuft wo, und wie ist es verbunden? | Deployment-Diagramm (folgt, `diagrams/deployment.png`) | 7 |
+| Implementation view | Woraus besteht der Code? | [Komponentendiagramm](diagrams/components.png) ([Quelle](diagrams/components.puml)) | 8 |
+
 
 ## 3 Architectural goals and constraints
 
