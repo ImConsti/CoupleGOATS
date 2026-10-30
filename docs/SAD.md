@@ -1,4 +1,4 @@
-# CoupleGOATS — Software Architecture Document
+# CoupleGOATS — Software Architektur Dokument
 
 <!--
 HOW TO USE THIS TEMPLATE
@@ -14,13 +14,13 @@ HOW TO USE THIS TEMPLATE
   https://cin.ufpe.br/~if682/RUP/webtmpl/templates/a_and_d/rup_sad.htm
 -->
 
-| Team | Version | Last change |
+| Team | Version | Letzte Änderung |
 | ---- | ------- | ----------- |
 | CoupleGOATS | 0.1 | 30.10.2026 |
 
 The Git history of this file is the revision history.
 
-## Table of contents
+## Inhaltsverzeichnis
 
 1. [Introduction](#1-introduction)
 2. [Architectural representation](#2-architectural-representation)
@@ -34,9 +34,9 @@ The Git history of this file is the revision history.
 10. [Size and performance](#10-size-and-performance)
 11. [Quality](#11-quality)
 
-## 1 Introduction
+## 1 Einführung
 
-### 1.1 Purpose
+### 1.1 Zweck
 
 *Author: Mika*
 
@@ -59,7 +59,7 @@ Es richtet sich an das Entwicklungsteam als gemeinsame Grundlage für Entwurfsen
 Dieses Dokument umfasst die gesamte Anwendung CoupleGOATS: das Frontend (Next.js), das Backend (Express) mit seiner REST-API und die SQLite-Datenbank, die gemeinsam im Monorepo unter `apps/frontend` und `apps/backend` liegen. Nicht Teil dieses Dokuments sind externe Softwaredienste, da die Anwendung derzeit keine nutzt (siehe [SRS 3.9.3](SRS.md#393-software-interfaces)). Der funktionale Umfang ist in [SRS 1.2](SRS.md#12-scope) beschrieben.
 
 
-### 1.3 Definitions, acronyms and abbreviations
+### 1.3 Begriffe, Abkürzungen und Kürzel
 
 *Author: Mika*
 
@@ -92,7 +92,7 @@ Begriffe der Fachdomäne stehen in [SRS 1.3](SRS.md#13-definitions-acronyms-and-
 
 
 
-### 1.4 References
+### 1.4 Referenzen
 
 *Author: Mika*
 
@@ -108,12 +108,12 @@ Begriffe der Fachdomäne stehen in [SRS 1.3](SRS.md#13-definitions-acronyms-and-
 | OpenAPI-Spezifikation | [openapi.yaml](../apps/backend/openapi.yaml) |
 | RUP-Vorlage SAD | [rup_sad.htm](https://cin.ufpe.br/~if682/RUP/webtmpl/templates/a_and_d/rup_sad.htm) |
 
-### 1.5 Overview
+### 1.5 Übersicht
 
 Section 2 names the views this document uses. Sections 3 to 11 describe the architecture view
 by view, following the RUP template.
 
-## 2 Architectural representation
+## 2 Architektonische Darstellung
 
 *Author: Mika*
 
@@ -132,7 +132,7 @@ Die Architektur von CoupleGOATS wird in fünf Sichten beschrieben, die den Sicht
 | Implementation view | Woraus besteht der Code? | [Komponentendiagramm](diagrams/components.png) ([Quelle](diagrams/components.puml)) | 8 |
 
 
-## 3 Architectural goals and constraints
+## 3 Architektonische Ziele und Einschränkungen
 
 <!-- Lecture 7. The requirements and constraints that shape your architecture: quality goals
      such as availability or security, and constraints such as your stack (SRS 3.6), your team
@@ -191,7 +191,7 @@ Zur Laufzeit gibt es das Frontend (Next.js) und das Backend (Node.js mit Express
 Hintergrundprozesse oder zeitgesteuerte Jobs gibt es derzeit nicht.
 
 
-## 7 Deployment view
+## 7 Bereitstellungsansicht
 
 *Author: Constantin*
 
@@ -227,10 +227,10 @@ zwischen Browser, Frontend und Backend. Externe fachliche Softwaredienste werden
 | Persistentes Volume | SQLite-Datei `/data/couplegoats.db` mit Schema und Anwendungsdaten | Backend-Pod: gemountet unter `/data` |
 | GitHub-Infrastruktur | GitHub Actions, GHCR und Infrastruktur-Repository | Argo CD: Image- und Manifest-Aktualisierung |
 
-## 8 Implementation view
+## 8 Implementierungsansicht
 
 
-### 8.1 Overview
+### 8.1 Übersicht
 
 *Author: brdly06*
 
@@ -258,27 +258,27 @@ Die Komponenten und ihre Verantwortlichkeiten sind in der folgenden Tabelle zusa
 Die REST-API ist die Schnittstelle zwischen Frontend und Backend. Die Datenbank wird ausschließlich über die Persistence-Komponente angesprochen. Die interne Aufteilung unterstützt die Trennung von Benutzeroberfläche, fachlicher Logik und Datenzugriff.
 
 
-### 8.2 Layers
+### 8.2 Schichten
 
 <!-- Lectures 8 and 9. The layers of your application and the rules between them. Leave this
      section as it is until then. -->
 
 *Follows with Lectures 8 and 9.*
 
-## 9 Data view
+## 9 Datenansicht
 
 <!-- Optional for now. Later: your database schema or ER model, derived from your domain model. -->
 
 *Follows later.*
 
-## 10 Size and performance
+## 10 Größe und Leistung
 
 <!-- Lecture 7. The numbers that shape your architecture, e.g., expected users and data, and
      your performance requirements from SRS 3.4. Leave this section as it is until then. -->
 
 *Follows with Lecture 7.*
 
-## 11 Quality
+## 11 Qualität
 
 <!-- Lectures 7 to 9. How your architecture supports the qualities you need: availability,
      security, maintainability, … Leave this section as it is until then. -->
