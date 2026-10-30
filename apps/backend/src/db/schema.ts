@@ -18,8 +18,8 @@ export const animals = sqliteTable("animals", {
         id: text().primaryKey().notNull().$default(() => crypto.randomUUID()),
         animalShelterId: text("animal_shelter_id").notNull().references(() => animalShelters.id, {onDelete: "cascade"}),
         name: text().notNull(),
-        species: text().notNull().references(() => species.id, {onDelete: "cascade"}),
-        breed: text().notNull().references(() => breeds.id, {onDelete: "cascade"}),
+        speciesId: text("species_id").notNull().references(() => species.id, {onDelete: "cascade"}),
+        breedId: text("breed_id").references(() => breeds.id, {onDelete: "set null"}),
         birthYear: integer("birth_year").notNull(),
         gender: text("gender").notNull(),
         requiredExperience: text("required_experience").notNull(),
@@ -70,13 +70,13 @@ export const species = sqliteTable("species", {
 
 export const breeds = sqliteTable("breeds", {
         id: text().primaryKey().notNull().$default(() => crypto.randomUUID()),
-        species: text().notNull().references(() => species.id, {onDelete: "cascade"}),
+        speciesId: text("species_id").notNull().references(() => species.id, {onDelete: "cascade"}),
         name: text().notNull(),
         createdAt: text("created_at").$default(() => new Date().toISOString()).notNull(),
         updatedAt: text("updated_at").$default(() => new Date().toISOString()).$onUpdate(() => new Date().toISOString()).notNull(),
     },
     (table) => [
-        unique("breeds_species_name_unique").on(table.species, table.name),
+        unique("breeds_species_name_unique").on(table.speciesId, table.name),
     ]);
 
 export const animalsTags = sqliteTable("animals_tags", {
@@ -146,8 +146,8 @@ export const interests = sqliteTable("interests", {
 export const userFilters = sqliteTable("user_filters", {
         id: text().primaryKey().notNull().$default(() => crypto.randomUUID()),
         userId: text("user_id").notNull().references(() => users.id, {onDelete: "cascade"}),
-        animalSpecies: text("animal_species").references(() => species.id, {onDelete: "cascade"}),
-        animalBreed: text("animal_breed").references(() => breeds.id, {onDelete: "cascade"}),
+        animalSpeciesId: text("animal_species_id").references(() => species.id, {onDelete: "cascade"}),
+        animalBreedId: text("animal_breed_id").references(() => breeds.id, {onDelete: "cascade"}),
         animalMinAge: integer("animal_min_age"),
         animalMaxAge: integer("animal_max_age"),
         animalGender: text("animal_gender"),
@@ -158,8 +158,8 @@ export const userFilters = sqliteTable("user_filters", {
     },
     (table) => [
         unique("user_filters_unique").on(
-            table.animalBreed,
-            table.animalSpecies,
+            table.animalBreedId,
+            table.animalSpeciesId,
             table.userId,
         ),
         check(
