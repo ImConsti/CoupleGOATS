@@ -25,9 +25,9 @@ The Git history of this file is the revision history.
 1. [Introduction](#1-introduction)
 2. [Architectural representation](#2-architectural-representation)
 3. [Architectural goals and constraints](#3-architectural-goals-and-constraints)
-4. [Use-case view](#4-use-case-view)
-5. [Logical view](#5-logical-view)
-6. [Process view](#6-process-view)
+4. [Use-Case Sicht](#4-use-case-sicht)
+5. [Logische Sicht](#5-logische-sicht)
+6. [Prozesssicht](#6-prozesssicht)
 7. [Deployment view](#7-deployment-view)
 8. [Implementation view](#8-implementation-view)
 9. [Data view](#9-data-view)
@@ -140,51 +140,56 @@ Die Architektur von CoupleGOATS wird in fünf Sichten beschrieben, die den Sicht
 
 *Follows with Lecture 7.*
 
-## 4 Use-case view
+## 4 Use-Case Sicht
 
-*Author: [first name]*
+*Author: Carolin*
 
-<!-- The use cases that matter most for your architecture — usually the ones you realized in
-     Task 4. Link your use case diagram instead of copying it. -->
+Das Use-Case-Diagramm der gesamten Anwendung ist in [SRS 2.2](SRS.md#22-use-case-diagram).
 
-The use case diagram of the whole application is in [SRS 2.2](SRS.md#22-use-case-diagram). The
-use cases most important for the architecture are: […]
+Für die Architektur sind folgende Use Cases am wichtigsten:
+- Swipe (UC-01): durchläuft Frontend, API und Datenbank und erzeugt über den Like den Match-Zustand, der das Meet & greet ermöglicht.
+- Tierprofile mit Tags verwalten (UC-03): erfordert die Rechteprüfung (nur das eigene Tierheim darf bearbeiten) und bildet eine n:m-Beziehung zwischen Tier und Tag ab.
+- Meet & greet (UC-04): betrifft Adoptierende und Tierheime mit jeweils eigener Ansichten und hat Zustände (angefragt, bestätigt, abgesagt).
 
-### 4.1 Use-case realizations
-
-<!-- One row per realization from Task 4. No new diagrams: link the files. -->
+### 4.1 Use-Case Realisierungen
 
 | Use case | Realization | Author |
 | -------- | ----------- | ------ |
-| [UC-02 Book a room](use_cases/UC-02_[name].md) | [UCR-02](use_case_realizations/UCR-02_[name].md) | [first name] |
+| [UC-01 Tiere swipen](use_cases/UC-01_swipe.md) | [UCR-01](use_case_realizations/UCR-01_swipe.md) | Mika |
+| [UC-02 Tierprofil ansehen](use_cases/UC-02_animal_detail.md) | [UCR-02](use_case_realizations/UCR-02_animal_detail.md) | Aaron |
+| [UC-03 Tierprofil verwalten](use_cases/UC-03_manage_animal.md) | [UCR-03](use_case_realizations/UCR-03_manage_animal.md) | Aaron |
+| [UC-04 Meet & Greet buchen](use_cases/UC-04_meet_and_greet.md) | [UCR-04](use_case_realizations/UCR-04_meet_and_greet.md) | Constantin |
+| [UC-05 Nutzerprofil verwalten](use_cases/UC-05_manage_profile.md) | [UCR-05](use_case_realizations/UCR-05_manage_profile.md) | Constantin |
+| [UC-06 Tierheim Dashboard ansehen](use_cases/UC-06_shelter_dashboard.md) | [UCR-06](use_case_realizations/UCR-06_shelter_dashboard.md) | Carolin |
 
-## 5 Logical view
+## 5 Logische Sicht
 
-### 5.1 Overview
+### 5.1 Überblick
 
-*Author: [first name]*
+*Author: Carolin*
 
 <!-- Link your domain model from Task 5. If you have a package diagram, put it here: the
      packages of your code and their dependencies, without cycles. -->
 
-The domain model is in [domain_model.md](domain_model.md). […]
+Das Domain-Model ist in [domain_model.md](domain_model.md).
 
-### 5.2 Architecturally significant design packages
+### 5.2 Architekturrelevante Design-Pakete
 
-<!-- Optional for now. Link the design classes of your realizations (UCR section 2.5) or describe
-     your most important packages in one sentence each. -->
+Die Designklassen sind in Abschnitt 2.5 der jeweiligen Use-Case-Realisierung zu finden:
+- [Design Klassen UCR-01](use_case_realizations/UCR-01_swipe.md#25-design-classes) (Autor: Mika)
+- [Design Klassen UCR-02](use_case_realizations/UCR-02_animal_detail.md#25-design-classes) (Autor: Aaron)
+- [Design Klassen UCR-03](use_case_realizations/UCR-03_manage_animal.md#25-design-classes) (Autor: Aaron)
+- [Design Klassen UCR-04](use_case_realizations/UCR-04_meet_and_greet.md#25-design-klassen) (Autor: Constantin)
+- [Design Klassen UCR-05](use_case_realizations/UCR-05_manage_profile.md#25-design-klassen) (Autor: Constantin)
+- [Design Klassen UCR-06](use_case_realizations/UCR-06_shelter_dashboard.md#25-design-classes) (Autor: Carolin)
 
-[…]
+## 6 Prozesssicht
 
-## 6 Process view
+*Author: Carolin*
 
-*Author: [first name]*
+Zur Laufzeit gibt es das Frontend (Next.js) und das Backend (Node.js mit Express, Einbindung der SQLite-DB), das Frontend ruft das Backend über die REST-API auf. 
+Hintergrundprozesse oder zeitgesteuerte Jobs gibt es derzeit nicht.
 
-<!-- Optional for now. One or two sentences: which processes run, e.g., the frontend in the
-     browser, the backend, the database — and anything that runs in the background, such as a
-     scheduled job. -->
-
-[…]
 
 ## 7 Deployment view
 
