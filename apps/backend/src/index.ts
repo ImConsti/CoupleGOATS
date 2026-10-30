@@ -9,6 +9,7 @@ import {parse} from "yaml";
 import {routeNotFoundHandler} from "./middleware/routeNotFoundHandler.js";
 import {errorHandler} from "./middleware/errorHandler.js";
 import { router as authRouter } from "./router/authController.js";
+import { router as tagsRouter } from "./router/tagsController.js";
 
 async function runMigration() {
     const db = drizzle({
@@ -46,6 +47,7 @@ app.get("/test", (_req, res) => {
     res.json({ok: true});
 });
 app.use("/api/v1/auth", authRouter);
+app.use("/api/v1/tags", tagsRouter);
 
 app.use(routeNotFoundHandler);
 app.use(errorHandler);

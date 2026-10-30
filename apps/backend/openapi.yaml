@@ -718,7 +718,7 @@ paths:
             application/json:
               schema:
                 type: array
-                items: { $ref: "#/components/schemas/Tag" }
+                items: { $ref: "#/components/schemas/TagGroup" }
     post:
       tags: [Master Data]
       summary: Tag anlegen (Admin)
@@ -870,6 +870,9 @@ components:
     InterestStatus:
       type: string
       enum: [user_liked, user_disliked, user_requested, shelter_deadline, shelter_completed]
+    TagCategory:
+      type: string
+      enum: [personality, energy level, training & experience, living environment, social behavior, time & attention, special needs, lifestyle]
 
     Timestamps:
       type: object
@@ -987,7 +990,20 @@ components:
           properties:
             id: { type: string, format: uuid }
             name: { type: string }
-        - { $ref: "#/components/schemas/Timestamps" }
+            category: {type: string}
+            affectsMatching: {type: boolean}
+            isCritical: {type: boolean}
+
+    TagGroup:
+      type: object
+      required: [ category, tags ]
+      properties:
+        category:
+          $ref: "#/components/schemas/TagCategory"
+        tags:
+          type: array
+          items:
+            $ref: "#/components/schemas/Tag"
 
     AnimalFields:
       type: object
