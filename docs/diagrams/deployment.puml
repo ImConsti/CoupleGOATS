@@ -1,0 +1,81 @@
+@startuml deployment
+title CoupleGOATS – UML Deployment Diagram\nAuthor: Constantin
+
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam componentStyle rectangle
+skinparam node {
+  BackgroundColor #F5F7FA
+  BorderColor #34495E
+  FontColor #1F2937
+}
+skinparam artifact {
+  BackgroundColor #FFFFFF
+  BorderColor #2563EB
+  FontColor #1F2937
+}
+skinparam database {
+  BackgroundColor #EAF2F8
+  BorderColor #34495E
+  FontColor #1F2937
+}
+skinparam cloud {
+  BackgroundColor #FFF9E6
+  BorderColor #B7950B
+  FontColor #1F2937
+}
+
+node "Endgerät" as client {
+  node "Browser" <<execution environment>> as browser {
+    artifact "Next.js / React UI" as ui
+  }
+}
+
+cloud "GitHub" as github {
+  artifact "GitHub Actions\nBuild & manifest bump" as actions
+  artifact "GHCR\nFrontend- und Backend-Image" as ghcr
+  artifact "Infrastruktur-Repository\nKubernetes-Manifeste" as manifests
+}
+
+node "NodeHarbor Kubernetes-Cluster" as cluster {
+  node "Traefik Ingress" <<execution environment>> as ingress {
+    artifact "TLS-Terminierung\nPfad-Routing" as routing
+  }
+
+  node "Frontend-Pod (1 Replik)" as frontendPod {
+    node "Docker / Node.js 22" <<execution environment>> as frontendRuntime {
+      artifact "Next.js Standalone Server\nPort 3000" as frontend
+    }
+  }
+
+  node "Backend-Pod (1 Replik, Recreate)" as backendPod {
+    node "Docker / Node.js 22" <<execution environment>> as backendRuntime {
+      artifact "Express REST API\nDrizzle ORM / libSQL\nPort 3001" as backend
+    }
+  }
+
+  database "Persistent Volume Claim\ncouplegoats-data (1 GiB)" as pvc {
+    artifact "SQLite-Datenbank\n/data/couplegoats.db" as sqlite
+  }
+
+  artifact "Argo CD" as argocd
+}
+
+browser --> ingress : HTTPS 443\ncouplegoats.cstnlabs.de
+ingress --> frontend : HTTP 80 -> 3000\nPfad /
+ingress --> backend : HTTP 80 -> 3001\nPfad /api (Präfix entfernt)
+backend --> sqlite : Dateizugriff\nMount /data
+
+actions --> ghcr : Docker-Images pushen
+actions --> manifests : Image-Tags aktualisieren
+manifests --> argocd : Git-Synchronisation
+ghcr --> frontendPod : Frontend-Image pullen
+ghcr --> backendPod : Backend-Image pullen
+argocd --> cluster : Manifeste anwenden
+
+note bottom of cluster
+  Produktives Setup und Ziel-Setup für die finale Demo.
+  Keine externen fachlichen Softwaredienste.
+end note
+@enduml

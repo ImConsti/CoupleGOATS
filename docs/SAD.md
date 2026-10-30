@@ -16,7 +16,7 @@ HOW TO USE THIS TEMPLATE
 
 | Team | Version | Last change |
 | ---- | ------- | ----------- |
-| CoupleGOATS | 0.1 | 28.10.2026 |
+| CoupleGOATS | 0.1 | 30.10.2026 |
 
 The Git history of this file is the revision history.
 
@@ -102,7 +102,7 @@ Begriffe der Fachdomäne stehen in [SRS 1.3](SRS.md#13-definitions-acronyms-and-
 | Domain model | [domain_model.md](domain_model.md) |
 | Repository | [ImConsti/CoupleGOATS](https://github.com/ImConsti/CoupleGOATS) |
 | Board | [CoupleGoats Board](https://github.com/users/ImConsti/projects/1) |
-| Laufende Anwendung | [couplegoats.85.215.100.89.nip.io](https://couplegoats.85.215.100.89.nip.io/) |
+| Laufende Anwendung | [couplegoats.cstnlabs.de](https://couplegoats.cstnlabs.de/) |
 | Use-Case-Realisierungen | [use_case_realizations/](use_case_realizations/) |
 | API-Endpunkte | [api-endpoints.md](api-endpoints.md) |
 | OpenAPI-Spezifikation | [openapi.yaml](../apps/backend/openapi.yaml) |
@@ -128,7 +128,7 @@ Die Architektur von CoupleGOATS wird in fünf Sichten beschrieben, die den Sicht
 | Use-case view | Was leistet das System, und für wen? | [Use-Case-Diagramm](diagrams/use-case-diagram.png) ([Quelle](diagrams/use-case-diagram.puml)), [Use-Case-Realisierungen UCR-01 bis UCR-06](use_case_realizations/) | 4 |
 | Logical view | Welche Klassen gibt es, und wie hängen sie zusammen? | [Domain model](diagrams/domain_model.png) ([Quelle](diagrams/domain_model.mmd)), Klassendiagramme der Realisierungen (`diagrams/UCR-01_classes.png` bis `diagrams/UCR-06_classes.png`) | 5 |
 | Process view | Was läuft gleichzeitig ab? | Kurzbeschreibung; Sequenzdiagramme der Realisierungen (`diagrams/UCR-01_sequence_design.png` bis `diagrams/UCR-06_sequence_design.png`) | 6 |
-| Deployment view | Was läuft wo, und wie ist es verbunden? | Deployment-Diagramm (folgt, `diagrams/deployment.png`) | 7 |
+| Deployment view | Was läuft wo, und wie ist es verbunden? | [Deployment-Diagramm](diagrams/deployment.png) ([Quelle](diagrams/deployment.puml)) | 7 |
 | Implementation view | Woraus besteht der Code? | [Komponentendiagramm](diagrams/components.png) ([Quelle](diagrams/components.puml)) | 8 |
 
 
@@ -193,17 +193,39 @@ Hintergrundprozesse oder zeitgesteuerte Jobs gibt es derzeit nicht.
 
 ## 7 Deployment view
 
-*Author: [first name]*
+*Author: Constantin*
 
-<!-- One UML deployment diagram: nodes (devices, execution environments), the artifacts that
-     run on them, and the communication paths with their protocol. Draw the setup you plan for
-     your final demo — or the one you use today, and say which. -->
+Das Diagramm zeigt das aktuell produktiv eingesetzte und für die finale Demo vorgesehene
+Deployment unter `https://couplegoats.cstnlabs.de`. Ein Endgerät greift per HTTPS auf den
+Traefik-Ingress des Kubernetes-Clusters zu. Traefik terminiert TLS und leitet Anfragen an `/`
+zum Frontend-Service sowie Anfragen an `/api` zum Backend-Service weiter; beim Backend wird
+das Präfix `/api` vor der Weiterleitung entfernt.
+
+Frontend und Backend laufen jeweils als einzelner Docker-Container in einem eigenen Pod. Der
+Next.js-Standalone-Server lauscht auf Port 3000, die Express-API auf Port 3001. Das Backend
+greift über Drizzle ORM und den libSQL-Client auf die SQLite-Datei
+`/data/couplegoats.db` zu. Diese liegt auf einem persistenten Kubernetes-Volume und bleibt
+damit bei einem Neustart oder Austausch des Backend-Pods erhalten. Da SQLite nur von einer
+Backend-Instanz verwendet werden soll, läuft das Backend mit einer Replik und der
+Deployment-Strategie `Recreate`.
+
+Bei einem Push auf `main` baut GitHub Actions beide Docker-Images und legt sie in der GitHub
+Container Registry (GHCR) ab. Anschließend aktualisiert die Pipeline die Image-Tags im
+Infrastruktur-Repository; Argo CD synchronisiert die Kubernetes-Manifeste mit dem Cluster.
+GHCR, GitHub Actions und Argo CD gehören damit zum Auslieferungsweg, nicht zur Laufzeitkommunikation
+zwischen Browser, Frontend und Backend. Externe fachliche Softwaredienste werden gemäß
+[SRS 3.9.3](SRS.md#393-software-interfaces) nicht verwendet.
 
 ![Deployment diagram](diagrams/deployment.png)
 
 | Node | What runs there | Connected to |
 | ---- | --------------- | ------------ |
-| [Server] | [backend, database] | [browser: HTTPS] |
+| Endgerät | Browser mit ausgeliefertem Next.js-/React-Frontend | Traefik-Ingress: HTTPS 443 |
+| Kubernetes-Cluster | Traefik-Ingress mit TLS-Terminierung und Routing | Browser: HTTPS 443; Frontend- und Backend-Service: HTTP 80 |
+| Frontend-Pod | Docker-Container mit Node.js 22 und Next.js-Standalone-Server | Frontend-Service: HTTP 3000 |
+| Backend-Pod | Docker-Container mit Node.js 22, Express-API, Drizzle ORM und libSQL-Client | Backend-Service: HTTP 3001; persistentes Volume: Dateizugriff |
+| Persistentes Volume | SQLite-Datei `/data/couplegoats.db` mit Schema und Anwendungsdaten | Backend-Pod: gemountet unter `/data` |
+| GitHub-Infrastruktur | GitHub Actions, GHCR und Infrastruktur-Repository | Argo CD: Image- und Manifest-Aktualisierung |
 
 ## 8 Implementation view
 
