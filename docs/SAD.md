@@ -246,7 +246,7 @@ Laut SRS 3.9.3 sind derzeit keine externen Softwaredienste vorgesehen. Ein exter
 
 Die Komponenten und ihre Verantwortlichkeiten sind in der folgenden Tabelle zusammengefasst. Die zugeordneten Klassen stammen aus den Designklassendiagrammen von Task 5. Die Zuordnung beschreibt die vorgesehene Architektur und bestätigt nicht, dass diese Klassen bereits implementiert sind.
 
-| Component | Responsibility | Classes (Task 5) |
+| Komponente | Verantwortung | Klassen (Task 5) |
 |---|---|---|
 | Frontend | Benutzeroberfläche für Discovery, Tierdetails, Profilverwaltung, Matches, Terminverwaltung und Tierheim-Dashboard | DiscoveryPage, ShelterDashboardPage |
 | API & Auth | REST-Endpunkte, Request-Validierung, Authentifizierung und Autorisierung | DiscoveryController, AnimalDetailController, AnimalProfileController, UserInterestsRouter, ShelterInterestsRouter, UsersRouter, ShelterDashboardController, authenticationHandler, roleHandler, zodValidation, errorHandler |
