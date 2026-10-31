@@ -975,14 +975,13 @@ components:
         - type: object
           properties:
             id: { type: string, format: uuid }
-            species: { type: string, format: uuid }
+            speciesId: { type: string, format: uuid }
             name: { type: string }
-        - { $ref: "#/components/schemas/Timestamps" }
     BreedInput:
       type: object
-      required: [species, name]
+      required: [speciesId, name]
       properties:
-        species: { type: string, format: uuid }
+        speciesId: { type: string, format: uuid }
         name: { type: string }
     Tag:
       allOf:
@@ -990,7 +989,8 @@ components:
           properties:
             id: { type: string, format: uuid }
             name: { type: string }
-            category: {type: string}
+            category:
+              $ref: "#/components/schemas/TagCategory"
             affectsMatching: {type: boolean}
             isCritical: {type: boolean}
 
@@ -1009,8 +1009,8 @@ components:
       type: object
       properties:
         name: { type: string }
-        species: { type: string, format: uuid }
-        breed: { type: string, format: uuid }
+        speciesId: { type: string, format: uuid }
+        breedId: { type: [string, "null"], format: uuid }
         birthYear: { type: integer }
         gender: { $ref: "#/components/schemas/Gender" }
         requiredExperience: { $ref: "#/components/schemas/ExperienceLevel" }
@@ -1019,7 +1019,7 @@ components:
       allOf:
         - { $ref: "#/components/schemas/AnimalFields" }
         - type: object
-          required: [name, species, breed, birthYear, gender, requiredExperience, description]
+          required: [name, speciesId, birthYear, gender, requiredExperience, description]
           properties:
             tagIds:
               type: array
@@ -1075,8 +1075,8 @@ components:
     UserFilterInput:
       type: object
       properties:
-        animalSpecies: { type: [string, "null"], format: uuid }
-        animalBreed: { type: [string, "null"], format: uuid }
+        animalSpeciesId: { type: [string, "null"], format: uuid }
+        animalBreedId: { type: [string, "null"], format: uuid }
         animalMinAge: { type: [integer, "null"] }
         animalMaxAge: { type: [integer, "null"] }
         animalGender:
