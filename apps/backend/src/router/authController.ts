@@ -12,11 +12,11 @@ import { zodValidation } from "../validation/zod-validation.js";
 import { createUser } from "../repositories/userRepository.js";
 import { hashPassword } from "../utils/bcrypt.js";
 import { generateToken } from "../utils/jwt.js";
-import { InternalServerError } from "../errors/errors.js";
 import { createShelter } from "../repositories/shelterRepository.js";
 import {
   authenticationHandler,
   type AuthRequest,
+  getAuth,
 } from "../middleware/authenticationHandler.js";
 import { login } from "../services/authService.js";
 
@@ -90,12 +90,10 @@ router.get(
   authenticationHandler,
   (req: AuthRequest, res: Response, next: NextFunction) => {
     try {
-      if (!req.auth?.sub || !req.auth?.role){
-        throw new InternalServerError("An internal server error occurred");
-      }
+      const auth = getAuth(req);
       res.status(200).json({
-        id: req.auth.sub,
-        role: req.auth.role,
+        id: auth.sub,
+        role: auth.role,
       });
     } catch (error) {
       next(error);

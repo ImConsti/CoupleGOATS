@@ -20,3 +20,21 @@ export async function findAllTags(): Promise<Tag[]>{
     throw mapDatabaseError(error);
   }
 }
+
+export async function findTagsByIds(ids: string[]): Promise<Tag[]> {
+  try {
+    if (ids.length === 0) return [];
+    return await db.query.tags.findMany({
+      where: (tag, { inArray }) => inArray(tag.id, ids),
+      columns: {
+        id: true,
+        name: true,
+        category: true,
+        affectsMatching: true,
+        isCritical: true,
+      },
+    });
+  } catch (error: unknown) {
+    throw mapDatabaseError(error);
+  }
+}

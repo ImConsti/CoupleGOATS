@@ -50,18 +50,25 @@ export const createAnimalShelterSchema = z.object({
 
 export const updateAnimalShelterSchema = createAnimalShelterSchema.partial();
 
-export const createAnimalSchema = z.object({
-  animalShelterId: z.uuid(),
-  name: z.string(),
-  species: z.uuid(),
-  breed: z.uuid(),
-  birthYear: z.int(),
+export const createAnimalProfileSchema = z.object({
+  name: z.string().trim().min(1).max(100),
+  speciesId: z.uuid(),
+  breedId: z.uuid().optional(),
+  birthYear: z
+    .int()
+    .min(1900)
+    .refine((year) => year <= new Date().getFullYear()),
   gender: z.enum(genders),
   requiredExperience: z.enum(experienceLevels),
-  description: z.string(),
+  description: z.string().trim().min(1).max(2000),
+  tagIds: z
+    .array(z.uuid())
+    .max(40)
+    .refine((ids) => ids.every((id, index) => ids.indexOf(id) === index))
+    .default([]),
 });
 
-export const updateAnimalSchema = createAnimalSchema.partial();
+export const updateAnimalProfileSchema = createAnimalProfileSchema.partial();
 
 export const createTagSchema = z.object({
   name: z.string(),
@@ -84,7 +91,7 @@ export const createInterestSchema = z.object({
 export const updateInterestSchema = createInterestSchema.partial();
 
 export const createBreedSchema = z.object({
-  species: z.uuid(),
+  speciesId: z.uuid(),
   name: z.string(),
 });
 
@@ -95,8 +102,8 @@ export const createSpeciesSchema = z.object({ name: z.string() });
 export const updateSpeciesSchema = createSpeciesSchema;
 
 export const createUserFilterSchema = z.object({
-  animalSpecies: z.uuid().nullish(),
-  animalBreed: z.uuid().nullish(),
+  animalSpeciesId: z.uuid().nullish(),
+  animalBreedId: z.uuid().nullish(),
   animalMinAge: z.int().nullish(),
   animalMaxAge: z.int().nullish(),
   animalGender: z.enum(genders).nullish(),
