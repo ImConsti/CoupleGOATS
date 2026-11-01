@@ -19,3 +19,18 @@ export async function findBreedsBySpecies(speciesId: string): Promise<Breed[]>{
     throw mapDatabaseError(error);
   }
 }
+
+export async function findBreedById(breedId: string): Promise<Breed | undefined> {
+  try {
+    return await db.query.breeds.findFirst({
+      where: (breed, { eq }) => eq(breed.id, breedId),
+      columns: {
+        id: true,
+        speciesId: true,
+        name: true,
+      },
+    });
+  } catch (error: unknown) {
+    throw mapDatabaseError(error);
+  }
+}

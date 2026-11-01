@@ -392,7 +392,7 @@ paths:
           description: Angelegt
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/AnimalDetail" }
+              schema: { $ref: "#/components/schemas/AnimalCreateResponse" }
         "400": { $ref: "#/components/responses/BadRequest" }
   /shelters/me/animals/{animalId}:
     parameters: [{ $ref: "#/components/parameters/AnimalId" }]
@@ -962,7 +962,12 @@ components:
         streetAddress: { type: string }
         postalCode: { type: string, pattern: "^\\d{5}$" }
         city: { type: string }
-
+    SpeciesSummary:
+      type: object
+      required: [ id, name ]
+      properties:
+        id: { type: string, format: uuid }
+        name: { type: string }
     Species:
       allOf:
         - type: object
@@ -970,6 +975,12 @@ components:
             id: { type: string, format: uuid }
             name: { type: string }
         - { $ref: "#/components/schemas/Timestamps" }
+    BreedSummary:
+      type: object
+      required: [ id, name ]
+      properties:
+        id: { type: string, format: uuid }
+        name: { type: string }
     Breed:
       allOf:
         - type: object
@@ -1010,7 +1021,7 @@ components:
       properties:
         name: { type: string }
         speciesId: { type: string, format: uuid }
-        breedId: { type: [string, "null"], format: uuid }
+        breedId: { type: string, format: uuid }
         birthYear: { type: integer }
         gender: { $ref: "#/components/schemas/Gender" }
         requiredExperience: { $ref: "#/components/schemas/ExperienceLevel" }
@@ -1023,7 +1034,31 @@ components:
           properties:
             tagIds:
               type: array
+              maxItems: 40
+              uniqueItems: true
               items: { type: string, format: uuid }
+    AnimalCreateResponse:
+      allOf:
+        - type: object
+          required: [ id, animalShelterId, name, birthYear, gender, requiredExperience, description, species, breed, tags ]
+          properties:
+            id: { type: string, format: uuid }
+            animalShelterId: { type: string, format: uuid }
+            name: { type: string }
+            species: { $ref: "#/components/schemas/SpeciesSummary" }
+            breed:
+              nullable: true
+              allOf:
+                - { $ref: "#/components/schemas/BreedSummary" }
+            birthYear: { type: integer }
+            gender: { $ref: "#/components/schemas/Gender" }
+            requiredExperience: { $ref: "#/components/schemas/ExperienceLevel" }
+            description: { type: string }
+            tags:
+              type: array
+              items: { $ref: "#/components/schemas/Tag" }
+        - { $ref: "#/components/schemas/Timestamps" }
+
     AnimalUpdate:
       $ref: "#/components/schemas/AnimalFields"
     AnimalCard:

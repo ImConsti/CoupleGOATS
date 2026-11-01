@@ -1,5 +1,5 @@
 import type { NextFunction, Request, Response } from "express";
-import { AuthenticationError } from "../errors/errors.js";
+import { AuthenticationError, InternalServerError } from "../errors/errors.js";
 import { type JwtPayloadOutput, verifyToken } from "../utils/jwt.js";
 import { userExistsById } from "../repositories/userRepository.js";
 import { shelterExistsById } from "../repositories/shelterRepository.js";
@@ -49,4 +49,11 @@ async function accountExists(
       throw new AuthenticationError("Invalid credentials");
     }
   }
+}
+
+export function getAuth(req: AuthRequest): JwtPayloadOutput {
+  if (!req.auth) {
+    throw new InternalServerError("An internal server error occurred");
+  }
+  return req.auth;
 }

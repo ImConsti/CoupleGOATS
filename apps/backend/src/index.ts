@@ -11,6 +11,7 @@ import {errorHandler} from "./middleware/errorHandler.js";
 import { router as authRouter } from "./router/authController.js";
 import { router as tagsRouter } from "./router/tagsController.js";
 import { router as speciesRouter } from "./router/speciesController.js";
+import { router as sheltersRouter } from "./router/shelterController.js";
 
 async function runMigration() {
     const db = drizzle({
@@ -50,6 +51,7 @@ app.get("/test", (_req, res) => {
 app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/tags", tagsRouter);
 app.use("/api/v1/species", speciesRouter);
+app.use("/api/v1/shelters", sheltersRouter);
 
 app.use(routeNotFoundHandler);
 app.use(errorHandler);
