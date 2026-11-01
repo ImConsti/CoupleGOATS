@@ -43,6 +43,13 @@
       "when": 1793385331416,
       "tag": "0005_sturdy_blue_shield",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "6",
+      "when": 1793557698054,
+      "tag": "0006_fair_logan",
+      "breakpoints": true
     }
   ]
 }
