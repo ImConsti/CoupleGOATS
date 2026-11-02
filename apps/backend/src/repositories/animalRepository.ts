@@ -137,11 +137,6 @@ export async function animalExistsForShelter(
   }
 }
 
-/**
- * Updates only the given fields of an animal owned by the shelter and always
- * bumps updatedAt (also when only the tags changed).
- * Returns false if the animal does not exist or belongs to another shelter.
- */
 export async function updateAnimal(
   animalId: string,
   shelterId: string,

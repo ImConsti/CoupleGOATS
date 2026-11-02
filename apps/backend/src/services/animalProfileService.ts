@@ -102,8 +102,6 @@ export async function updateAnimalProfile(
     animalFields.breedId !== undefined ||
     tagIds !== undefined;
   if (relationsChanged) {
-    // Breed is always checked against the resulting species, so changing only
-    // the species with a breed that no longer fits is rejected (422).
     const speciesId = animalFields.speciesId ?? current.species.id;
     const breedId =
       animalFields.breedId !== undefined
