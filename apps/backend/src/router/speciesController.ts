@@ -6,8 +6,18 @@ import express, {
 import { zodValidation } from "../validation/zod-validation.js";
 import { z } from "zod";
 import { getBreedsBySpecies } from "../services/breedService.js";
+import { getAllSpecies } from "../services/speciesService.js";
 
 export const router = express.Router({ mergeParams: true });
+
+router.get("/", async (_req: Request, res: Response, next: NextFunction) => {
+  try {
+    const species = await getAllSpecies();
+    res.status(200).json(species);
+  } catch (error: unknown) {
+    next(error);
+  }
+});
 
 router.get("/:speciesId/breeds", async (req: Request, res: Response, next: NextFunction) => {
   try {
