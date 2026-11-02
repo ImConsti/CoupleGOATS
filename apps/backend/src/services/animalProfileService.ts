@@ -1,26 +1,26 @@
 import type { z } from "zod";
-import type { createAnimalProfileSchema } from "../validation/schemas.js";
-import { type Breed, findBreedById } from "../repositories/breedRepository.js";
-import { UnprocessableEntityError } from "../errors/errors.js";
+import type {
+  createAnimalProfileSchema,
+  updateAnimalProfileSchema,
+} from "../validation/schemas.js";
+import { findBreedById } from "../repositories/breedRepository.js";
 import {
+  NotFoundError,
+  UnprocessableEntityError,
+} from "../errors/errors.js";
+import {
+  type AnimalProfile,
+  type AnimalProfileRelations,
+  animalExistsForShelter,
+  deleteAnimalTags,
+  findAnimalProfileById,
   insertAnimal,
   insertAnimalTags,
+  updateAnimal,
 } from "../repositories/animalRepository.js";
 import { findTagsByIds, type Tag } from "../repositories/tagRepository.js";
-import type { InferSelectModel } from "drizzle-orm";
-import { animals } from "../db/schema.js";
-import { db } from "../db/db.js";
-import {
-  findSpeciesById,
-  type Species,
-} from "../repositories/speciesRepository.js";
-
-type AnimalProfileRelations = { species: Species; breed: Omit<Breed, "speciesId"> | null; tags: Tag[] };
-
-type AnimalProfile = Omit<
-  InferSelectModel<typeof animals>,
-  "breedId" | "speciesId"
-> & AnimalProfileRelations;
+import { db, type DbOrTrx } from "../db/db.js";
+import { findSpeciesById } from "../repositories/speciesRepository.js";
 
 export async function createAnimalProfile(
   shelterId: string,
@@ -77,3 +77,92 @@ async function resolveAnimalRelations(speciesId: string, tagIds: string[], breed
   }
   return {species, breed, tags}
 }
+
+export async function getAnimalProfile(
+  shelterId: string,
+  animalId: string,
+): Promise<AnimalProfile> {
+  const animalProfile = await findAnimalProfileById(animalId, shelterId);
+  if (!animalProfile) {
+    throw new NotFoundError("Animal not found");
+  }
+  return animalProfile;
+}
+
+export async function updateAnimalProfile(
+  shelterId: string,
+  animalId: string,
+  request: z.infer<typeof updateAnimalProfileSchema>,
+): Promise<AnimalProfile> {
+  const current = await getAnimalProfile(shelterId, animalId);
+  const { tagIds, ...animalFields } = request;
+
+  const relationsChanged =
+    animalFields.speciesId !== undefined ||
+    animalFields.breedId !== undefined ||
+    tagIds !== undefined;
+  if (relationsChanged) {
+    const speciesId = animalFields.speciesId ?? current.species.id;
+    const breedId =
+      animalFields.breedId !== undefined
+        ? animalFields.breedId
+        : (current.breed?.id ?? null);
+    await resolveAnimalRelations(speciesId, tagIds ?? [], breedId);
+  }
+
+  return await db.transaction(async (trx) => {
+    const updated = await updateAnimal(animalId, shelterId, animalFields, trx);
+    if (!updated) {
+      throw new NotFoundError("Animal not found");
+    }
+    if (tagIds !== undefined) {
+      await replaceTags(animalId, tagIds, trx);
+    }
+    return await loadUpdatedProfile(animalId, shelterId, trx);
+  });
+}
+
+export async function replaceAnimalTags(
+  shelterId: string,
+  animalId: string,
+  tagIds: string[],
+): Promise<Tag[]> {
+  if (!(await animalExistsForShelter(animalId, shelterId))) {
+    throw new NotFoundError("Animal not found");
+  }
+  const tags = await findTagsByIds(tagIds);
+  if (tags.length !== tagIds.length) {
+    throw new UnprocessableEntityError("One or more tags do not exist");
+  }
+
+  return await db.transaction(async (trx) => {
+    const updated = await updateAnimal(animalId, shelterId, {}, trx);
+    if (!updated) {
+      throw new NotFoundError("Animal not found");
+    }
+    await replaceTags(animalId, tagIds, trx);
+    return (await loadUpdatedProfile(animalId, shelterId, trx)).tags;
+  });
+}
+
+async function replaceTags(
+  animalId: string,
+  tagIds: string[],
+  trx: DbOrTrx,
+): Promise<void> {
+  await deleteAnimalTags(animalId, trx);
+  await insertAnimalTags(animalId, tagIds, trx);
+}
+
+async function loadUpdatedProfile(
+  animalId: string,
+  shelterId: string,
+  trx: DbOrTrx,
+): Promise<AnimalProfile> {
+  const animalProfile = await findAnimalProfileById(animalId, shelterId, trx);
+  if (!animalProfile) {
+    throw new NotFoundError("Animal not found");
+  }
+  return animalProfile;
+}
+

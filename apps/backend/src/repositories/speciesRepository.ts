@@ -33,3 +33,16 @@ export async function findSpeciesById(id: string): Promise<Species | undefined>{
     throw mapDatabaseError(error);
   }
 }
+
+export async function findAllSpecies(): Promise<Species[]> {
+  try {
+    return await db.query.species.findMany({
+      columns: {
+        id: true,
+        name: true,
+      },
+    });
+  } catch (error: unknown) {
+    throw mapDatabaseError(error);
+  }
+}
