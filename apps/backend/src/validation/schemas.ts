@@ -50,10 +50,9 @@ export const createAnimalShelterSchema = z.object({
 
 export const updateAnimalShelterSchema = createAnimalShelterSchema.partial();
 
-export const createAnimalProfileSchema = z.object({
+const animalProfileFields = {
   name: z.string().trim().min(1).max(100),
   speciesId: z.uuid(),
-  breedId: z.uuid().optional(),
   birthYear: z
     .int()
     .min(1900)
@@ -61,14 +60,33 @@ export const createAnimalProfileSchema = z.object({
   gender: z.enum(genders),
   requiredExperience: z.enum(experienceLevels),
   description: z.string().trim().min(1).max(2000),
-  tagIds: z
-    .array(z.uuid())
-    .max(40)
-    .refine((ids) => ids.every((id, index) => ids.indexOf(id) === index))
-    .default([]),
+};
+
+const animalTagIdsSchema = z
+  .array(z.uuid())
+  .max(40)
+  .refine((ids) => ids.every((id, index) => ids.indexOf(id) === index));
+
+export const createAnimalProfileSchema = z.object({
+  ...animalProfileFields,
+  breedId: z.uuid().optional(),
+  tagIds: animalTagIdsSchema.default([]),
 });
 
-export const updateAnimalProfileSchema = createAnimalProfileSchema.partial();
+export const updateAnimalProfileSchema = z
+  .strictObject({
+    ...animalProfileFields,
+    breedId: z.uuid().nullable(),
+    tagIds: animalTagIdsSchema,
+  })
+  .partial()
+  .refine((fields) => Object.keys(fields).length > 0, {
+    message: "At least one field must be provided",
+  });
+
+export const replaceAnimalTagsSchema = z.strictObject({
+  tagIds: animalTagIdsSchema,
+});
 
 export const createTagSchema = z.object({
   name: z.string(),
