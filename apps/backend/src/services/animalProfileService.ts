@@ -1,16 +1,9 @@
-import type { z } from "zod";
-import type {
-  createAnimalProfileSchema,
-  updateAnimalProfileSchema,
-} from "../validation/schemas.js";
 import { findBreedById } from "../repositories/breedRepository.js";
 import {
   NotFoundError,
   UnprocessableEntityError,
 } from "../errors/errors.js";
 import {
-  type AnimalProfile,
-  type AnimalProfileRelations,
   animalExistsForShelter,
   deleteAnimalTags,
   findAnimalProfileById,
@@ -18,13 +11,21 @@ import {
   insertAnimalTags,
   updateAnimal,
 } from "../repositories/animalRepository.js";
-import { findTagsByIds, type Tag } from "../repositories/tagRepository.js";
-import { db, type DbOrTrx } from "../db/db.js";
+import { findTagsByIds } from "../repositories/tagRepository.js";
+import { db } from "../db/db.js";
 import { findSpeciesById } from "../repositories/speciesRepository.js";
+import type {
+  AnimalProfile,
+  AnimalProfileRelations,
+  CreateAnimalProfileInput,
+  DbOrTrx,
+  Tag,
+  UpdateAnimalProfileInput,
+} from "../types.js";
 
 export async function createAnimalProfile(
   shelterId: string,
-  request: z.infer<typeof createAnimalProfileSchema>,
+  request: CreateAnimalProfileInput,
 ): Promise<AnimalProfile> {
   const { tagIds, ...animalFields } = request;
   const {species, breed, tags} = await resolveAnimalRelations(animalFields.speciesId, tagIds, animalFields.breedId );
@@ -92,7 +93,7 @@ export async function getAnimalProfile(
 export async function updateAnimalProfile(
   shelterId: string,
   animalId: string,
-  request: z.infer<typeof updateAnimalProfileSchema>,
+  request: UpdateAnimalProfileInput,
 ): Promise<AnimalProfile> {
   const current = await getAnimalProfile(shelterId, animalId);
   const { tagIds, ...animalFields } = request;
@@ -118,7 +119,7 @@ export async function updateAnimalProfile(
     if (tagIds !== undefined) {
       await replaceTags(animalId, tagIds, trx);
     }
-    return await loadUpdatedProfile(animalId, shelterId, trx);
+    return await loadProfile(animalId, shelterId, trx);
   });
 }
 
@@ -141,7 +142,7 @@ export async function replaceAnimalTags(
       throw new NotFoundError("Animal not found");
     }
     await replaceTags(animalId, tagIds, trx);
-    return (await loadUpdatedProfile(animalId, shelterId, trx)).tags;
+    return (await loadProfile(animalId, shelterId, trx)).tags;
   });
 }
 
@@ -154,7 +155,7 @@ async function replaceTags(
   await insertAnimalTags(animalId, tagIds, trx);
 }
 
-async function loadUpdatedProfile(
+async function loadProfile(
   animalId: string,
   shelterId: string,
   trx: DbOrTrx,

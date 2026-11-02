@@ -1,9 +1,9 @@
 import express, { type Response, type NextFunction } from "express";
 import {
   authenticationHandler,
-  type AuthRequest,
   getAuth,
 } from "../middleware/authenticationHandler.js";
+import type { AuthRequest } from "../types.js";
 import { checkRole } from "../middleware/roleHandler.js";
 import { zodValidation } from "../validation/zod-validation.js";
 import { z } from "zod";

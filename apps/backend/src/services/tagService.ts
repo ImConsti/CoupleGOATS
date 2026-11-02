@@ -1,10 +1,6 @@
-import { findAllTags, type Tag } from "../repositories/tagRepository.js";
+import { findAllTags } from "../repositories/tagRepository.js";
 import { tagCategories } from "../validation/schemas.js";
-
-type GroupedTag = {
-  category: (typeof tagCategories)[number];
-  tags: Tag[];
-};
+import type { GroupedTag } from "../types.js";
 
 export async function getAllTagsGroupedByCategory(): Promise<GroupedTag[]> {
   const allTags = await findAllTags();

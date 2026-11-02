@@ -1,9 +1,6 @@
 import { db } from "../db/db.js";
 import { mapDatabaseError } from "../errors/map-database-error.js";
-import type { InferSelectModel } from "drizzle-orm";
-import { type species } from "../db/schema.js";
-
-export type Species = Omit<InferSelectModel<typeof species>, "createdAt" | "updatedAt">;
+import type { Species } from "../types.js";
 
 export async function speciesExistsById(id: string): Promise<boolean>{
   try {

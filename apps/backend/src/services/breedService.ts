@@ -1,7 +1,5 @@
-import {
-  type Breed,
-  findBreedsBySpecies,
-} from "../repositories/breedRepository.js";
+import { findBreedsBySpecies } from "../repositories/breedRepository.js";
+import type { Breed } from "../types.js";
 import { NotFoundError } from "../errors/errors.js";
 import { speciesExistsById } from "../repositories/speciesRepository.js";
 

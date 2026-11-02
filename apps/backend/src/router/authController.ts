@@ -15,9 +15,9 @@ import { generateToken } from "../utils/jwt.js";
 import { createShelter } from "../repositories/shelterRepository.js";
 import {
   authenticationHandler,
-  type AuthRequest,
   getAuth,
 } from "../middleware/authenticationHandler.js";
+import type { AuthRequest } from "../types.js";
 import { login } from "../services/authService.js";
 
 export const router = express.Router({ mergeParams: true });
