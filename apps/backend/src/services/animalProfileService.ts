@@ -28,7 +28,7 @@ export async function createAnimalProfile(
   request: CreateAnimalProfileInput,
 ): Promise<AnimalProfile> {
   const { tagIds, ...animalFields } = request;
-  const {species, breed, tags} = await resolveAnimalRelations(animalFields.speciesId, tagIds, animalFields.breedId );
+  await resolveAnimalRelations(animalFields.speciesId, tagIds, animalFields.breedId );
 
   return await db.transaction(async (trx) => {
     const animal  = await insertAnimal(
@@ -36,21 +36,8 @@ export async function createAnimalProfile(
       animalFields,
       trx,
     );
-    await insertAnimalTags(animal.id, tags.map((tag) => tag.id), trx);
-    return {
-      id: animal.id,
-      animalShelterId: animal.animalShelterId,
-      name: animal.name,
-      species,
-      breed,
-      birthYear: animal.birthYear,
-      gender: animal.gender,
-      requiredExperience: animal.requiredExperience,
-      description: animal.description,
-      createdAt: animal.createdAt,
-      updatedAt: animal.updatedAt,
-      tags,
-    };
+    await insertAnimalTags(animal.id, tagIds, trx);
+    return await loadProfile(animal.id, shelterId, trx);
   });
 }
 
