@@ -1,7 +1,5 @@
-import {
-  findAllSpecies,
-  type Species,
-} from "../repositories/speciesRepository.js";
+import { findAllSpecies } from "../repositories/speciesRepository.js";
+import type { Species } from "../types.js";
 
 export async function getAllSpecies(): Promise<Species[]> {
   const species = await findAllSpecies();

@@ -1,39 +1,21 @@
-import type { z } from "zod";
-import type {
-  createAnimalProfileSchema,
-  updateAnimalProfileSchema,
-} from "../validation/schemas.js";
-import { db, type DbOrTrx } from "../db/db.js";
+import { db } from "../db/db.js";
 import { animals, animalsTags } from "../db/schema.js";
 import { mapDatabaseError } from "../errors/map-database-error.js";
 import { DatabaseError } from "../errors/errors.js";
-import { and, eq, type InferSelectModel } from "drizzle-orm";
-import type { Breed } from "./breedRepository.js";
-import type { Species } from "./speciesRepository.js";
-import type { Tag } from "./tagRepository.js";
-
-export type AnimalProfileRelations = {
-  species: Species;
-  breed: Omit<Breed, "speciesId"> | null;
-  tags: Tag[];
-};
-
-export type AnimalProfile = Omit<
-  InferSelectModel<typeof animals>,
-  "breedId" | "speciesId"
-> &
-  AnimalProfileRelations;
-
-export type AnimalUpdateFields = Omit<
-  z.infer<typeof updateAnimalProfileSchema>,
-  "tagIds"
->;
+import { and, eq } from "drizzle-orm";
+import type {
+  Animal,
+  AnimalCreateFields,
+  AnimalProfile,
+  AnimalUpdateFields,
+  DbOrTrx,
+} from "../types.js";
 
 export async function insertAnimal(
   shelterId: string,
-  data: Omit<z.infer<typeof createAnimalProfileSchema>, "tagIds">,
+  data: AnimalCreateFields,
   exec: DbOrTrx = db,
-): Promise<InferSelectModel<typeof animals>> {
+): Promise<Animal> {
   try {
     const [animal] = await exec
       .insert(animals)

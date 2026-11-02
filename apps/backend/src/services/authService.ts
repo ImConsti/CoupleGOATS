@@ -1,24 +1,9 @@
-import { type loginSchema, roles } from "../validation/schemas.js";
-import { z } from "zod";
 import { getUserByEmail } from "../repositories/userRepository.js";
 import { AuthenticationError, InternalServerError } from "../errors/errors.js";
 import { verifyPassword } from "../utils/bcrypt.js";
 import { getShelterByEmail } from "../repositories/shelterRepository.js";
 import { generateToken } from "../utils/jwt.js";
-
-type AuthResult = {
-  id: string;
-  role: (typeof roles)[number];
-  token: string;
-};
-
-type Account = {
-  id: string;
-  passwordHash: string;
-  role: (typeof roles)[number];
-};
-
-type LoginInput = z.infer<typeof loginSchema>
+import type { Account, AuthResult, LoginInput } from "../types.js";
 
 export async function login(
   request: LoginInput,

@@ -4,18 +4,13 @@ import {
   UnprocessableEntityError,
   ConflictError,
 } from "./errors.js";
-
-type dbError = {
-  cause: {
-    rawCode: number;
-  };
-};
+import type { DbError } from "../types.js";
 
 export function mapDatabaseError(error: unknown): AppError {
   if (error instanceof AppError) {
     return error;
   } else {
-    const dbError: dbError = error as dbError;
+    const dbError = error as DbError;
     switch (dbError?.cause?.rawCode) {
       case 2067:
         return new ConflictError("resource already exists");

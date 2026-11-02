@@ -1,13 +1,9 @@
-import type { NextFunction, Request, Response } from "express";
+import type { NextFunction, Response } from "express";
 import { AuthenticationError, InternalServerError } from "../errors/errors.js";
-import { type JwtPayloadOutput, verifyToken } from "../utils/jwt.js";
+import { verifyToken } from "../utils/jwt.js";
 import { userExistsById } from "../repositories/userRepository.js";
 import { shelterExistsById } from "../repositories/shelterRepository.js";
-import type { roles } from "../validation/schemas.js";
-
-export type AuthRequest = Request & {
-  auth?: JwtPayloadOutput;
-};
+import type { AuthRequest, JwtPayloadOutput, Role } from "../types.js";
 
 export async function authenticationHandler(
   req: AuthRequest,
@@ -35,7 +31,7 @@ export async function authenticationHandler(
 
 async function accountExists(
   id: string,
-  role: (typeof roles)[number],
+  role: Role,
 ): Promise<boolean> {
   switch (role) {
     case "admin":

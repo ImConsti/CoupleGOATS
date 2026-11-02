@@ -1,20 +1,10 @@
 import jwt, { type SignOptions } from "jsonwebtoken";
-import { roles } from "../validation/schemas.js";
+import type { JwtPayloadInput, JwtPayloadOutput, Role } from "../types.js";
 import { AuthenticationError, InternalServerError } from "../errors/errors.js";
-
-type JwtPayloadInput = {
-  sub: string;
-  role: typeof roles[number];
-}
-
-export type JwtPayloadOutput = JwtPayloadInput & {
-  exp: number;
-  iat: number;
-}
 
 export function generateToken(
   userOrShelterId: string,
-  role: (typeof roles)[number],
+  role: Role,
 ): string {
   const payload: JwtPayloadInput = {
     sub: userOrShelterId,
