@@ -16,7 +16,7 @@ export default function PasswordInput({...props}: PasswordInputProps){
     return(
         <div className="password-wrapper">
             <input type={isEyeVisible ? "password" : "text"} className="textfield" {...props}/>
-            <button className="password-toggle" onClick={switchEye}>
+            <button type="button" className="password-toggle" onClick={switchEye}>
                 <img src={isEyeVisible ? "/showEye.svg" : "/hideEye.svg"} alt="showPW" />
             </button>
         </div>
