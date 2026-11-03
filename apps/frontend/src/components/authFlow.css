@@ -1,5 +1,42 @@
 @import "tailwindcss";
 
+/* ---------- Basis-Styles (vorher in loginPage.css) ---------- */
+.selectRoleButton {
+  @apply bg-white border border-gray-200 rounded-2xl p-4 flex items-center gap-4 w-full text-left shadow-sm transition-all hover:cursor-pointer hover:scale-101;
+}
+
+.iconDiv{
+  @apply bg-emerald-50 text-emerald-900 p-3 rounded-xl flex items-center justify-center;
+}
+
+.coupleGoatsFont{
+  font-family: var(--oswald-font);
+}
+
+.orangeFont{
+  @apply text-orange-600;
+}
+
+.greenFont{
+  @apply text-emerald-900
+}
+
+.loginHeader{
+  @apply font-bold text-3xl;
+}
+
+.descriptionText{
+  @apply block text-gray-500 text-sm;
+}
+
+.textfield{
+  @apply bg-white border border-gray-200 rounded-xl placeholder-gray-400 w-full h-10 px-3;
+}
+
+.submitButton{
+  @apply w-full h-10 bg-emerald-900 text-white rounded-xl hover:cursor-pointer;
+}
+
 /* ---------- Zurück-Button ---------- */
 .backButton{
   @apply text-sm text-gray-500 text-left w-fit hover:cursor-pointer hover:text-emerald-900;

@@ -1,16 +1,16 @@
 "use client";
 
 import {useState} from "react";
-import {useRouter} from "next/navigation";
 import PasswordInput from "@/components/passwordInput";
 import EmailInput from "@/components/emailInput";
+import {useAuth} from "@/components/authProvider";
 import type {AuthRole} from "@/components/authFlow";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
 
 export default function RegisterForm({role}: {role: AuthRole}) {
 
-    const router = useRouter();
+    const {signIn} = useAuth();
 
     const [errorMessage, setErrorMessage] = useState("");
     const [isLoading, setIsLoading] = useState(false);
@@ -112,8 +112,8 @@ export default function RegisterForm({role}: {role: AuthRole}) {
 
             const data = await response.json();
 
-            localStorage.setItem("token", data.token);
-            router.push(role === "shelter" ? "/shelter/overview" : "/user/discover");
+            // Token speichern + Anmeldestatus laden, die Weiterleitung übernimmt AuthFlow
+            await signIn(data.token);
         } catch {
             setErrorMessage("Der Server ist nicht erreichbar. Bitte versuche es später erneut.");
         } finally {

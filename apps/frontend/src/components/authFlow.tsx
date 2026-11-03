@@ -1,11 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import {useEffect, useState} from "react";
+import {useRouter} from "next/navigation";
 import "./authFlow.css";
-import "../app/auth/login/loginPage.css";
 import "../app/globals.css";
 import LoginForm from "@/components/loginForm";
 import RegisterForm from "@/components/registerForm";
+import {useAuth} from "@/components/authProvider";
+import {homePathForRole} from "@/lib/auth";
 
 export type AuthRole = "user" | "shelter";
 type AuthMode = "login" | "register";
@@ -14,7 +16,17 @@ type AuthFlowProps = {
     initialMode: AuthMode;
 };
 
-export default function AuthFlow({ initialMode }: AuthFlowProps) {
+export default function AuthFlow({initialMode}: AuthFlowProps) {
+
+    const router = useRouter();
+    const {status, user} = useAuth();
+
+    // Wer schon angemeldet ist (oder sich gerade angemeldet hat), wird zur eigenen Startseite geschickt
+    useEffect(() => {
+        if (status === "authenticated" && user) {
+            router.replace(homePathForRole(user.role));
+        }
+    }, [status, user, router]);
 
     const [role, setRole] = useState<AuthRole | null>(null);
     const [mode, setMode] = useState<AuthMode>(initialMode);
@@ -47,7 +59,7 @@ export default function AuthFlow({ initialMode }: AuthFlowProps) {
                     <>
                         <button className="selectRoleButton" onClick={() => setRole("user")}>
                             <div className="iconDiv">
-                                <img src="/heart.svg" alt="Heart Icon" className="w-6 h-6" />
+                                <img src="/heart.svg" alt="Heart Icon" className="w-6 h-6"/>
                             </div>
                             <div>
                                 <span className="block font-bold text-gray-900 text-lg">Ich bin Adoptierender</span>
@@ -57,7 +69,7 @@ export default function AuthFlow({ initialMode }: AuthFlowProps) {
 
                         <button className="selectRoleButton" onClick={() => setRole("shelter")}>
                             <div className="iconDiv">
-                                <img src="/house.svg" alt="House Icon" className="w-6 h-6" />
+                                <img src="/house.svg" alt="House Icon" className="w-6 h-6"/>
                             </div>
                             <div>
                                 <span className="block font-bold text-gray-900 text-lg">Ich repräsentiere ein Tierheim</span>
