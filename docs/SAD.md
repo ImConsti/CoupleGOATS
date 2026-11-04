@@ -134,11 +134,36 @@ Die Architektur von CoupleGOATS wird in fünf Sichten beschrieben, die den Sicht
 
 ## 3 Architektonische Ziele und Einschränkungen
 
+### 3.2.1 QS-02 – Benutzbarkeit und Erlernbarkeit der Hauptfunktion
+
+**Autor:** brdly06  
+**Verfeinert:** NFR-U-01  
+**Qualitätsattribut:** Benutzbarkeit
+
+| Bestandteil | Beschreibung |
+|---|---|
+| **Quelle** | Ein neuer Adoptierender ohne jegliche Vorerfahrung mit der Anwendung CoupleGOATS. |
+| **Auslöser** | Der Nutzer startet die Anwendung zum ersten Mal und versucht, die Hauptaufgabe (Tiere entdecken und bewerten) nach einer kurzen App-Beschreibung durchzuführen. |
+| **Artefakt** | Frontend-Benutzeroberfläche, insbesondere die Entdeckungsseite und das interaktive Benutzeroberflächen-Design. |
+| **Umgebung** | Normalbetrieb der Webanwendung in einem aktuellen Webbrowser auf Desktop- oder Mobilgeräten. |
+| **Reaktion** | Der Nutzer versteht die Kernfunktionalität intuitiv und schließt die Aufgabe erfolgreich und ohne fremde Hilfe ab. |
+| **Reaktionsmaß** | In mindestens 9 von 10 Versuchen (90 %) wird die Hauptaufgabe innerhalb von 60 Sekunden erfolgreich abgeschlossen. |
+
+## Geschäftswert
+
+**H (Hoch):** Eine intuitive Bedienbarkeit senkt die Abbruchrate von Neuanwendern drastisch und sorgt dafür, dass potenzielle Adoptierende schnell und unkompliziert mit Tierheimen in Kontakt treten können.
+
+## Technisches Risiko
+
+**M (Mittel):** Die Herausforderung besteht darin, komplexe Filter- und Bewertungsmechanismen so intuitiv und rückmeldungsstark zu gestalten, dass auch technisch weniger versierte Nutzer sofort ohne Handbuch zurechtkommen.
+
+## Architektur & Benutzeroberflächen-Ablauf
+
+<img width="1088" height="634" alt="image" src="https://github.com/user-attachments/assets/7d534463-cc97-4385-bffd-4fdd68bf042f" />
+
 <!-- Lecture 7. The requirements and constraints that shape your architecture: quality goals
      such as availability or security, and constraints such as your stack (SRS 3.6), your team
      size, or your schedule. Leave this section as it is until then. -->
-
-*Follows with Lecture 7.*
 
 ## 4 Use-Case Sicht
 
