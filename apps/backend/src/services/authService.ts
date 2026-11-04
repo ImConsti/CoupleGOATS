@@ -1,9 +1,43 @@
-import { getUserByEmail } from "../repositories/userRepository.js";
+import { createUser, getUserByEmail } from "../repositories/userRepository.js";
 import { AuthenticationError, InternalServerError } from "../errors/errors.js";
-import { verifyPassword } from "../utils/bcrypt.js";
-import { getShelterByEmail } from "../repositories/shelterRepository.js";
+import { hashPassword, verifyPassword } from "../utils/bcrypt.js";
+import { createShelter, getShelterByEmail } from "../repositories/shelterRepository.js";
 import { generateToken } from "../utils/jwt.js";
-import type { Account, AuthResult, LoginInput } from "../types.js";
+import type {
+  Account,
+  AuthResult,
+  LoginInput,
+  RegisterShelterInput,
+  RegisterUserInput,
+} from "../types.js";
+
+export async function registerUser(
+  { password, ...request }: RegisterUserInput,
+): Promise<AuthResult> {
+  const user = await createUser({
+    ...request,
+    passwordHash: await hashPassword(password),
+  });
+  return {
+    id: user.id,
+    role: "user",
+    token: generateToken(user.id, "user"),
+  };
+}
+
+export async function registerShelter(
+  { password, ...request }: RegisterShelterInput,
+): Promise<AuthResult> {
+  const shelter = await createShelter({
+    ...request,
+    passwordHash: await hashPassword(password),
+  });
+  return {
+    id: shelter.id,
+    role: "shelter",
+    token: generateToken(shelter.id, "shelter"),
+  };
+}
 
 export async function login(
   request: LoginInput,

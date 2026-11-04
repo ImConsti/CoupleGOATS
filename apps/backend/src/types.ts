@@ -4,8 +4,10 @@ import type { z } from "zod";
 import type { db } from "./db/db.js";
 import type { animals, breeds, species, tags } from "./db/schema.js";
 import type {
+  createAnimalShelterSchema,
   createAnimalProfileSchema,
   loginSchema,
+  registerUserSchema,
   roles,
   tagCategories,
   updateAnimalProfileSchema,
@@ -40,6 +42,10 @@ export type AuthRequest = Request & {
 };
 
 export type LoginInput = z.infer<typeof loginSchema>;
+
+export type RegisterUserInput = z.infer<typeof registerUserSchema>;
+
+export type RegisterShelterInput = z.infer<typeof createAnimalShelterSchema>;
 
 export type Account = {
   id: string;

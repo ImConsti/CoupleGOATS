@@ -128,7 +128,7 @@ export async function updateAnimal(
   try {
     const updated = await exec
       .update(animals)
-      .set({ ...data, updatedAt: new Date().toISOString() })
+      .set({ ...data})
       .where(
         and(eq(animals.id, animalId), eq(animals.animalShelterId, shelterId)),
       )
