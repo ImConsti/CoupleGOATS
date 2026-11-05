@@ -134,6 +134,21 @@ Die Architektur von CoupleGOATS wird in fünf Sichten beschrieben, die den Sicht
 
 ## 3 Architektonische Ziele und Einschränkungen
 
+### 3.1 Qualitätsszenarien
+
+#### QS-03 Vollständigkeit der API-Dokumentation
+
+| QS-03 Vollständigkeit der API-Dokumentation | *Author: Constantin* · Refines [NFR-S-01](SRS.md#35-supportability) |
+| ------------------------------------------ | --------------------------------------------------------------- |
+| Source | Ein Mitglied des Backend-Teams, das einen REST-Endpunkt ergänzt oder ändert. |
+| Stimulus | Das Teammitglied stellt die Änderung des Endpunkts zur Integration bereit. |
+| Artifact | Die Komponente „API & Auth“ des Backends aus dem [Komponentendiagramm](diagrams/components.png). |
+| Environment | Laufende Entwicklung; die Änderung wird vor der Integration mit der API-Spezifikation abgeglichen. |
+| Response | Das Team dokumentiert den Endpunkt mit Methode, Pfad und relevantem Anfrage- und Antwortverhalten in der API-Spezifikation und gleicht die Spezifikation mit den implementierten Routen ab. |
+| Response measure | Beim Abgleich sind **100 %** der implementierten REST-Endpunkte in `openapi.yaml` dokumentiert. |
+
+Business value **M**: Eine vollständige Schnittstellenbeschreibung erleichtert die Zusammenarbeit zwischen Frontend und Backend sowie spätere Änderungen. Technical risk **M**: Bei Änderungen an Routen und deren Verhalten kann die Dokumentation ohne konsequenten Abgleich veralten.
+
 ### 3.2.1 QS-02 – Benutzbarkeit und Erlernbarkeit der Hauptfunktion
 
 **Autor:** brdly06  
