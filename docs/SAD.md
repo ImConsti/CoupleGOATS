@@ -136,6 +136,20 @@ Die Architektur von CoupleGOATS wird in fünf Sichten beschrieben, die den Sicht
 
 ### 3.1 Qualitätsszenarien
 
+#### QS-02 Datenerhalt bei Serverneustart
+
+| QS-02 Datenerhalt bei Serverneustart | *Author: Mika* · Refines [NFR-R-01](SRS.md#33-reliability) |
+| --- | --- |
+| Source | Betreiberin oder Betreiber der Anwendung. |
+| Stimulus | Der Server wird neu gestartet, z. B. für ein Update, während Adoptierende und Tierheime bereits Matches und Meet-&-greet-Termine gespeichert haben. |
+| Artifact | Die Komponenten „Persistence“ und „SQLite Database“ aus dem [Komponentendiagramm](diagrams/components.png). |
+| Environment | Normalbetrieb im Produktivsystem; der Neustart erfolgt regulär oder durch einen Absturz des Backends, nicht durch einen Defekt des Datenträgers. |
+| Response | Alle vor dem Neustart bestätigten Daten sind nach dem Neustart unverändert abrufbar. |
+| Response measure | **100 %** der vor dem Neustart bestätigten Matches, Termine und Tierprofile sind nach dem Neustart vorhanden (**0** verlorene Datensätze). |
+
+Business value **H**: Verlorene Matches oder Termine zerstören das Vertrauen von Adoptierenden und Tierheimen, und das Meet & greet ist der Kern des Nutzens.
+Technical risk **L**: Die Daten liegen auf einem persistenten Volume und überleben den Neustart, das Risiko besteht nur bei einem Absturz mitten in einem Schreibvorgang.
+
 #### QS-03 Vollständigkeit der API-Dokumentation
 
 | QS-03 Vollständigkeit der API-Dokumentation | *Author: Constantin* · Refines [NFR-S-01](SRS.md#35-supportability) |
