@@ -163,30 +163,28 @@ Technical risk **L**: Die Daten liegen auf einem persistenten Volume und überle
 
 Business value **M**: Eine vollständige Schnittstellenbeschreibung erleichtert die Zusammenarbeit zwischen Frontend und Backend sowie spätere Änderungen. Technical risk **M**: Bei Änderungen an Routen und deren Verhalten kann die Dokumentation ohne konsequenten Abgleich veralten.
 
-### 3.2.1 QS-02 – Benutzbarkeit und Erlernbarkeit der Hauptfunktion
+### QS-01 – Suchergebnisse innerhalb von 10 Sekunden
 
-**Autor:** brdly06  
-**Verfeinert:** NFR-U-01  
-**Qualitätsattribut:** Benutzbarkeit
+**Author:** Aaron  
+**Refines:** NFR-P-01  
+**Qualitätsattribut:** Performance
 
 | Bestandteil | Beschreibung |
 |---|---|
-| **Quelle** | Ein neuer Adoptierender ohne jegliche Vorerfahrung mit der Anwendung CoupleGOATS. |
-| **Auslöser** | Der Nutzer startet die Anwendung zum ersten Mal und versucht, die Hauptaufgabe (Tiere entdecken und bewerten) nach einer kurzen App-Beschreibung durchzuführen. |
-| **Artefakt** | Frontend-Benutzeroberfläche, insbesondere die Entdeckungsseite und das interaktive Benutzeroberflächen-Design. |
-| **Umgebung** | Normalbetrieb der Webanwendung in einem aktuellen Webbrowser auf Desktop- oder Mobilgeräten. |
-| **Reaktion** | Der Nutzer versteht die Kernfunktionalität intuitiv und schließt die Aufgabe erfolgreich und ohne fremde Hilfe ab. |
-| **Reaktionsmaß** | In mindestens 9 von 10 Versuchen (90 %) wird die Hauptaufgabe innerhalb von 60 Sekunden erfolgreich abgeschlossen. |
+| **Source** | Ein Adoptierender, der nach passenden Tieren sucht. |
+| **Stimulus** | Der Adoptierende stellt über CoupleGOATS eine Suchanfrage. |
+| **Artifact** | Die Komponente **Application Services** aus dem Komponentendiagramm (Task 6), welche die Suchfunktion ausführt. |
+| **Environment** | Normalbetrieb der Anwendung mit bis zu 1.000 gespeicherten Datensätzen. |
+| **Response** | Die Anwendung zeigt dem Adoptierenden die zur Suchanfrage passenden Suchergebnisse an. |
+| **Response Measure** | Die Suchergebnisse werden in mindestens **95 % der Fälle innerhalb von 10 Sekunden** angezeigt. |
 
-## Geschäftswert
+## Business Value
 
-**H (Hoch):** Eine intuitive Bedienbarkeit senkt die Abbruchrate von Neuanwendern drastisch und sorgt dafür, dass potenzielle Adoptierende schnell und unkompliziert mit Tierheimen in Kontakt treten können.
+**H (Hoch):** Eine schnelle Suche ermöglicht Adoptierenden, passende Tiere ohne lange Wartezeiten zu finden. Dadurch wird die zentrale Vermittlungsfunktion von CoupleGOATS unterstützt.
 
-## Technisches Risiko
+## Technical Risk
 
-**M (Mittel):** Die Herausforderung besteht darin, komplexe Filter- und Bewertungsmechanismen so intuitiv und rückmeldungsstark zu gestalten, dass auch technisch weniger versierte Nutzer sofort ohne Handbuch zurechtkommen.
-
-## Architektur & Benutzeroberflächen-Ablauf
+**M (Mittel):** Die geforderte Antwortzeit muss auch bei bis zu 1.000 gespeicherten Datensätzen zuverlässig eingehalten werden. Dafür müssen Suchverarbeitung und Datenzugriff ausreichend performant sein.
 
 <img width="1088" height="634" alt="image" src="https://github.com/user-attachments/assets/7d534463-cc97-4385-bffd-4fdd68bf042f" />
 
