@@ -136,6 +136,20 @@ Die Architektur von CoupleGOATS wird in fünf Sichten beschrieben, die den Sicht
 
 ### 3.1 Qualitätsszenarien
 
+#### QS-01 Suchergebnisse innerhalb von 10 Sekunden
+
+| QS-01 Suchergebnisse innerhalb von 10 Sekunden | *Autor: brdly06* · Konkretisiert [NFR-P-01](SRS.md#34-performance) |
+| --- | --- |
+| Quelle | Ein Adoptierender, der nach passenden Tieren sucht. |
+| Auslöser | Der Adoptierende stellt über CoupleGOATS eine Suchanfrage. |
+| Betroffenes Element | Die Komponente „Application Services“ des Backends aus dem [Komponentendiagramm](diagrams/components.png). |
+| Umgebung | Normalbetrieb der Anwendung mit bis zu 1.000 gespeicherten Datensätzen. |
+| Antwort | Die Anwendung zeigt dem Adoptierenden die zur Suchanfrage passenden Suchergebnisse an. |
+| Antwortmaß | Die Suchergebnisse werden in mindestens **95 % der Fälle innerhalb von 10 Sekunden** angezeigt. |
+
+Geschäftswert **H**: Eine schnelle Suche ermöglicht Adoptierenden, passende Tiere ohne lange Wartezeiten zu finden. Dadurch wird die zentrale Vermittlungsfunktion von CoupleGOATS unterstützt.
+Technisches Risiko **M**: Die geforderte Antwortzeit muss auch bei bis zu 1.000 gespeicherten Datensätzen zuverlässig eingehalten werden. Dafür müssen Suchverarbeitung und Datenzugriff ausreichend performant sein.
+
 #### QS-02 Datenerhalt bei Serverneustart
 
 | QS-02 Datenerhalt bei Serverneustart | *Author: Mika* · Refines [NFR-R-01](SRS.md#33-reliability) |
@@ -162,31 +176,6 @@ Technical risk **L**: Die Daten liegen auf einem persistenten Volume und überle
 | Response measure | Beim Abgleich sind **100 %** der implementierten REST-Endpunkte in `openapi.yaml` dokumentiert. |
 
 Business value **M**: Eine vollständige Schnittstellenbeschreibung erleichtert die Zusammenarbeit zwischen Frontend und Backend sowie spätere Änderungen. Technical risk **M**: Bei Änderungen an Routen und deren Verhalten kann die Dokumentation ohne konsequenten Abgleich veralten.
-
-### QS-01 – Suchergebnisse innerhalb von 10 Sekunden
-
-**Author:** Aaron  
-**Refines:** NFR-P-01  
-**Qualitätsattribut:** Performance
-
-| Bestandteil | Beschreibung |
-|---|---|
-| **Source** | Ein Adoptierender, der nach passenden Tieren sucht. |
-| **Stimulus** | Der Adoptierende stellt über CoupleGOATS eine Suchanfrage. |
-| **Artifact** | Die Komponente **Application Services** aus dem Komponentendiagramm (Task 6), welche die Suchfunktion ausführt. |
-| **Environment** | Normalbetrieb der Anwendung mit bis zu 1.000 gespeicherten Datensätzen. |
-| **Response** | Die Anwendung zeigt dem Adoptierenden die zur Suchanfrage passenden Suchergebnisse an. |
-| **Response Measure** | Die Suchergebnisse werden in mindestens **95 % der Fälle innerhalb von 10 Sekunden** angezeigt. |
-
-## Business Value
-
-**H (Hoch):** Eine schnelle Suche ermöglicht Adoptierenden, passende Tiere ohne lange Wartezeiten zu finden. Dadurch wird die zentrale Vermittlungsfunktion von CoupleGOATS unterstützt.
-
-## Technical Risk
-
-**M (Mittel):** Die geforderte Antwortzeit muss auch bei bis zu 1.000 gespeicherten Datensätzen zuverlässig eingehalten werden. Dafür müssen Suchverarbeitung und Datenzugriff ausreichend performant sein.
-
-<img width="1088" height="634" alt="image" src="https://github.com/user-attachments/assets/7d534463-cc97-4385-bffd-4fdd68bf042f" />
 
 <!-- Lecture 7. The requirements and constraints that shape your architecture: quality goals
      such as availability or security, and constraints such as your stack (SRS 3.6), your team
@@ -229,8 +218,8 @@ Das Domain-Model ist in [domain_model.md](domain_model.md).
 
 Die Designklassen sind in Abschnitt 2.5 der jeweiligen Use-Case-Realisierung zu finden:
 - [Design Klassen UCR-01](use_case_realizations/UCR-01_swipe.md#25-design-classes) (Autor: Mika)
-- [Design Klassen UCR-02](use_case_realizations/UCR-02_animal_detail.md#25-design-classes) (Autor: Aaron)
-- [Design Klassen UCR-03](use_case_realizations/UCR-03_manage_animal.md#25-design-classes) (Autor: Aaron)
+- [Design Klassen UCR-02](use_case_realizations/UCR-02_animal_detail.md#25-design-classes) (Autor: brdly06)
+- [Design Klassen UCR-03](use_case_realizations/UCR-03_manage_animal.md#25-design-classes) (Autor: brdly06)
 - [Design Klassen UCR-04](use_case_realizations/UCR-04_meet_and_greet.md#25-design-klassen) (Autor: Constantin)
 - [Design Klassen UCR-05](use_case_realizations/UCR-05_manage_profile.md#25-design-klassen) (Autor: Constantin)
 - [Design Klassen UCR-06](use_case_realizations/UCR-06_shelter_dashboard.md#25-design-classes) (Autor: Carolin)
