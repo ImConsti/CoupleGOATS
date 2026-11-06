@@ -135,6 +135,16 @@ Die Architektur von CoupleGOATS wird in fünf Sichten beschrieben, die den Sicht
 ## 3 Architektonische Ziele und Einschränkungen
 
 ### 3.1 Qualitätsszenarien
+*Author: Carolin*
+
+| ID    | Qualität   | Verfeinerung   | Szenario, kurz                | Wert | Risiko | Autor       |
+| ----- | --------- | ------------ | ------------------------------ | :---: | :--: | ------------ |
+| QS-01 | Performance | Antwortzeit | Adoptierender stellt Suchanfrage → Ergebnisse in 95 % der Fälle innerhlab von 10 s | H  | M  | brdly06 |
+| QS-02 | Zuverlässigkeit | Datenerhalt | Server wird neu gestartet → 100 % der Matches, Termine und Tierprofile sind vorhanden | H   | L  | Mika |
+| QS-03 | Wartbarkeit | API-Dokumentation | Teammitglied ergänzt oder ändert Endpunkt → 100 % der Endpunkte sind in `openapi.yaml` dokumentiert | M   | M  | Constantin |
+
+QS-01 kommt zuerst, weil es unter den Szenarien mit hohem Wert das höchste technische Risiko hat: Die Antwortzeit von 10 s muss auch bei bis zu 1.000 Datensätzen eingehalten werden, wodurch es entscheidend ist, wie Suche und Datenzugriff umgesetzt werden. 
+QS-02 hat ebenfalls hohen Wert, ist aber durch das persistente Volume bereits gut abgesichert.
 
 #### QS-01 Suchergebnisse innerhalb von 10 Sekunden
 
@@ -176,6 +186,17 @@ Technical risk **L**: Die Daten liegen auf einem persistenten Volume und überle
 | Response measure | Beim Abgleich sind **100 %** der implementierten REST-Endpunkte in `openapi.yaml` dokumentiert. |
 
 Business value **M**: Eine vollständige Schnittstellenbeschreibung erleichtert die Zusammenarbeit zwischen Frontend und Backend sowie spätere Änderungen. Technical risk **M**: Bei Änderungen an Routen und deren Verhalten kann die Dokumentation ohne konsequenten Abgleich veralten.
+
+### 3.2 Einschränkungen
+
+*Author: Carolin*
+
+| ID   | Art           | Einschränkungen                               | Bedeutung für unsere Architektur |
+| ---- | -------------- | ---------------------------------------- | ---------------------------------- |
+| C-01 | Technisch      | Frontend mit Next.js (React), Backend mit Express, beides in TypeScript, SQLite als Datenbank.<br> Details in [SRS 3.6](SRS.md#36-design-constraints) | Das Frontend ist eine eigene Next.js-Anwendung und spricht das Backend über die REST-API an.<br> Da wir SQLite nutzen, betreiben wir das Backend bewusst mit nur einer Instanz. |
+| C-02 | Organisatorisch | Vier Teammitglieder, parallel weitere Vorlesungen, Zeit bis zum Ende des vierten Semesters                        | Wenige Komponenten, nur das was wir selbst warten können, Fokus auf die wichtigsten Use Cases.                    |
+| C-03 | Wirtschaftlich       | kein Budget, nur freie Open-Source-Bibliotheken ([SRS 3.8](SRS.md#38-purchased-components))                      | Wir nutzen nur kostenlose Open-Source-Bibliotheken und keine kostenpflichtigen Dienste. Dadurch läuft alles im eigenen Backend, E-Mail-Benachrichtigungen gibt es vorerst nicht.                    |
+| C-04 | Rechtlich        | Wir speichern personenbezogene Daten (Name, E-Mail-Adresse, Profilangaben, Termine), siehe [SRS 3.11](SRS.md#311-legal-copyright-and-other-notices)                         | Wir achten auf grundlegende Datenschutzprinzipien wie Datenminimierung und sichere Speicherung.<br> Personenbezogene Daten sind nur für berechtigte Konten sichtbar.                      |
 
 <!-- Lecture 7. The requirements and constraints that shape your architecture: quality goals
      such as availability or security, and constraints such as your stack (SRS 3.6), your team
