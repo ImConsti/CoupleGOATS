@@ -132,7 +132,7 @@ Die Architektur von CoupleGOATS wird in fünf Sichten beschrieben, die den Sicht
 ### 3.1 Qualitätsszenarien
 *Autor: Carolin*
 
-| ID    | Qualität   | Verfeinerung   | Szenario, kurz                | Wert | Risiko | Autor       |
+| ID    | Qualität   | Verfeinerung   | Szenario, kurz                | Geschäftswert | Risiko | Autor       |
 | ----- | --------- | ------------ | ------------------------------ | :---: | :--: | ------------ |
 | QS-01 | Performance | Antwortzeit | Adoptierender stellt Suchanfrage → Ergebnisse in 95 % der Fälle innerhlab von 10 s | H  | M  | brdly06 |
 | QS-02 | Zuverlässigkeit | Datenerhalt | Server wird neu gestartet → 100 % der Matches, Termine und Tierprofile sind vorhanden | H   | L  | Mika |
