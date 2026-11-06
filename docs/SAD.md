@@ -1,16 +1,17 @@
-# CoupleGOATS — Software Architektur Dokument
+# CoupleGOATS — Softwarearchitekturdokument
 
 <!--
-HOW TO USE THIS TEMPLATE
-- Copy this file into the docs/ folder of your repository, next to SRS.md.
-- Replace every [placeholder] in square brackets. Comments like this one are guidance: they
-  are invisible on GitHub, and you may delete them once a section is done.
-- Keep every heading and its number. Sections marked "Lecture 7" or later stay as they are
-  until that lecture. If a section does not apply, write "Not applicable" and one sentence why.
-- Every section you write names its author: in the "Author" line below its heading, or in
-  the Author column of a table.
-- Put every diagram into docs/diagrams/, the image together with its source file.
-- Structure after the RUP template "Software Architecture Document":
+HINWEISE ZUR VERWENDUNG
+- Diese Datei liegt im Ordner docs/ des Repositories, neben SRS.md.
+- Kommentare wie dieser sind Hinweise: Sie sind auf GitHub unsichtbar und dürfen gelöscht werden,
+  sobald ein Abschnitt fertig ist.
+- Jede Überschrift und ihre Nummer bleiben erhalten. Abschnitte, die auf eine spätere Vorlesung
+  verweisen, bleiben bis dahin unverändert. Trifft ein Abschnitt nicht zu, steht dort
+  „Nicht zutreffend“ und ein Satz zur Begründung.
+- Jeder Abschnitt nennt seine Autorin oder seinen Autor: in der Zeile „Autor“ unter der Überschrift
+  oder in der Spalte „Autor“ einer Tabelle.
+- Jedes Diagramm liegt in docs/diagrams/, das Bild zusammen mit seiner Quelldatei.
+- Struktur nach der RUP-Vorlage „Software Architecture Document“:
   https://cin.ufpe.br/~if682/RUP/webtmpl/templates/a_and_d/rup_sad.htm
 -->
 
@@ -18,30 +19,29 @@ HOW TO USE THIS TEMPLATE
 | ---- | ------- | ----------- |
 | CoupleGOATS | 0.1 | 30.10.2026 |
 
-The Git history of this file is the revision history.
+Die Git-Historie dieser Datei ist die Änderungshistorie.
 
 ## Inhaltsverzeichnis
 
-1. [Introduction](#1-introduction)
-2. [Architectural representation](#2-architectural-representation)
-3. [Architectural goals and constraints](#3-architectural-goals-and-constraints)
-4. [Use-Case Sicht](#4-use-case-sicht)
+1. [Einführung](#1-einführung)
+2. [Architektonische Darstellung](#2-architektonische-darstellung)
+3. [Architektonische Ziele und Einschränkungen](#3-architektonische-ziele-und-einschränkungen)
+4. [Anwendungsfallsicht](#4-anwendungsfallsicht)
 5. [Logische Sicht](#5-logische-sicht)
 6. [Prozesssicht](#6-prozesssicht)
-7. [Deployment view](#7-deployment-view)
-8. [Implementation view](#8-implementation-view)
-9. [Data view](#9-data-view)
-10. [Size and performance](#10-size-and-performance)
-11. [Quality](#11-quality)
+7. [Bereitstellungsansicht](#7-bereitstellungsansicht)
+8. [Implementierungsansicht](#8-implementierungsansicht)
+9. [Datenansicht](#9-datenansicht)
+10. [Größe und Leistung](#10-größe-und-leistung)
+11. [Qualität](#11-qualität)
 
 ## 1 Einführung
 
 ### 1.1 Zweck
 
-*Author: Mika*
+*Autor: Mika*
 
-<!-- One paragraph: what this document describes and who reads it — your team, the developer
-     who takes the project over, and the lecturer as investor. -->
+<!-- Ein Absatz: Was dieses Dokument beschreibt und wer es liest – das Team, der Entwickelnde, der das Projekt übernimmt, und der Dozent als Investor. -->
 
 Dieses Dokument beschreibt die Architektur der Webanwendung CoupleGOATS: aus welchen Teilen die Anwendung besteht, wie diese miteinander verbunden sind und wo sie laufen.
 
@@ -49,28 +49,26 @@ Es richtet sich an das Entwicklungsteam als gemeinsame Grundlage für Entwurfsen
 
 
 
-### 1.2 Scope
+### 1.2 Umfang
 
-*Author: Mika*
+*Autor: Mika*
 
-<!-- One or two sentences: which software this document covers, e.g., the whole application
-     with frontend, backend, and database. The functional scope is in SRS 1.2 — link it. -->
+<!-- Ein bis zwei Sätze: Welche Software dieses Dokument abdeckt, z. B. die gesamte Anwendung mit Frontend, Backend und Datenbank. Der funktionale Umfang steht in SRS 1.2 – verlinken. -->
 
 Dieses Dokument umfasst die gesamte Anwendung CoupleGOATS: das Frontend (Next.js), das Backend (Express) mit seiner REST-API und die SQLite-Datenbank, die gemeinsam im Monorepo unter `apps/frontend` und `apps/backend` liegen. Nicht Teil dieses Dokuments sind externe Softwaredienste, da die Anwendung derzeit keine nutzt (siehe [SRS 3.9.3](SRS.md#393-software-interfaces)). Der funktionale Umfang ist in [SRS 1.2](SRS.md#12-scope) beschrieben.
 
 
 ### 1.3 Begriffe, Abkürzungen und Kürzel
 
-*Author: Mika*
+*Autor: Mika*
 
-<!-- Terms of the domain are in the SRS and in your domain model. Add only the technical terms
-     a reader of this document needs. -->
+<!-- Begriffe der Fachdomäne stehen in der SRS und im Domänenmodell. Hier nur technische Begriffe ergänzen, die Leserinnen und Leser dieses Dokuments brauchen. -->
 
-| Term | Meaning |
+| Begriff | Bedeutung |
 | ---- | ------- |
-| SAD | Software Architecture Document |
-| SRS | Software Requirements Specification |
-| UCR | Use-case realization |
+| SAD | Softwarearchitekturdokument |
+| SRS | Softwareanforderungsspezifikation |
+| UCR | Anwendungsfallrealisierung |
 | UML | Unified Modeling Language, Notation für die Architekturdiagramme dieses Dokuments |
 | REST | Representational State Transfer, Architekturstil der HTTP-Schnittstelle zwischen Frontend und Backend |
 | JSON | JavaScript Object Notation, Datenformat, in dem Frontend und Backend Nutzdaten austauschen |
@@ -88,54 +86,51 @@ Dieses Dokument umfasst die gesamte Anwendung CoupleGOATS: das Frontend (Next.js
 | GitHub Actions | CI/CD-Dienst von GitHub, der bei jedem Push auf `main` die Docker-Images baut |
 | Monorepo | Ein Git-Repository, das mehrere Anwendungen enthält, hier Frontend und Backend |
 
-Begriffe der Fachdomäne stehen in [SRS 1.3](SRS.md#13-definitions-acronyms-and-abbreviations) und im [Domain model](domain_model.md).
+Begriffe der Fachdomäne stehen in [SRS 1.3](SRS.md#13-definitions-acronyms-and-abbreviations) und im [Domänenmodell](domain_model.md).
 
 
 
 ### 1.4 Referenzen
 
-*Author: Mika*
+*Autor: Mika*
 
-| Title | Link |
+| Titel | Link |
 | ----- | ---- |
 | SRS | [SRS.md](SRS.md) |
-| Domain model | [domain_model.md](domain_model.md) |
+| Domänenmodell | [domain_model.md](domain_model.md) |
 | Repository | [ImConsti/CoupleGOATS](https://github.com/ImConsti/CoupleGOATS) |
 | Board | [CoupleGoats Board](https://github.com/users/ImConsti/projects/1) |
 | Laufende Anwendung | [couplegoats.cstnlabs.de](https://couplegoats.cstnlabs.de/) |
-| Use-Case-Realisierungen | [use_case_realizations/](use_case_realizations/) |
+| Anwendungsfallrealisierungen | [use_case_realizations/](use_case_realizations/) |
 | API-Endpunkte | [api-endpoints.md](api-endpoints.md) |
 | OpenAPI-Spezifikation | [openapi.yaml](../apps/backend/openapi.yaml) |
 | RUP-Vorlage SAD | [rup_sad.htm](https://cin.ufpe.br/~if682/RUP/webtmpl/templates/a_and_d/rup_sad.htm) |
 
 ### 1.5 Übersicht
 
-Section 2 names the views this document uses. Sections 3 to 11 describe the architecture view
-by view, following the RUP template.
+Abschnitt 2 nennt die Sichten, die dieses Dokument verwendet. Die Abschnitte 3 bis 11 beschreiben die Architektur Sicht für Sicht, gemäß der RUP-Vorlage.
 
 ## 2 Architektonische Darstellung
 
-*Author: Mika*
+*Autor: Mika*
 
-<!-- Which views you use and which diagram shows each. The table is prefilled with the views of
-     Lecture 6 — adjust it if you add or drop a view. Later lectures add your architectural
-     style and your architecture decisions here. -->
+<!-- Welche Sichten verwendet werden und welches Diagramm jede Sicht zeigt. Die Tabelle enthält vorab die Sichten aus Vorlesung 6 – anpassen, wenn eine Sicht ergänzt oder entfernt wird. Spätere Vorlesungen ergänzen hier Architekturstil und Architekturentscheidungen. -->
 
-Die Architektur von CoupleGOATS wird in fünf Sichten beschrieben, die den Sichten der RUP-Vorlage entsprechen. Jede Sicht beantwortet eine eigene Frage und stützt sich auf die Diagramme, die das Team im Repository unter `docs/diagrams/` ablegt, jeweils als Bild zusammen mit seiner Quelldatei. Ein Paketdiagramm verwendet das Projekt nicht; die Aufteilung des Codes zeigt stattdessen das Komponentendiagramm. Die Process view wird durch eine Kurzbeschreibung abgedeckt. Die Sequenzdiagramme der Use-Case-Realisierungen ergänzen sie um den zeitlichen Ablauf einzelner Anwendungsfälle.
+Die Architektur von CoupleGOATS wird in fünf Sichten beschrieben, die den Sichten der RUP-Vorlage entsprechen. Jede Sicht beantwortet eine eigene Frage und stützt sich auf die Diagramme, die das Team im Repository unter `docs/diagrams/` ablegt, jeweils als Bild zusammen mit seiner Quelldatei. Ein Paketdiagramm verwendet das Projekt nicht; die Aufteilung des Codes zeigt stattdessen das Komponentendiagramm. Die Prozesssicht wird durch eine Kurzbeschreibung abgedeckt. Die Sequenzdiagramme der Anwendungsfallrealisierungen ergänzen sie um den zeitlichen Ablauf einzelner Anwendungsfälle.
 
-| View | Question it answers | Diagram | Section |
+| Sicht | Beantwortete Frage | Diagramm | Abschnitt |
 | ---- | ------------------- | ------- | ------- |
-| Use-case view | Was leistet das System, und für wen? | [Use-Case-Diagramm](diagrams/use-case-diagram.png) ([Quelle](diagrams/use-case-diagram.puml)), [Use-Case-Realisierungen UCR-01 bis UCR-06](use_case_realizations/) | 4 |
-| Logical view | Welche Klassen gibt es, und wie hängen sie zusammen? | [Domain model](diagrams/domain_model.png) ([Quelle](diagrams/domain_model.mmd)), Klassendiagramme der Realisierungen (`diagrams/UCR-01_classes.png` bis `diagrams/UCR-06_classes.png`) | 5 |
-| Process view | Was läuft gleichzeitig ab? | Kurzbeschreibung; Sequenzdiagramme der Realisierungen (`diagrams/UCR-01_sequence_design.png` bis `diagrams/UCR-06_sequence_design.png`) | 6 |
-| Deployment view | Was läuft wo, und wie ist es verbunden? | [Deployment-Diagramm](diagrams/deployment.png) ([Quelle](diagrams/deployment.puml)) | 7 |
-| Implementation view | Woraus besteht der Code? | [Komponentendiagramm](diagrams/components.png) ([Quelle](diagrams/components.puml)) | 8 |
+| Anwendungsfallsicht | Was leistet das System, und für wen? | [Anwendungsfalldiagramm](diagrams/use-case-diagram.png) ([Quelle](diagrams/use-case-diagram.puml)), [Anwendungsfallrealisierungen UCR-01 bis UCR-06](use_case_realizations/) | 4 |
+| Logische Sicht | Welche Klassen gibt es, und wie hängen sie zusammen? | [Domänenmodell](diagrams/domain_model.png) ([Quelle](diagrams/domain_model.mmd)), Klassendiagramme der Realisierungen (`diagrams/UCR-01_classes.png` bis `diagrams/UCR-06_classes.png`) | 5 |
+| Prozesssicht | Was läuft gleichzeitig ab? | Kurzbeschreibung; Sequenzdiagramme der Realisierungen (`diagrams/UCR-01_sequence_design.png` bis `diagrams/UCR-06_sequence_design.png`) | 6 |
+| Bereitstellungsansicht | Was läuft wo, und wie ist es verbunden? | [Bereitstellungsdiagramm](diagrams/deployment.png) ([Quelle](diagrams/deployment.puml)) | 7 |
+| Implementierungsansicht | Woraus besteht der Code? | [Komponentendiagramm](diagrams/components.png) ([Quelle](diagrams/components.puml)) | 8 |
 
 
 ## 3 Architektonische Ziele und Einschränkungen
 
 ### 3.1 Qualitätsszenarien
-*Author: Carolin*
+*Autor: Carolin*
 
 | ID    | Qualität   | Verfeinerung   | Szenario, kurz                | Wert | Risiko | Autor       |
 | ----- | --------- | ------------ | ------------------------------ | :---: | :--: | ------------ |
@@ -162,61 +157,59 @@ Technisches Risiko **M**: Die geforderte Antwortzeit muss auch bei bis zu 1.000 
 
 #### QS-02 Datenerhalt bei Serverneustart
 
-| QS-02 Datenerhalt bei Serverneustart | *Author: Mika* · Refines [NFR-R-01](SRS.md#33-reliability) |
+| QS-02 Datenerhalt bei Serverneustart | *Autor: Mika* · Konkretisiert [NFR-R-01](SRS.md#33-reliability) |
 | --- | --- |
-| Source | Betreiberin oder Betreiber der Anwendung. |
-| Stimulus | Der Server wird neu gestartet, z. B. für ein Update, während Adoptierende und Tierheime bereits Matches und Meet-&-greet-Termine gespeichert haben. |
-| Artifact | Die Komponenten „Persistence“ und „SQLite Database“ aus dem [Komponentendiagramm](diagrams/components.png). |
-| Environment | Normalbetrieb im Produktivsystem; der Neustart erfolgt regulär oder durch einen Absturz des Backends, nicht durch einen Defekt des Datenträgers. |
-| Response | Alle vor dem Neustart bestätigten Daten sind nach dem Neustart unverändert abrufbar. |
-| Response measure | **100 %** der vor dem Neustart bestätigten Matches, Termine und Tierprofile sind nach dem Neustart vorhanden (**0** verlorene Datensätze). |
+| Quelle | Betreiberin oder Betreiber der Anwendung. |
+| Auslöser | Der Server wird neu gestartet, z. B. für ein Update, während Adoptierende und Tierheime bereits Matches und Meet-&-greet-Termine gespeichert haben. |
+| Betroffenes Element | Die Komponenten „Persistence“ und „SQLite Database“ aus dem [Komponentendiagramm](diagrams/components.png). |
+| Umgebung | Normalbetrieb im Produktivsystem; der Neustart erfolgt regulär oder durch einen Absturz des Backends, nicht durch einen Defekt des Datenträgers. |
+| Antwort | Alle vor dem Neustart bestätigten Daten sind nach dem Neustart unverändert abrufbar. |
+| Antwortmaß | **100 %** der vor dem Neustart bestätigten Matches, Termine und Tierprofile sind nach dem Neustart vorhanden (**0** verlorene Datensätze). |
 
-Business value **H**: Verlorene Matches oder Termine zerstören das Vertrauen von Adoptierenden und Tierheimen, und das Meet & greet ist der Kern des Nutzens.
-Technical risk **L**: Die Daten liegen auf einem persistenten Volume und überleben den Neustart, das Risiko besteht nur bei einem Absturz mitten in einem Schreibvorgang.
+Geschäftswert **H**: Verlorene Matches oder Termine zerstören das Vertrauen von Adoptierenden und Tierheimen, und das Meet & greet ist der Kern des Nutzens.
+Technisches Risiko **L**: Die Daten liegen auf einem persistenten Volume und überleben den Neustart, das Risiko besteht nur bei einem Absturz mitten in einem Schreibvorgang.
 
 #### QS-03 Vollständigkeit der API-Dokumentation
 
-| QS-03 Vollständigkeit der API-Dokumentation | *Author: Constantin* · Refines [NFR-S-01](SRS.md#35-supportability) |
+| QS-03 Vollständigkeit der API-Dokumentation | *Autor: Constantin* · Konkretisiert [NFR-S-01](SRS.md#35-supportability) |
 | ------------------------------------------ | --------------------------------------------------------------- |
-| Source | Ein Mitglied des Backend-Teams, das einen REST-Endpunkt ergänzt oder ändert. |
-| Stimulus | Das Teammitglied stellt die Änderung des Endpunkts zur Integration bereit. |
-| Artifact | Die Komponente „API & Auth“ des Backends aus dem [Komponentendiagramm](diagrams/components.png). |
-| Environment | Laufende Entwicklung; die Änderung wird vor der Integration mit der API-Spezifikation abgeglichen. |
-| Response | Das Team dokumentiert den Endpunkt mit Methode, Pfad und relevantem Anfrage- und Antwortverhalten in der API-Spezifikation und gleicht die Spezifikation mit den implementierten Routen ab. |
-| Response measure | Beim Abgleich sind **100 %** der implementierten REST-Endpunkte in `openapi.yaml` dokumentiert. |
+| Quelle | Ein Mitglied des Backend-Teams, das einen REST-Endpunkt ergänzt oder ändert. |
+| Auslöser | Das Teammitglied stellt die Änderung des Endpunkts zur Integration bereit. |
+| Betroffenes Element | Die Komponente „API & Auth“ des Backends aus dem [Komponentendiagramm](diagrams/components.png). |
+| Umgebung | Laufende Entwicklung; die Änderung wird vor der Integration mit der API-Spezifikation abgeglichen. |
+| Antwort | Das Team dokumentiert den Endpunkt mit Methode, Pfad und relevantem Anfrage- und Antwortverhalten in der API-Spezifikation und gleicht die Spezifikation mit den implementierten Routen ab. |
+| Antwortmaß | Beim Abgleich sind **100 %** der implementierten REST-Endpunkte in `openapi.yaml` dokumentiert. |
 
-Business value **M**: Eine vollständige Schnittstellenbeschreibung erleichtert die Zusammenarbeit zwischen Frontend und Backend sowie spätere Änderungen. Technical risk **M**: Bei Änderungen an Routen und deren Verhalten kann die Dokumentation ohne konsequenten Abgleich veralten.
+Geschäftswert **M**: Eine vollständige Schnittstellenbeschreibung erleichtert die Zusammenarbeit zwischen Frontend und Backend sowie spätere Änderungen. Technisches Risiko **M**: Bei Änderungen an Routen und deren Verhalten kann die Dokumentation ohne konsequenten Abgleich veralten.
 
 ### 3.2 Einschränkungen
 
-*Author: Carolin*
+*Autor: Carolin*
 
 | ID   | Art           | Einschränkungen                               | Bedeutung für unsere Architektur |
 | ---- | -------------- | ---------------------------------------- | ---------------------------------- |
 | C-01 | Technisch      | Frontend mit Next.js (React), Backend mit Express, beides in TypeScript, SQLite als Datenbank.<br> Details in [SRS 3.6](SRS.md#36-design-constraints) | Das Frontend ist eine eigene Next.js-Anwendung und spricht das Backend über die REST-API an.<br> Da wir SQLite nutzen, betreiben wir das Backend bewusst mit nur einer Instanz. |
-| C-02 | Organisatorisch | Vier Teammitglieder, parallel weitere Vorlesungen, Zeit bis zum Ende des vierten Semesters                        | Wenige Komponenten, nur das was wir selbst warten können, Fokus auf die wichtigsten Use Cases.                    |
+| C-02 | Organisatorisch | Vier Teammitglieder, parallel weitere Vorlesungen, Zeit bis zum Ende des vierten Semesters                        | Wenige Komponenten, nur das was wir selbst warten können, Fokus auf die wichtigsten Anwendungsfälle.                    |
 | C-03 | Wirtschaftlich       | kein Budget, nur freie Open-Source-Bibliotheken ([SRS 3.8](SRS.md#38-purchased-components))                      | Wir nutzen nur kostenlose Open-Source-Bibliotheken und keine kostenpflichtigen Dienste. Dadurch läuft alles im eigenen Backend, E-Mail-Benachrichtigungen gibt es vorerst nicht.                    |
 | C-04 | Rechtlich        | Wir speichern personenbezogene Daten (Name, E-Mail-Adresse, Profilangaben, Termine), siehe [SRS 3.11](SRS.md#311-legal-copyright-and-other-notices)                         | Wir achten auf grundlegende Datenschutzprinzipien wie Datenminimierung und sichere Speicherung.<br> Personenbezogene Daten sind nur für berechtigte Konten sichtbar.                      |
 
-<!-- Lecture 7. The requirements and constraints that shape your architecture: quality goals
-     such as availability or security, and constraints such as your stack (SRS 3.6), your team
-     size, or your schedule. Leave this section as it is until then. -->
+<!-- Vorlesung 7. Die Anforderungen und Einschränkungen, die die Architektur prägen: Qualitätsziele wie Verfügbarkeit oder Sicherheit sowie Einschränkungen wie Technologiestack (SRS 3.6), Teamgröße oder Zeitplan. Bis dahin unverändert lassen. -->
 
-## 4 Use-Case Sicht
+## 4 Anwendungsfallsicht
 
-*Author: Carolin*
+*Autor: Carolin*
 
-Das Use-Case-Diagramm der gesamten Anwendung ist in [SRS 2.2](SRS.md#22-use-case-diagram).
+Das Anwendungsfalldiagramm der gesamten Anwendung ist in [SRS 2.2](SRS.md#22-use-case-diagram).
 
-Für die Architektur sind folgende Use Cases am wichtigsten:
+Für die Architektur sind folgende Anwendungsfälle am wichtigsten:
 - Swipe (UC-01): durchläuft Frontend, API und Datenbank und erzeugt über den Like den Match-Zustand, der das Meet & greet ermöglicht.
 - Tierprofile mit Tags verwalten (UC-03): erfordert die Rechteprüfung (nur das eigene Tierheim darf bearbeiten) und bildet eine n:m-Beziehung zwischen Tier und Tag ab.
 - Meet & greet (UC-04): betrifft Adoptierende und Tierheime mit jeweils eigener Ansichten und hat Zustände (angefragt, bestätigt, abgesagt).
 
-### 4.1 Use-Case Realisierungen
+### 4.1 Anwendungsfallrealisierungen
 
-| Use case | Realization | Author |
-| -------- | ----------- | ------ |
+| Anwendungsfall | Realisierung | Autor |
+| -------------- | ------------ | ----- |
 | [UC-01 Tiere swipen](use_cases/UC-01_swipe.md) | [UCR-01](use_case_realizations/UCR-01_swipe.md) | Mika |
 | [UC-02 Tierprofil ansehen](use_cases/UC-02_animal_detail.md) | [UCR-02](use_case_realizations/UCR-02_animal_detail.md) | Aaron |
 | [UC-03 Tierprofil verwalten](use_cases/UC-03_manage_animal.md) | [UCR-03](use_case_realizations/UCR-03_manage_animal.md) | Aaron |
@@ -228,26 +221,25 @@ Für die Architektur sind folgende Use Cases am wichtigsten:
 
 ### 5.1 Überblick
 
-*Author: Carolin*
+*Autor: Carolin*
 
-<!-- Link your domain model from Task 5. If you have a package diagram, put it here: the
-     packages of your code and their dependencies, without cycles. -->
+<!-- Domänenmodell aus Aufgabe 5 verlinken. Gibt es ein Paketdiagramm, steht es hier: die Pakete des Codes und ihre Abhängigkeiten, ohne Zyklen. -->
 
-Das Domain-Model ist in [domain_model.md](domain_model.md).
+Das Domänenmodell ist in [domain_model.md](domain_model.md).
 
-### 5.2 Architekturrelevante Design-Pakete
+### 5.2 Architekturrelevante Entwurfspakete
 
-Die Designklassen sind in Abschnitt 2.5 der jeweiligen Use-Case-Realisierung zu finden:
-- [Design Klassen UCR-01](use_case_realizations/UCR-01_swipe.md#25-design-classes) (Autor: Mika)
-- [Design Klassen UCR-02](use_case_realizations/UCR-02_animal_detail.md#25-design-classes) (Autor: brdly06)
-- [Design Klassen UCR-03](use_case_realizations/UCR-03_manage_animal.md#25-design-classes) (Autor: brdly06)
-- [Design Klassen UCR-04](use_case_realizations/UCR-04_meet_and_greet.md#25-design-klassen) (Autor: Constantin)
-- [Design Klassen UCR-05](use_case_realizations/UCR-05_manage_profile.md#25-design-klassen) (Autor: Constantin)
-- [Design Klassen UCR-06](use_case_realizations/UCR-06_shelter_dashboard.md#25-design-classes) (Autor: Carolin)
+Die Entwurfsklassen sind in Abschnitt 2.5 der jeweiligen Anwendungsfallrealisierung zu finden:
+- [Entwurfsklassen UCR-01](use_case_realizations/UCR-01_swipe.md#25-design-classes) (Autor: Mika)
+- [Entwurfsklassen UCR-02](use_case_realizations/UCR-02_animal_detail.md#25-design-classes) (Autor: brdly06)
+- [Entwurfsklassen UCR-03](use_case_realizations/UCR-03_manage_animal.md#25-design-classes) (Autor: brdly06)
+- [Entwurfsklassen UCR-04](use_case_realizations/UCR-04_meet_and_greet.md#25-design-klassen) (Autor: Constantin)
+- [Entwurfsklassen UCR-05](use_case_realizations/UCR-05_manage_profile.md#25-design-klassen) (Autor: Constantin)
+- [Entwurfsklassen UCR-06](use_case_realizations/UCR-06_shelter_dashboard.md#25-design-classes) (Autor: Carolin)
 
 ## 6 Prozesssicht
 
-*Author: Carolin*
+*Autor: Carolin*
 
 Zur Laufzeit gibt es das Frontend (Next.js) und das Backend (Node.js mit Express, Einbindung der SQLite-DB), das Frontend ruft das Backend über die REST-API auf. 
 Hintergrundprozesse oder zeitgesteuerte Jobs gibt es derzeit nicht.
@@ -255,10 +247,10 @@ Hintergrundprozesse oder zeitgesteuerte Jobs gibt es derzeit nicht.
 
 ## 7 Bereitstellungsansicht
 
-*Author: Constantin*
+*Autor: Constantin*
 
-Das Diagramm zeigt das aktuell produktiv eingesetzte und für die finale Demo vorgesehene
-Deployment unter `https://couplegoats.cstnlabs.de`. Ein Endgerät greift per HTTPS auf den
+Das Diagramm zeigt die aktuell produktiv eingesetzte und für die finale Demo vorgesehene
+Bereitstellung unter `https://couplegoats.cstnlabs.de`. Ein Endgerät greift per HTTPS auf den
 Traefik-Ingress des Kubernetes-Clusters zu. Traefik terminiert TLS und leitet Anfragen an `/`
 zum Frontend-Service sowie Anfragen an `/api` zum Backend-Service weiter; beim Backend wird
 das Präfix `/api` vor der Weiterleitung entfernt.
@@ -269,7 +261,7 @@ greift über Drizzle ORM und den libSQL-Client auf die SQLite-Datei
 `/data/couplegoats.db` zu. Diese liegt auf einem persistenten Kubernetes-Volume und bleibt
 damit bei einem Neustart oder Austausch des Backend-Pods erhalten. Da SQLite nur von einer
 Backend-Instanz verwendet werden soll, läuft das Backend mit einer Replik und der
-Deployment-Strategie `Recreate`.
+Bereitstellungsstrategie `Recreate`.
 
 Bei einem Push auf `main` baut GitHub Actions beide Docker-Images und legt sie in der GitHub
 Container Registry (GHCR) ab. Anschließend aktualisiert die Pipeline die Image-Tags im
@@ -278,10 +270,10 @@ GHCR, GitHub Actions und Argo CD gehören damit zum Auslieferungsweg, nicht zur 
 zwischen Browser, Frontend und Backend. Externe fachliche Softwaredienste werden gemäß
 [SRS 3.9.3](SRS.md#393-software-interfaces) nicht verwendet.
 
-![Deployment diagram](diagrams/deployment.png)
+![Bereitstellungsdiagramm](diagrams/deployment.png)
 
-| Node | What runs there | Connected to |
-| ---- | --------------- | ------------ |
+| Knoten | Was dort läuft | Verbunden mit |
+| ------ | -------------- | ------------- |
 | Endgerät | Browser mit ausgeliefertem Next.js-/React-Frontend | Traefik-Ingress: HTTPS 443 |
 | Kubernetes-Cluster | Traefik-Ingress mit TLS-Terminierung und Routing | Browser: HTTPS 443; Frontend- und Backend-Service: HTTP 80 |
 | Frontend-Pod | Docker-Container mit Node.js 22 und Next.js-Standalone-Server | Frontend-Service: HTTP 3000 |
@@ -294,9 +286,9 @@ zwischen Browser, Frontend und Backend. Externe fachliche Softwaredienste werden
 
 ### 8.1 Übersicht
 
-*Author: brdly06*
+*Autor: brdly06*
 
-Das Komponentendiagramm zeigt die Architektur der Webanwendung CoupleGOATS mit Frontend, Backend, Datenbank und den wesentlichen Backend-Komponenten. Es basiert auf den technischen Vorgaben aus SRS 3.6, den Software-Schnittstellen aus SRS 3.9.3 sowie den Designklassen aus Task 5.
+Das Komponentendiagramm zeigt die Architektur der Webanwendung CoupleGOATS mit Frontend, Backend, Datenbank und den wesentlichen Backend-Komponenten. Es basiert auf den technischen Vorgaben aus SRS 3.6, den Software-Schnittstellen aus SRS 3.9.3 sowie den Entwurfsklassen aus Aufgabe 5.
 
 Das Frontend basiert auf Next.js, React und TypeScript. Es kommuniziert über die REST-API unter `/api/v1` mit dem Backend. Die Kommunikation erfolgt über HTTPS; die Nutzdaten werden im JSON-Format übertragen. Datei-Uploads verwenden `multipart/form-data`.
 
@@ -306,12 +298,12 @@ Die Persistence-Komponente verwendet Drizzle ORM und den libSQL-Client, um auf d
 
 Laut SRS 3.9.3 sind derzeit keine externen Softwaredienste vorgesehen. Ein externer E-Mail-Dienst wird lediglich als mögliche spätere Erweiterung erwähnt und ist deshalb nicht als bestehende Komponente dargestellt.
 
-Die Komponenten und ihre Verantwortlichkeiten sind in der folgenden Tabelle zusammengefasst. Die zugeordneten Klassen stammen aus den Designklassendiagrammen von Task 5. Die Zuordnung beschreibt die vorgesehene Architektur und bestätigt nicht, dass diese Klassen bereits implementiert sind.
+Die Komponenten und ihre Verantwortlichkeiten sind in der folgenden Tabelle zusammengefasst. Die zugeordneten Klassen stammen aus den Entwurfsklassendiagrammen von Aufgabe 5. Die Zuordnung beschreibt die vorgesehene Architektur und bestätigt nicht, dass diese Klassen bereits implementiert sind.
 
-| Komponente | Verantwortung | Klassen (Task 5) |
+| Komponente | Verantwortung | Klassen (Aufgabe 5) |
 |---|---|---|
 | Frontend | Benutzeroberfläche für Discovery, Tierdetails, Profilverwaltung, Matches, Terminverwaltung und Tierheim-Dashboard | DiscoveryPage, ShelterDashboardPage |
-| API & Auth | REST-Endpunkte, Request-Validierung, Authentifizierung und Autorisierung | DiscoveryController, AnimalDetailController, AnimalProfileController, UserInterestsRouter, ShelterInterestsRouter, UsersRouter, ShelterDashboardController, authenticationHandler, roleHandler, zodValidation, errorHandler |
+| API & Auth | REST-Endpunkte, Anfragevalidierung, Authentifizierung und Autorisierung | DiscoveryController, AnimalDetailController, AnimalProfileController, UserInterestsRouter, ShelterInterestsRouter, UsersRouter, ShelterDashboardController, authenticationHandler, roleHandler, zodValidation, errorHandler |
 | Application Services | Fachliche Logik für Discovery, Tierprofile, Interessen, Termine, Nutzerprofile und Dashboard | DiscoveryService, AnimalDetailService, AnimalProfileService, InterestService, UserService, ShelterDashboardService |
 | Persistence | Datenzugriff und Speicherung über Repositories und Drizzle ORM | AnimalRepository, AnimalPictureRepository, AnimalShelterRepository, InterestRepository, UserRepository, UserFilterRepository |
 | Media Handling | Verarbeitung und Verwaltung hochgeladener Tier- und Profilbilder | PhotoStorageService |
@@ -322,27 +314,24 @@ Die REST-API ist die Schnittstelle zwischen Frontend und Backend. Die Datenbank 
 
 ### 8.2 Schichten
 
-<!-- Lectures 8 and 9. The layers of your application and the rules between them. Leave this
-     section as it is until then. -->
+<!-- Vorlesungen 8 und 9. Die Schichten der Anwendung und die Regeln zwischen ihnen. Bis dahin unverändert lassen. -->
 
-*Follows with Lectures 8 and 9.*
+*Folgt mit den Vorlesungen 8 und 9.*
 
 ## 9 Datenansicht
 
-<!-- Optional for now. Later: your database schema or ER model, derived from your domain model. -->
+<!-- Vorerst optional. Später: Datenbankschema oder ER-Modell, abgeleitet aus dem Domänenmodell. -->
 
-*Follows later.*
+*Folgt später.*
 
 ## 10 Größe und Leistung
 
-<!-- Lecture 7. The numbers that shape your architecture, e.g., expected users and data, and
-     your performance requirements from SRS 3.4. Leave this section as it is until then. -->
+<!-- Vorlesung 7. Die Zahlen, die die Architektur prägen, z. B. erwartete Nutzende und Daten sowie die Leistungsanforderungen aus SRS 3.4. Bis dahin unverändert lassen. -->
 
-*Follows with Lecture 7.*
+*Folgt mit Vorlesung 7.*
 
 ## 11 Qualität
 
-<!-- Lectures 7 to 9. How your architecture supports the qualities you need: availability,
-     security, maintainability, … Leave this section as it is until then. -->
+<!-- Vorlesungen 7 bis 9. Wie die Architektur die benötigten Qualitäten unterstützt: Verfügbarkeit, Sicherheit, Wartbarkeit, … Bis dahin unverändert lassen. -->
 
-*Follows with Lectures 7 to 9.*
+*Folgt mit den Vorlesungen 7 bis 9.*
