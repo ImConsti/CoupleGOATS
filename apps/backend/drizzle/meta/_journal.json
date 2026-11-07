@@ -50,6 +50,13 @@
       "when": 1793557698054,
       "tag": "0006_fair_logan",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "6",
+      "when": 1794054465945,
+      "tag": "0007_yellow_machine_man",
+      "breakpoints": true
     }
   ]
 }
