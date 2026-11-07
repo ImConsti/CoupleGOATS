@@ -11,6 +11,8 @@ import type {
   roles,
   tagCategories,
   updateAnimalProfileSchema,
+  animalSortFields,
+  sortOrders,
 } from "./validation/schemas.js";
 
 
@@ -98,3 +100,37 @@ export type AnimalProfileRelations = {
 
 export type AnimalProfile = Omit<Animal, "breedId" | "speciesId"> &
   AnimalProfileRelations;
+
+export type AnimalRow = InferSelectModel<typeof animals> & {
+  species: Species;
+  breed: Omit<Breed, "speciesId"> | null;
+  animalsTags: { tag: Tag }[];
+};
+
+export type AnimalSort = (typeof animalSortFields)[number];
+
+export type SortOrder = (typeof sortOrders)[number];
+
+export type AnimalFilters = {
+  speciesId?: string | undefined;
+  search?: string | undefined;
+}
+
+export type AnimalListParams = {
+  offset: number;
+  limit: number;
+  sort: AnimalSort;
+  order: SortOrder;
+  filters?: AnimalFilters;
+};
+
+export type PaginationMeta = {
+  page: number;
+  limit: number;
+  total: number;
+}
+
+export type Paginated<T> = {
+  items: T[];
+  meta: PaginationMeta;
+}

@@ -29,6 +29,10 @@ export const tagCategories = [
   "lifestyle",
 ] as const;
 
+export const animalSortFields = ["name", "createdAt"] as const;
+
+export const sortOrders = ["asc", "desc"] as const;
+
 export const emailSchema = z.string().trim().toLowerCase().pipe(z.email());
 
 export const passwordSchema = z.string().min(8).max(72);

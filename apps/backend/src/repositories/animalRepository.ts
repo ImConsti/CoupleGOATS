@@ -2,14 +2,36 @@ import { db } from "../db/db.js";
 import { animals, animalsTags } from "../db/schema.js";
 import { mapDatabaseError } from "../errors/map-database-error.js";
 import { DatabaseError } from "../errors/errors.js";
-import { and, eq } from "drizzle-orm";
+import { and, eq, asc, desc, sql, like, SQL, count } from "drizzle-orm";
 import type {
   Animal,
   AnimalCreateFields,
+  AnimalFilters,
+  AnimalListParams,
   AnimalProfile,
+  AnimalRow,
   AnimalUpdateFields,
   DbOrTrx,
 } from "../types.js";
+
+const animalProfileWith = {
+  species: { columns: { id: true, name: true } },
+  breed: { columns: { id: true, name: true } },
+  animalsTags: {
+    columns: {},
+    with: {
+      tag: {
+        columns: {
+          id: true,
+          name: true,
+          category: true,
+          affectsMatching: true,
+          isCritical: true,
+        },
+      },
+    },
+  },
+} as const;
 
 export async function insertAnimal(
   shelterId: string,
@@ -102,6 +124,49 @@ export async function findAnimalProfileById(
   }
 }
 
+export async function findAnimalProfilesByShelterId(
+  shelterId: string,
+  params: AnimalListParams,
+): Promise<AnimalProfile[]> {
+  try {
+    const { offset, limit, sort, order, filters = {} } = params;
+    const dir = order === "asc" ? asc : desc;
+    const rows = await db.query.animals.findMany({
+      where: buildAnimalWhere(shelterId, filters),
+      with: animalProfileWith,
+      orderBy: [
+        dir(
+          sort === "name"
+            ? sql`${animals.name} COLLATE NOCASE`
+            : animals.createdAt,
+        ),
+        asc(animals.id),
+      ],
+      limit,
+      offset,
+    });
+    return rows.map((animal) => toAnimalProfile(animal));
+  } catch (error: unknown) {
+    throw mapDatabaseError(error);
+  }
+}
+
+export async function countAnimalsByShelterId(
+  shelterId: string,
+  filters: AnimalFilters = {},
+): Promise<number> {
+  try {
+    const [result] = await db
+      .select({ total: count() })
+      .from(animals)
+      .where(buildAnimalWhere(shelterId, filters));
+
+    return result?.total ?? 0;
+  } catch (error: unknown) {
+    throw mapDatabaseError(error);
+  }
+}
+
 export async function animalExistsForShelter(
   animalId: string,
   shelterId: string,
@@ -148,4 +213,34 @@ export async function deleteAnimalTags(
   } catch (error: unknown) {
     throw mapDatabaseError(error);
   }
+}
+
+function toAnimalProfile(animal: AnimalRow): AnimalProfile {
+  return {
+    id: animal.id,
+    animalShelterId: animal.animalShelterId,
+    name: animal.name,
+    species: animal.species,
+    breed: animal.breed,
+    birthYear: animal.birthYear,
+    gender: animal.gender,
+    requiredExperience: animal.requiredExperience,
+    description: animal.description,
+    createdAt: animal.createdAt,
+    updatedAt: animal.updatedAt,
+    tags: animal.animalsTags
+      .map((animalTag) => animalTag.tag)
+      .sort((a, b) => a.name.localeCompare(b.name, "de")),
+  };
+}
+
+function buildAnimalWhere(
+  shelterId: string,
+  filters: AnimalFilters = {},
+): SQL | undefined {
+  return and(
+    eq(animals.animalShelterId, shelterId),
+    filters.speciesId ? eq(animals.speciesId, filters.speciesId) : undefined,
+    filters.search ? like(animals.name, `%${filters.search}%`) : undefined,
+  );
 }
