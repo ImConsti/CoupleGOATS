@@ -146,7 +146,7 @@ classDiagram
     AnimalShelter "1" *-- "0..*" Animal : betreut
     Animal "1" *-- "1..*" AnimalPicture : hat
     Animal "0..*" --> "1" Species : gehört zu
-    Animal "0..*" --> "1" Breed : ist
+    Animal "0..*" --> "0..1" Breed : ist
     Species "1" -- "0..*" Breed : umfasst
     Animal "0..*" -- "0..*" Tag : trägt
 

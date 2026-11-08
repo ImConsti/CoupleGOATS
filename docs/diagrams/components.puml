@@ -1,0 +1,66 @@
+
+flowchart LR
+    title["CoupleGOATS – UML Component Diagram<br/>Author: Aaron"]
+
+    User["Adoptierende /<br/>Tierheim-Mitarbeitende"]
+
+    Frontend["Frontend<br/><br/>Next.js 16<br/>React 19<br/>TypeScript"]
+
+    subgraph Backend["Backend – Node.js 22 / Express 5"]
+        direction LR
+
+        API["API & Auth<br/><br/>REST-Routen<br/>Authentifizierung<br/>Autorisierung<br/>Zod-Validierung"]
+
+        Services["Application Services<br/><br/>Discovery & Swipes<br/>Tierprofile<br/>Interessen & Termine<br/>Nutzerprofile<br/>Dashboard"]
+
+        Persistence["Persistence<br/><br/>Repositories<br/>Drizzle ORM<br/>Datenzugriff"]
+
+        Media["Media Handling<br/><br/>Foto-Upload<br/>Foto-Verwaltung<br/>PhotoStorageService"]
+    end
+
+    DB[("SQLite / libSQL<br/><br/>Persistente Daten<br/>inkl. Tierbilder")]
+
+    IREST(["REST API<br/>HTTPS / JSON<br/>/api/v1"])
+    IDB(["Repository-Zugriff<br/>Drizzle / libSQL"])
+    IMEDIA(["Foto-Verarbeitung"])
+
+    User -->|"Browser / HTTPS"| Frontend
+
+    Frontend -.->|"benötigt"| IREST
+    API ---|"bietet an"| IREST
+
+    API -->|"validierte Anfragen"| Services
+    Services -->|"Daten lesen/schreiben"| Persistence
+    Services -->|"Fotos verwalten"| Media
+
+    Persistence -.->|"benötigt"| IDB
+    DB ---|"bietet an"| IDB
+
+    Media -.->|"interne Funktion"| IMEDIA
+    Services -.->|"benötigt"| IMEDIA
+
+    FrontendNote["Browser-Frontend<br/>Keine direkte DB-Verbindung"]
+    DBNote["Zugriff ausschließlich<br/>über das Backend"]
+    MediaNote["Bildspeicherung gemäß SRS:<br/>SQLite-Datei<br/>Kein externer Storage-Dienst"]
+    ServicesNote["Fachliche Logik aus Task 5<br/>und UC-01 bis UC-06"]
+
+    Frontend -.- FrontendNote
+    DB -.- DBNote
+    Media -.- MediaNote
+    Services -.- ServicesNote
+
+    Legend["Legende<br/>Gestrichelt: benötigte Schnittstelle<br/>Durchgezogen: Datenfluss / Verbindung<br/>Externe Services: keine laut SRS 3.9.3"]
+
+    classDef component fill:#F5F7FA,stroke:#34495E,color:#1F2937
+    classDef database fill:#EAF2F8,stroke:#34495E,color:#1F2937
+    classDef interface fill:#FFFFFF,stroke:#2563EB,color:#1F2937
+    classDef note fill:#FFF9E6,stroke:#B7950B,color:#1F2937
+    classDef heading fill:#FFFFFF,stroke:#FFFFFF,color:#1F2937
+
+    class Frontend,API,Services,Persistence,Media component
+    class DB database
+    class IREST,IDB,IMEDIA interface
+    class FrontendNote,DBNote,MediaNote,ServicesNote,Legend note
+    class title heading
+
+    style Backend fill:#FFFFFF,stroke:#34495E,stroke-width:2px

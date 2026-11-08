@@ -3,11 +3,11 @@ import { breeds, animals, species, animalShelters, tags, animalsTags, interests,
 
 export const animalsRelations = relations(animals, ({one, many}) => ({
 	breed: one(breeds, {
-		fields: [animals.breed],
+		fields: [animals.breedId],
 		references: [breeds.id]
 	}),
 	species: one(species, {
-		fields: [animals.species],
+		fields: [animals.speciesId],
 		references: [species.id]
 	}),
 	animalShelter: one(animalShelters, {
@@ -22,7 +22,7 @@ export const animalsRelations = relations(animals, ({one, many}) => ({
 export const breedsRelations = relations(breeds, ({one, many}) => ({
 	animals: many(animals),
 	species: one(species, {
-		fields: [breeds.species],
+		fields: [breeds.speciesId],
 		references: [species.id]
 	}),
 	userFilters: many(userFilters),
@@ -71,11 +71,11 @@ export const usersRelations = relations(users, ({many}) => ({
 
 export const userFiltersRelations = relations(userFilters, ({one}) => ({
 	breed: one(breeds, {
-		fields: [userFilters.animalBreed],
+		fields: [userFilters.animalBreedId],
 		references: [breeds.id]
 	}),
 	species: one(species, {
-		fields: [userFilters.animalSpecies],
+		fields: [userFilters.animalSpeciesId],
 		references: [species.id]
 	}),
 	user: one(users, {

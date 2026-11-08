@@ -1,9 +1,6 @@
 import type { NextFunction, Response } from "express";
 import { ForbiddenError } from "../errors/errors.js";
-import type { roles } from "../validation/schemas.js";
-import type { AuthRequest } from "./authenticationHandler.js";
-
-type Role = (typeof roles)[number];
+import type { AuthRequest, Role } from "../types.js";
 
 export function checkRole(...allowed: Role[]) {
   return (req: AuthRequest, _res: Response, next: NextFunction): void => {

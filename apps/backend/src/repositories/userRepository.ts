@@ -24,6 +24,20 @@ export async function getUserByEmail(
   }
 }
 
+export async function userExistsById(id: string): Promise<boolean>{
+  try {
+    const user = await db.query.users.findFirst({
+      where: (user, {eq}) => eq(user.id, id),
+      columns: {
+        id: true,
+      }
+    })
+    return user !== undefined;
+  } catch (error: unknown) {
+    throw mapDatabaseError(error);
+  }
+}
+
 export async function createUser(
   user: typeof users.$inferInsert,
 ): Promise<{ id: string }> {

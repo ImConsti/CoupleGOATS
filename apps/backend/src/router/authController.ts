@@ -6,19 +6,15 @@ import express, {
 import {
   createAnimalShelterSchema,
   loginSchema,
-  registerUserSchema,
-  roles,
+  registerUserSchema
 } from "../validation/schemas.js";
 import { zodValidation } from "../validation/zod-validation.js";
-import { createUser, getUserByEmail } from "../repositories/userRepository.js";
-import { hashPassword, verifyPassword } from "../utils/bcrypt.js";
-import { generateToken } from "../utils/jwt.js";
-import { AuthenticationError, InternalServerError } from "../errors/errors.js";
-import { createShelter, getShelterByEmail } from "../repositories/shelterRepository.js";
 import {
   authenticationHandler,
-  type AuthRequest,
+  getAuth,
 } from "../middleware/authenticationHandler.js";
+import type { AuthRequest } from "../types.js";
+import { login, registerShelter, registerUser } from "../services/authService.js";
 
 export const router = express.Router({ mergeParams: true });
 
@@ -26,19 +22,12 @@ router.post(
   "/register/user",
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const { password, ...request } = zodValidation(
+      const request = zodValidation(
         registerUserSchema,
         req.body,
       );
-      const user = await createUser({
-        ...request,
-        passwordHash: await hashPassword(password),
-      });
-      res.status(201).json({
-        token: generateToken(user.id, "user"),
-        role: "user",
-        id: user.id,
-      });
+      const result = await registerUser(request);
+      res.status(201).json(result);
     } catch (error: unknown) {
       next(error);
     }
@@ -49,19 +38,12 @@ router.post(
   "/register/shelter",
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const { password, ...request } = zodValidation(
+      const request = zodValidation(
         createAnimalShelterSchema,
         req.body,
       );
-      const shelter = await createShelter({
-        ...request,
-        passwordHash: await hashPassword(password),
-      });
-      res.status(201).json({
-        token: generateToken(shelter.id, "shelter"),
-        role: "shelter",
-        id: shelter.id,
-      });
+      const result = await registerShelter(request);
+      res.status(201).json(result);
     } catch (error: unknown) {
       next(error);
     }
@@ -73,36 +55,8 @@ router.post(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const request = zodValidation(loginSchema, req.body);
-      let id: string;
-      let role: (typeof roles)[number];
-      switch (request.role) {
-        case "user": {
-          const user = await getUserByEmail(request.email);
-          if (!user) {
-            throw new AuthenticationError("Invalid credentials");
-          }
-          await verifyPassword(request.password, user.passwordHash);
-          id = user.id;
-          role = user.isAdmin ? "admin" : "user";
-          break;
-        }
-
-        case "shelter": {
-          const shelter = await getShelterByEmail(request.email);
-          if (!shelter) {
-            throw new AuthenticationError("Invalid credentials");
-          }
-          await verifyPassword(request.password, shelter.passwordHash);
-          id = shelter.id;
-          role = "shelter";
-          break;
-        }
-
-        default: {
-          throw new InternalServerError("An internal server error occurred");
-        }
-      }
-      res.status(200).json({ token: generateToken(id, role), role, id });
+      const result = await login(request);
+      res.status(200).json({ id: result.id, role: result.role, token: result.token });
     } catch (error: unknown) {
       next(error);
     }
@@ -118,12 +72,10 @@ router.get(
   authenticationHandler,
   (req: AuthRequest, res: Response, next: NextFunction) => {
     try {
-      if (!req.auth?.sub || !req.auth?.role){
-        throw new InternalServerError("An internal server error occurred");
-      }
+      const auth = getAuth(req);
       res.status(200).json({
-        id: req.auth.sub,
-        role: req.auth.role,
+        id: auth.sub,
+        role: auth.role,
       });
     } catch (error) {
       next(error);
