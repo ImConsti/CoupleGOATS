@@ -81,44 +81,12 @@ export async function findAnimalProfileById(
     const animal = await exec.query.animals.findFirst({
       where: (animal, { and, eq }) =>
         and(eq(animal.id, animalId), eq(animal.animalShelterId, shelterId)),
-      with: {
-        species: { columns: { id: true, name: true } },
-        breed: { columns: { id: true, name: true } },
-        animalsTags: {
-          columns: {},
-          with: {
-            tag: {
-              columns: {
-                id: true,
-                name: true,
-                category: true,
-                affectsMatching: true,
-                isCritical: true,
-              },
-            },
-          },
-        },
-      },
+      with: animalProfileWith,
     });
     if (!animal) {
       return undefined;
     }
-    return {
-      id: animal.id,
-      animalShelterId: animal.animalShelterId,
-      name: animal.name,
-      species: animal.species,
-      breed: animal.breed,
-      birthYear: animal.birthYear,
-      gender: animal.gender,
-      requiredExperience: animal.requiredExperience,
-      description: animal.description,
-      createdAt: animal.createdAt,
-      updatedAt: animal.updatedAt,
-      tags: animal.animalsTags
-        .map((animalTag) => animalTag.tag)
-        .sort((a, b) => a.name.localeCompare(b.name, "de")),
-    };
+    return toAnimalProfile(animal);
   } catch (error: unknown) {
     throw mapDatabaseError(error);
   }
