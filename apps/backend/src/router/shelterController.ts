@@ -4,9 +4,8 @@ import {
   getAuth,
 } from "../middleware/authenticationHandler.js";
 import type { AuthRequest } from "../types.js";
-import { checkRole } from "../middleware/roleHandler.js";
+import { checkExactRole, checkRole } from "../middleware/roleHandler.js";
 import { zodValidation } from "../validation/zod-validation.js";
-import { ForbiddenError } from "../errors/errors.js";
 import { z } from "zod";
 import {
   createAnimalProfileSchema,
@@ -27,14 +26,10 @@ export const router = express.Router({ mergeParams: true });
 router.get(
   "/me/animals",
   authenticationHandler,
-  checkRole("shelter"),
+  checkExactRole("shelter"),
   async (req: AuthRequest, res: Response, next: NextFunction) => {
     try {
       const auth = getAuth(req);
-      if (auth.role !== "shelter") {
-        throw new ForbiddenError("Forbidden");
-      }
-
       const { page, limit, sort, order, speciesId, search } = zodValidation(
         listShelterAnimalsQuerySchema,
         req.query,
