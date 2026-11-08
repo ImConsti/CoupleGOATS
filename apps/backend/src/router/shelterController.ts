@@ -27,9 +27,11 @@ export const router = express.Router({ mergeParams: true });
 router.get(
   "/me/animals",
   authenticationHandler,
+  checkRole("shelter"),
   async (req: AuthRequest, res: Response, next: NextFunction) => {
     try {
       const auth = getAuth(req);
+      // checkRole also allows admins; this endpoint is restricted to shelters.
       if (auth.role !== "shelter") {
         throw new ForbiddenError("Forbidden");
       }
