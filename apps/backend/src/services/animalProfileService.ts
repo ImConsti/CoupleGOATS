@@ -1,12 +1,11 @@
 import { findBreedById } from "../repositories/breedRepository.js";
-import {
-  NotFoundError,
-  UnprocessableEntityError,
-} from "../errors/errors.js";
+import { NotFoundError, UnprocessableEntityError } from "../errors/errors.js";
 import {
   animalExistsForShelter,
+  countAnimalsByShelterId,
   deleteAnimalTags,
   findAnimalProfileById,
+  findAnimalProfilesByShelterId,
   insertAnimal,
   insertAnimalTags,
   updateAnimal,
@@ -15,10 +14,14 @@ import { findTagsByIds } from "../repositories/tagRepository.js";
 import { db } from "../db/db.js";
 import { findSpeciesById } from "../repositories/speciesRepository.js";
 import type {
+  AnimalFilters,
   AnimalProfile,
   AnimalProfileRelations,
+  AnimalSort,
   CreateAnimalProfileInput,
   DbOrTrx,
+  Paginated,
+  SortOrder,
   Tag,
   UpdateAnimalProfileInput,
 } from "../types.js";
@@ -28,20 +31,24 @@ export async function createAnimalProfile(
   request: CreateAnimalProfileInput,
 ): Promise<AnimalProfile> {
   const { tagIds, ...animalFields } = request;
-  await resolveAnimalRelations(animalFields.speciesId, tagIds, animalFields.breedId );
+  await resolveAnimalRelations(
+    animalFields.speciesId,
+    tagIds,
+    animalFields.breedId,
+  );
 
   return await db.transaction(async (trx) => {
-    const animal  = await insertAnimal(
-      shelterId,
-      animalFields,
-      trx,
-    );
+    const animal = await insertAnimal(shelterId, animalFields, trx);
     await insertAnimalTags(animal.id, tagIds, trx);
     return await loadProfile(animal.id, shelterId, trx);
   });
 }
 
-async function resolveAnimalRelations(speciesId: string, tagIds: string[], breedId: string | null = null): Promise<AnimalProfileRelations> {
+async function resolveAnimalRelations(
+  speciesId: string,
+  tagIds: string[],
+  breedId: string | null = null,
+): Promise<AnimalProfileRelations> {
   let breed: AnimalProfileRelations["breed"] | null = null;
   const species = await findSpeciesById(speciesId);
   if (!species) {
@@ -63,7 +70,7 @@ async function resolveAnimalRelations(speciesId: string, tagIds: string[], breed
   if (tags.length !== tagIds.length) {
     throw new UnprocessableEntityError("One or more tags do not exist");
   }
-  return {species, breed, tags}
+  return { species, breed, tags };
 }
 
 export async function getAnimalProfile(
@@ -133,6 +140,33 @@ export async function replaceAnimalTags(
   });
 }
 
+export async function getAnimalProfilesByShelter(
+  shelterId: string,
+  page: number,
+  limit: number,
+  sort: AnimalSort,
+  order: SortOrder,
+  filters: AnimalFilters = {},
+): Promise<Paginated<AnimalProfile>> {
+  const offset = (page - 1) * limit;
+  const animalProfiles = await findAnimalProfilesByShelterId(shelterId, {
+    offset,
+    limit,
+    sort,
+    order,
+    filters,
+  });
+  const totalAnimalProfiles = await countAnimalsByShelterId(shelterId, filters);
+  return {
+    items: animalProfiles,
+    meta: {
+      page,
+      limit,
+      total: totalAnimalProfiles,
+    },
+  };
+}
+
 async function replaceTags(
   animalId: string,
   tagIds: string[],
@@ -153,4 +187,3 @@ async function loadProfile(
   }
   return animalProfile;
 }
-
