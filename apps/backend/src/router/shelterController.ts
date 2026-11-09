@@ -68,7 +68,7 @@ router.post(
 router.get(
   "/me/animals/:animalId",
   authenticationHandler,
-  checkRole("shelter"),
+  checkExactRole("shelter"),
   async (req: AuthRequest, res: Response, next: NextFunction) => {
     try {
       const auth = getAuth(req);
@@ -84,7 +84,7 @@ router.get(
 router.patch(
   "/me/animals/:animalId",
   authenticationHandler,
-  checkRole("shelter"),
+    checkExactRole("shelter"),
   async (req: AuthRequest, res: Response, next: NextFunction) => {
     try {
       const auth = getAuth(req);
@@ -105,7 +105,7 @@ router.patch(
 router.put(
   "/me/animals/:animalId/tags",
   authenticationHandler,
-  checkRole("shelter"),
+    checkExactRole("shelter"),
   async (req: AuthRequest, res: Response, next: NextFunction) => {
     try {
       const auth = getAuth(req);
