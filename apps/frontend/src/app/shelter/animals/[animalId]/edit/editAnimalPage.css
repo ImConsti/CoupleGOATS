@@ -1,0 +1,50 @@
+@import "tailwindcss";
+
+/* Seite: breiter als die Anmeldekarte, aber nicht von Rand zu Rand */
+.editAnimalPage{
+  @apply w-full max-w-5xl mx-auto px-4 py-8 sm:px-6 sm:py-10 flex flex-col gap-4;
+}
+
+.editAnimalBackLink{
+  @apply text-sm text-gray-500 w-fit hover:text-emerald-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-900 rounded;
+}
+
+.editAnimalIntro{
+  @apply flex flex-col gap-1 mb-2;
+}
+
+.editAnimalEyebrow{
+  @apply text-xs font-semibold uppercase tracking-widest text-gray-500;
+}
+
+.editAnimalHeader{
+  @apply font-bold text-3xl sm:text-4xl text-gray-900;
+}
+
+.editAnimalSubtitle{
+  @apply text-gray-500;
+}
+
+.editAnimalCard{
+  @apply bg-white border border-gray-200 rounded-3xl p-6 sm:p-8 shadow-sm;
+}
+
+.editAnimalCardNarrow{
+  @apply w-full max-w-xl mx-auto;
+}
+
+.editAnimalStatus{
+  @apply text-sm text-gray-500 py-6 text-center;
+}
+
+.editAnimalErrorTitle{
+  @apply text-lg font-bold text-gray-900 mb-1;
+}
+
+.editAnimalErrorActions{
+  @apply flex flex-wrap justify-center gap-3 mt-4;
+}
+
+.editAnimalButton{
+  @apply inline-flex items-center justify-center h-10 px-5 bg-emerald-900 text-white rounded-xl cursor-pointer hover:bg-emerald-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-900;
+}

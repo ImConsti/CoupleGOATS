@@ -1,0 +1,45 @@
+@import "tailwindcss";
+
+.animalsPage{
+  @apply w-full max-w-3xl mx-auto px-4 py-8 flex flex-col gap-4;
+}
+
+.animalsHeader{
+  @apply font-bold text-3xl text-gray-900;
+}
+
+.animalsStatus{
+  @apply text-sm text-gray-500 py-6 text-center;
+}
+
+.animalsList{
+  @apply flex flex-col gap-4;
+}
+
+.animalsCard{
+  @apply bg-white border border-gray-200 rounded-2xl p-4 shadow-sm flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between;
+}
+
+.animalsCardInfo{
+  @apply flex flex-col gap-1 min-w-0;
+}
+
+.animalsCardName{
+  @apply font-bold text-lg text-gray-900;
+}
+
+.animalsCardMeta{
+  @apply text-sm text-gray-500;
+}
+
+.animalsTags{
+  @apply flex flex-wrap gap-2 mt-1;
+}
+
+.animalsTag{
+  @apply rounded-full bg-emerald-50 text-emerald-900 px-3 py-0.5 text-xs;
+}
+
+.animalsEditButton{
+  @apply inline-flex items-center justify-center gap-2 h-10 px-5 shrink-0 bg-emerald-900 text-white rounded-xl cursor-pointer hover:bg-emerald-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-900;
+}
