@@ -1,0 +1,73 @@
+@import "tailwindcss";
+
+.animalForm {
+    @apply mt-6 rounded-3xl border border-[#e1e8e2] bg-white p-6;
+}
+
+.animalFormGrid {
+    @apply grid grid-cols-1 gap-4 sm:grid-cols-2;
+}
+
+.animalFormField {
+    @apply mt-4;
+}
+
+.animalFormGrid > .animalFormField {
+    @apply mt-0;
+}
+
+.animalFormLabel {
+    @apply mb-1.5 block text-[11px] font-semibold text-[#5f7a6a];
+}
+
+.animalFormInput {
+    @apply w-full rounded-xl border border-[#d9e2db] bg-white px-3.5 py-3 text-sm text-[#1f3a2e] outline-none transition placeholder:text-gray-400 focus:border-[#1f4a3a] focus:ring-2 focus:ring-[#1f4a3a]/15 disabled:cursor-not-allowed disabled:bg-[#f1f4f1] disabled:text-gray-400;
+}
+
+.animalFormInputError {
+    @apply border-red-500;
+}
+
+.animalFormError {
+    @apply mt-1.5 text-xs text-red-600;
+}
+
+.animalFormHint {
+    @apply mt-1.5 text-xs text-[#6b7f73];
+}
+
+.animalFormBanner {
+    @apply mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700;
+}
+
+.animalFormFieldset {
+    @apply mt-5 min-w-0 border-0 p-0;
+}
+
+.animalFormLegend {
+    @apply mb-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#5f7a6a];
+}
+
+.animalFormTags {
+    @apply flex flex-wrap gap-2;
+}
+
+.animalFormTag {
+    @apply cursor-pointer rounded-full border border-[#d9e2db] bg-white px-3 py-1.5 text-xs font-semibold text-[#1f3a2e] outline-none transition hover:bg-[#eaf1ea] focus-visible:ring-2 focus-visible:ring-[#1f4a3a]/40;
+}
+
+.animalFormTagActive {
+    @apply border-[#1f4a3a] bg-[#1f4a3a] text-white hover:bg-[#183b2e];
+}
+
+.animalFormActions {
+    @apply mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end;
+}
+
+.animalFormSecondary {
+    @apply cursor-pointer rounded-xl border border-[#d9e2db] bg-white px-5 py-3 text-sm font-semibold text-[#1f3a2e] transition hover:bg-[#eaf1ea];
+}
+
+.animalFormSubmit {
+    @apply cursor-pointer rounded-xl bg-[#1f4a3a] px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-[#1f4a3a]/25 transition hover:bg-[#183b2e] disabled:cursor-not-allowed disabled:opacity-60;
+}
