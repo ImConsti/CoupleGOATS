@@ -92,6 +92,21 @@ export const replaceAnimalTagsSchema = z.strictObject({
   tagIds: animalTagIdsSchema,
 });
 
+const positiveQueryInteger = z
+  .string()
+  .regex(/^[1-9]\d*$/)
+  .transform(Number)
+  .pipe(z.int().positive());
+
+export const listShelterAnimalsQuerySchema = z.strictObject({
+  page: positiveQueryInteger.default(1),
+  limit: positiveQueryInteger.pipe(z.number().max(100)).default(20),
+  sort: z.enum(animalSortFields).default("name"),
+  order: z.enum(sortOrders).default("asc"),
+  speciesId: z.uuid().optional(),
+  search: z.string().trim().min(1).max(100).optional(),
+});
+
 export const createTagSchema = z.object({
   name: z.string(),
   category: z.enum(tagCategories),

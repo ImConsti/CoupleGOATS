@@ -112,6 +112,69 @@ paths:
       security:
         - bearerAuth: []
   /shelters/me/animals:
+    get:
+      tags:
+        - Shelter Animals
+      summary: Eigene Tiere paginiert laden
+      description: Nur für angemeldete Tierheime. Sortierung, Suche und Filter werden vor der Pagination angewendet.
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+          description: Seitennummer, beginnend bei 1.
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+          description: Anzahl der Tierprofile pro Seite.
+        - in: query
+          name: sort
+          schema:
+            type: string
+            enum: [name, createdAt]
+            default: name
+          description: Feld für die Sortierung.
+        - in: query
+          name: order
+          schema:
+            type: string
+            enum: [asc, desc]
+            default: asc
+          description: Sortierrichtung.
+        - in: query
+          name: speciesId
+          schema:
+            type: string
+            format: uuid
+          description: Nur Tiere dieser Tierart laden.
+        - in: query
+          name: search
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 100
+          description: Nach einem Teil des Tiernamens suchen.
+      responses:
+        "200":
+          description: Seite mit eigenen Tierprofilen.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaginatedAnimalProfiles"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+      security:
+        - bearerAuth: []
     post:
       tags:
         - Shelter Animals
@@ -702,3 +765,25 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/Tag"
+    PaginatedAnimalProfiles:
+      type: object
+      required: [items, meta]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/AnimalProfile"
+        meta:
+          type: object
+          required: [page, limit, total]
+          properties:
+            page:
+              type: integer
+              minimum: 1
+            limit:
+              type: integer
+              minimum: 1
+              maximum: 100
+            total:
+              type: integer
+              minimum: 0

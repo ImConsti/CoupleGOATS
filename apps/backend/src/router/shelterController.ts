@@ -4,22 +4,50 @@ import {
   getAuth,
 } from "../middleware/authenticationHandler.js";
 import type { AuthRequest } from "../types.js";
-import { checkRole } from "../middleware/roleHandler.js";
+import { checkExactRole, checkRole } from "../middleware/roleHandler.js";
 import { zodValidation } from "../validation/zod-validation.js";
 import { z } from "zod";
 import {
   createAnimalProfileSchema,
+  listShelterAnimalsQuerySchema,
   replaceAnimalTagsSchema,
   updateAnimalProfileSchema,
 } from "../validation/schemas.js";
 import {
   createAnimalProfile,
   getAnimalProfile,
+  getAnimalProfilesByShelter,
   replaceAnimalTags,
   updateAnimalProfile,
 } from "../services/animalProfileService.js";
 
 export const router = express.Router({ mergeParams: true });
+
+router.get(
+  "/me/animals",
+  authenticationHandler,
+  checkExactRole("shelter"),
+  async (req: AuthRequest, res: Response, next: NextFunction) => {
+    try {
+      const auth = getAuth(req);
+      const { page, limit, sort, order, speciesId, search } = zodValidation(
+        listShelterAnimalsQuerySchema,
+        req.query,
+      );
+      const result = await getAnimalProfilesByShelter(
+        auth.sub,
+        page,
+        limit,
+        sort,
+        order,
+        { speciesId, search },
+      );
+      res.status(200).json(result);
+    } catch (error: unknown) {
+      next(error);
+    }
+  },
+);
 
 router.post(
   "/me/animals",
