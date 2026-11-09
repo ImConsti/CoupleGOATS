@@ -52,7 +52,7 @@ router.get(
 router.post(
   "/me/animals",
   authenticationHandler,
-  checkRole("shelter"),
+  checkExactRole("shelter"),
   async (req: AuthRequest, res: Response, next: NextFunction) => {
     try {
       const auth = getAuth(req);
