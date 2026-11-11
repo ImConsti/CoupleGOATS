@@ -1,0 +1,125 @@
+@import "tailwindcss";
+
+/* ---------- Basis-Styles (vorher in loginPage.css) ---------- */
+.selectRoleButton {
+  @apply bg-white border border-gray-200 rounded-2xl p-4 flex items-center gap-4 w-full text-left shadow-sm transition-all hover:cursor-pointer hover:scale-101;
+}
+
+.iconDiv{
+  @apply bg-emerald-50 text-emerald-900 p-3 rounded-xl flex items-center justify-center;
+}
+
+.coupleGoatsFont{
+  font-family: var(--oswald-font);
+}
+
+.orangeFont{
+  @apply text-orange-600;
+}
+
+.greenFont{
+  @apply text-emerald-900
+}
+
+.loginHeader{
+  @apply font-bold text-3xl;
+}
+
+.descriptionText{
+  @apply block text-gray-500 text-sm;
+}
+
+.textfield{
+  @apply bg-white border border-gray-200 rounded-xl placeholder-gray-400 w-full h-10 px-3;
+}
+
+.submitButton{
+  @apply w-full h-10 bg-emerald-900 text-white rounded-xl hover:cursor-pointer;
+}
+
+/* ---------- Zurück-Button ---------- */
+.backButton{
+  @apply text-sm text-gray-500 text-left w-fit hover:cursor-pointer hover:text-emerald-900;
+}
+
+/* ---------- Reiter + Hügel ---------- */
+.authTabs{
+  @apply relative flex h-12;
+}
+
+.authHill{
+  @apply absolute left-0 top-0 w-1/2 bg-white border border-gray-200 pointer-events-none;
+  height: calc(100% + 1px); /* überdeckt die obere Kartenlinie, damit Hügel und Karte verschmelzen */
+  border-bottom: none;
+  border-radius: 1.75rem 1.75rem 0 0;
+  z-index: 2;
+  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.authHillRight{
+  transform: translateX(100%);
+}
+
+.authTab{
+  @apply relative flex-1 text-sm font-semibold text-gray-400 hover:cursor-pointer hover:text-gray-600 transition-colors;
+  z-index: 3;
+}
+
+.authTabActive{
+  @apply text-emerald-900;
+}
+
+/* ---------- Karte ---------- */
+.authBody{
+  @apply bg-white border border-gray-200 rounded-2xl p-6 shadow-sm;
+  transition: border-radius 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Ecke unter dem Hügel bleibt eckig */
+.authBodyLogin{
+  border-top-left-radius: 0;
+}
+
+.authBodyRegister{
+  border-top-right-radius: 0;
+}
+
+/* ---------- Inhalt wechselt ---------- */
+@keyframes slideInLeft {
+  from { opacity: 0; transform: translateX(-24px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(24px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+.slideInLeft{
+  animation: slideInLeft 0.3s ease-out;
+}
+
+.slideInRight{
+  animation: slideInRight 0.3s ease-out;
+}
+
+/* ---------- Formularelemente ---------- */
+.registerRow{
+  @apply grid grid-cols-2 gap-3;
+}
+
+.registerRowPostal{
+  grid-template-columns: 1fr 2fr;
+}
+
+.checkboxRow{
+  @apply flex items-center gap-3 text-sm text-gray-700 mb-2 cursor-pointer;
+}
+
+.checkboxRow input{
+  @apply w-4 h-4 accent-emerald-900;
+}
+
+.submitButton:disabled{
+  @apply opacity-60 cursor-not-allowed;
+}

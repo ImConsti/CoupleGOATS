@@ -4,13 +4,14 @@ import {useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
 import "./navigationBar.css";
 import { useState } from "react";
-import { logout } from "@/lib/logout";
+import { useAuth } from "@/components/authProvider";
 
 type NavBarAttributes = {userType: "user" | "shelter"};
 
 export default function NavigationBar({userType}:NavBarAttributes) {
 
     const router = useRouter();
+    const { signOut } = useAuth();
     const pathName = usePathname();
     const isUser = userType === "user";
     const [isLogoutDivVisible, setIsLogoutDivVisible] = useState(false)
@@ -21,7 +22,7 @@ export default function NavigationBar({userType}:NavBarAttributes) {
     const secondPath = isUser ? `${basePath}/matches`  : `${basePath}/animals`;
 
     async function handleLogout() {
-        await logout();
+        await signOut();
         router.push("/auth/login");
     }
 
