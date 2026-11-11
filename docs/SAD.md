@@ -126,6 +126,33 @@ Die Architektur von CoupleGOATS wird in fünf Sichten beschrieben, die den Sicht
 | Bereitstellungsansicht | Was läuft wo, und wie ist es verbunden? | [Bereitstellungsdiagramm](diagrams/deployment.png) ([Quelle](diagrams/deployment.puml)) | 7 |
 | Implementierungsansicht | Woraus besteht der Code? | [Komponentendiagramm](diagrams/components.png) ([Quelle](diagrams/components.puml)) | 8 |
 
+### 2.1 Architectural style
+
+*Author: [first name]*
+
+<!-- Three short paragraphs, together rarely longer than half a page.
+     Every reason names a scenario or a constraint from section 3 by its ID. -->
+
+**Main style.** [Our backend is a … : one sentence on the main style and where it applies.]
+[Where we deviate from it, e.g., client-server between browser and backend, an event for mails.]
+
+**Why.** (1) [reason with an ID, e.g., C-02 or QS-02, and what the style does for it].
+(2) [reason with an ID]. (3) [optional: a third reason].
+
+**Rejected alternative.** [The style we considered], which would have given us [its strength].
+We did not choose it because [reason with an ID]. [Optional: when we would decide differently.]
+
+### 2.2 Architecture decisions
+
+*Author: [first name]*
+
+<!-- One row per ADR in docs/decisions/. An accepted ADR is not rewritten: a new decision gets a
+     new ADR, and the old one gets the status "superseded by ADR-xx". -->
+
+| ADR    | Decision                                                  | Status     | Date         |
+| ------ | --------------------------------------------------------- | ---------- | ------------ |
+| ADR-01 | [[short title]](decisions/ADR-01_[short-title].md)         | [accepted] | [dd.mm.yyyy] |
+
 
 ## 3 Architektonische Ziele und Einschränkungen
 
@@ -314,10 +341,26 @@ Die REST-API ist die Schnittstelle zwischen Frontend und Backend. Die Datenbank 
 
 ### 8.2 Schichten
 
-<!-- Vorlesungen 8 und 9. Die Schichten der Anwendung und die Regeln zwischen ihnen. Bis dahin unverändert lassen. -->
+*Author: [first name]*
 
-*Folgt mit den Vorlesungen 8 und 9.*
+<!-- One row per layer of your backend. A modular monolith: the layers inside one module,
+     and your modules in the sentence below the table. A package diagram is welcome, not required. -->
 
+| Layer         | Folder         | Contains              | May use               |
+| ------------- | -------------- | --------------------- | --------------------- |
+| [Web]         | `[src/web]`    | [routes, validation]  | [core]                |
+| [Core]        | `[src/core]`   | [services, domain]    | [nothing below it, or only its own interfaces] |
+| [Persistence] | `[src/db]`     | [repositories, SQL]   | [the database]        |
+
+[Our modules are …, and they talk to each other through … — or delete this line if you have no
+modules.]
+
+<!-- Follow one use case through your code and check every import against the table.
+     A shortcut you found is a result, not a failure: name the file and the line. -->
+
+**Checked in the code.** We followed [UC-xx name]: `[file]` → `[file]` → `[file]`. [The rule
+holds. / We found one shortcut: `[file]` imports `[what]` directly (line [n]). It is on our
+board.]
 ## 9 Datenansicht
 
 <!-- Vorerst optional. Später: Datenbankschema oder ER-Modell, abgeleitet aus dem Domänenmodell. -->
@@ -330,8 +373,21 @@ Die REST-API ist die Schnittstelle zwischen Frontend und Backend. Die Datenbank 
 
 *Folgt mit Vorlesung 7.*
 
-## 11 Qualität
+## 11 Quality
 
-<!-- Vorlesungen 7 bis 9. Wie die Architektur die benötigten Qualitäten unterstützt: Verfügbarkeit, Sicherheit, Wartbarkeit, … Bis dahin unverändert lassen. -->
+*Author: [first name]*
 
-*Folgt mit den Vorlesungen 7 bis 9.*
+<!-- One row per scenario from section 3.1. One or two tactics per scenario.
+     Where: a component from 8.1 or a layer from 8.2. Status: in place, planned or not planned.
+     Price: one short phrase — every tactic costs something. Decision: the ADR, if there is one. -->
+
+How our architecture reaches the scenarios of section 3.1:
+
+| Scenario      | Tactics   | Where       | Status   | Price   | Decision |
+| ------------- | --------- | ----------- | -------- | ------- | -------- |
+| QS-01 [name]  | [tactic]  | [component] | [status] | [price] | [— or ADR-xx] |
+| QS-02 [name]  | [tactic]  | [component] | [status] | [price] | [— or ADR-xx] |
+| QS-03 [name]  | [tactic]  | [component] | [status] | [price] | [— or ADR-xx] |
+
+[Two or three sentences on your highest-rated scenario: why these tactics, and which alternative
+you did not take. If a tactic is "not planned", say why in one sentence.]
