@@ -126,21 +126,34 @@ Die Architektur von CoupleGOATS wird in fünf Sichten beschrieben, die den Sicht
 | Bereitstellungsansicht | Was läuft wo, und wie ist es verbunden? | [Bereitstellungsdiagramm](diagrams/deployment.png) ([Quelle](diagrams/deployment.puml)) | 7 |
 | Implementierungsansicht | Woraus besteht der Code? | [Komponentendiagramm](diagrams/components.png) ([Quelle](diagrams/components.puml)) | 8 |
 
-### 2.1 Architectural style
+### 2.1 Architekturstil
 
-*Author: [first name]*
+*Autor: Carolin*
 
 <!-- Three short paragraphs, together rarely longer than half a page.
      Every reason names a scenario or a constraint from section 3 by its ID. -->
 
-**Main style.** [Our backend is a … : one sentence on the main style and where it applies.]
-[Where we deviate from it, e.g., client-server between browser and backend, an event for mails.]
+**Hauptstil.** 
+Unser Backend ist ein Layered Monolith: ein einziger Node.js-Prozess (Express), der intern in die Schichten Controller, Services und Persistence (Repositories mit Drizzle ORM) aufgeteilt ist. 
+Jede Schicht ruft nur die darunterliegende auf. 
+Frontend (Next.js) und Backend bilden ein Client-Server-System: Der Browser fragt über die REST-API unter `/api/v1` an, das Backend antwortet mit JSON. 
+Weitere Stile setzen wir nicht ein.
 
-**Why.** (1) [reason with an ID, e.g., C-02 or QS-02, and what the style does for it].
-(2) [reason with an ID]. (3) [optional: a third reason].
+**Warum.** 
+(1) Wir sind vier Personen un besuchen parallel weitere Vorlesungen (C-02): Ein Backend bedeutet nur einen Prozess, der gebaut, deployt und überwacht werden muss, und wenige Komponenten, die wir selbst warten müssen. 
+(2) Die Daten liegen in einer SQLite-Datei (C-01), die nur ein Prozess gleichzeitig beschreiben darf. 
+Deshalb läuft das Backend mit einer Instanz (siehe Abschnitt 7).
+Das reicht auch für QS-02, da die Datei auf einem persistenten Volume liegt.
+(3) Keines unserer Szenarien (QS-01 bis QS-03) braucht unabhängige Skalierung. QS-01 verlangt beispielsweise, dass die Suche bei bis zu 1.000 Datensätzen in 95% der Fälle unter 10 s antworten. 
+Das schafft ein Prozess, in dem Service und Repository sich direkt aufrufen.
 
-**Rejected alternative.** [The style we considered], which would have given us [its strength].
-We did not choose it because [reason with an ID]. [Optional: when we would decide differently.]
+**Verworfene Alternative.** 
+Microservices (z. B. je ein Dienst für Tiere, Matches und Termine). 
+Sie würden uns unabhängiges Deployment und Skalieren ermöglichen. 
+Wir haben sie nicht gewählt, weil Tiere, Matches und Termine eng zusammenhängen. 
+Zudem bräuchte jeder Dienst eine eigene Datenbank, SQLite lässt jedoch nur eine Instanz zu (C-01). 
+Des Weiteren können wir nicht mehrere Dienste betreiben, überwachen und deployen (C-02). 
+Wir würden neu entscheiden, wenn die App deutschlandweit mit vielen Tierheimen läuft und einzelne Teile getrennt skaliert werden müssen.
 
 ### 2.2 Architecture decisions
 
