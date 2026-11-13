@@ -356,19 +356,19 @@ Die REST-API ist die Schnittstelle zwischen Frontend und Backend. Die Datenbank 
 
 *Autor: brdly06*
 
-*Status / Tracking: Estimate und tatsächliche Hours sind im Jira/Projekt-Board gepflegt.*
+| Schicht | Ordner | Inhalt | Darf verwenden |
+| --- | --- | --- | --- |
+| HTTP / Controller | `src/router/` | Express-Routen, Request-/Response-Verarbeitung und Aufruf der Anwendungsfälle | `services/`, `middleware/`, `validation/`, `errors/`, `types.ts` sowie Express |
+| Middleware | `src/middleware/` | Authentifizierung, Rollenprüfung und Fehler-/404-Behandlung | `services/`, `utils/`, `errors/`, `types.ts` sowie Express |
+| Validierung | `src/validation/` | Zod-Schemas und Validierungs-Hilfsfunktionen | Zod, `errors/` und gemeinsame Typen |
+| Anwendung / Services | `src/services/` | Anwendungsfälle und Geschäftsregeln | `repositories/`, `errors/`, `utils/` und `types.ts` |
+| Persistenz / Repository | `src/repositories/` | Datenbankabfragen und Repository-Funktionen | `db/`, `errors/` und `types.ts` |
+| Datenbank | `src/db/` sowie `drizzle/` | Drizzle-Verbindung, Schema, Relationen und SQL-Migrationen | Datenbank-/Drizzle-Bibliotheken; innerhalb der Anwendung keine höheren Schichten |
+| Gemeinsame Hilfsfunktionen | `src/errors/`, `src/utils/`, `src/types.ts` | Fehlerklassen/-mapping, technische Hilfsfunktionen und gemeinsam verwendete Typen | Externe Bibliotheken und niedrigere technische Typdefinitionen; keine Router-, Service- oder Repository-Aufrufe |
 
-Die Backend-Architektur (`apps/backend`) folgt einer klaren Schichtentrennung, die durch die folgende Tabelle unmittelbar prüfbar ist:
+Das Backend ist als modularer Monolith organisiert. In der vorliegenden Ordnerstruktur sind keine getrennten fachlichen Module mit eigenen Modulgrenzen erkennbar.
 
-| Schicht | Ordner | Inhalt / Verantwortung | Darf nutzen (Erlaubte Abhängigkeiten) |
-| :--- | :--- | :--- | :--- |
-| **API / Controller** | `src/api/` | HTTP-Routing, Request-Validierung (Zod), Entgegennahme von Anfragen, Steuerung der Responses | Application Services, Shared Types / DTOs |
-| **Application Services** | `src/services/` | Implementierung der Geschäftslogik, Orchestrierung von Fachprozessen | Persistence / Repositories, Domain Models |
-| **Persistence / Repository** | `src/repositories/` / `src/db/` | Datenzugriff, Datenbankoperationen über Drizzle ORM | Datenbank-Treiber, ORM-Schema |
-
-**Im Code geprüft (Code-Check & Use-Case-Trace).** Wir haben den Use Case **Abruf und Verwaltung von Tierprofilen (`Pets`)** durch den Code verfolgt: `src/api/pets.ts` (Zeile 1–45) → `src/services/petService.ts` (Zeile 1–60) → `src/repositories/petRepository.ts` (Zeile 1–30). 
-
-Die Regel hält (vollständige Einhaltung des Schichtenmodells): Der manuelle Import- und Abhängigkeits-Check für diesen Pfad bestätigt, dass der Controller (`src/api/pets.ts`) ausschließlich auf den Service (`src/services/petService.ts`) zugreift, welcher seinerseits das Repository (`src/repositories/petRepository.ts`) einbindet. Es wurden keine unerlaubten Rückwärtsdependencies (z. B. Controller greift direkt auf Repository zu) oder zirkuläre Importe festgestellt.
+**Im Code geprüft.** Wir haben den Anwendungsfall „Rassen einer Tierart abrufen“ verfolgt: `src/router/speciesController.ts` (Zeilen 22–29) → `src/services/breedService.ts` (Zeilen 6–12) → `src/repositories/breedRepository.ts` (Zeilen 5–18). Der geprüfte Hauptpfad hält die Schichtenfolge ein: Der Controller ruft den Service auf und der Service das Repository. Bei der Prüfung weiterer Imports fanden wir jedoch Abweichungen von den Regeln: `src/middleware/authenticationHandler.ts` verwendet die Repositories direkt (Zeilen 4–5), `src/services/animalProfileService.ts` greift direkt auf die Datenbank zu (Zeile 15) und `src/services/tagService.ts` importiert ein Validierungs-Schema (Zeile 2). Diese Abweichungen sind dokumentiert und werden im Rahmen dieses Issues nicht behoben.
 
 ## 9 Datenansicht
 
