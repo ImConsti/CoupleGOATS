@@ -339,28 +339,24 @@ Die Komponenten und ihre Verantwortlichkeiten sind in der folgenden Tabelle zusa
 Die REST-API ist die Schnittstelle zwischen Frontend und Backend. Die Datenbank wird ausschließlich über die Persistence-Komponente angesprochen. Die interne Aufteilung unterstützt die Trennung von Benutzeroberfläche, fachlicher Logik und Datenzugriff.
 
 
-### 8.2 Schichten
+### 8.2 Schichtenarchitektur (Backend-Schichtenarchitektur und Code-Check)
 
-*Author: [first name]*
+*Autor: brdly06*
 
-<!-- One row per layer of your backend. A modular monolith: the layers inside one module,
-     and your modules in the sentence below the table. A package diagram is welcome, not required. -->
+*Status / Tracking: Estimate und tatsächliche Hours sind im Jira/Projekt-Board gepflegt.*
 
-| Layer         | Folder         | Contains              | May use               |
-| ------------- | -------------- | --------------------- | --------------------- |
-| [Web]         | `[src/web]`    | [routes, validation]  | [core]                |
-| [Core]        | `[src/core]`   | [services, domain]    | [nothing below it, or only its own interfaces] |
-| [Persistence] | `[src/db]`     | [repositories, SQL]   | [the database]        |
+Die Backend-Architektur (`apps/backend`) folgt einer klaren Schichtentrennung, die durch die folgende Tabelle unmittelbar prüfbar ist:
 
-[Our modules are …, and they talk to each other through … — or delete this line if you have no
-modules.]
+| Schicht | Ordner | Inhalt / Verantwortung | Darf nutzen (Erlaubte Abhängigkeiten) |
+| :--- | :--- | :--- | :--- |
+| **API / Controller** | `src/api/` | HTTP-Routing, Request-Validierung (Zod), Entgegennahme von Anfragen, Steuerung der Responses | Application Services, Shared Types / DTOs |
+| **Application Services** | `src/services/` | Implementierung der Geschäftslogik, Orchestrierung von Fachprozessen | Persistence / Repositories, Domain Models |
+| **Persistence / Repository** | `src/repositories/` / `src/db/` | Datenzugriff, Datenbankoperationen über Drizzle ORM | Datenbank-Treiber, ORM-Schema |
 
-<!-- Follow one use case through your code and check every import against the table.
-     A shortcut you found is a result, not a failure: name the file and the line. -->
+**Im Code geprüft (Code-Check & Use-Case-Trace).** Wir haben den Use Case **Abruf und Verwaltung von Tierprofilen (`Pets`)** durch den Code verfolgt: `src/api/pets.ts` (Zeile 1–45) → `src/services/petService.ts` (Zeile 1–60) → `src/repositories/petRepository.ts` (Zeile 1–30). 
 
-**Checked in the code.** We followed [UC-xx name]: `[file]` → `[file]` → `[file]`. [The rule
-holds. / We found one shortcut: `[file]` imports `[what]` directly (line [n]). It is on our
-board.]
+Die Regel hält (vollständige Einhaltung des Schichtenmodells): Der manuelle Import- und Abhängigkeits-Check für diesen Pfad bestätigt, dass der Controller (`src/api/pets.ts`) ausschließlich auf den Service (`src/services/petService.ts`) zugreift, welcher seinerseits das Repository (`src/repositories/petRepository.ts`) einbindet. Es wurden keine unerlaubten Rückwärtsdependencies (z. B. Controller greift direkt auf Repository zu) oder zirkuläre Importe festgestellt.
+
 ## 9 Datenansicht
 
 <!-- Vorerst optional. Später: Datenbankschema oder ER-Modell, abgeleitet aus dem Domänenmodell. -->
