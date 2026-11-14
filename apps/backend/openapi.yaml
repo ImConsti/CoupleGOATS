@@ -258,6 +258,22 @@ paths:
       description:
         "Mindestens ein Feld ist erforderlich. breedId: null entfernt die Rasse. tagIds ersetzt
         alle bisherigen Tags."
+    delete:
+      tags:
+        - Shelter Animals
+      summary: Tier löschen
+      responses:
+        "204":
+          description: Gelöscht
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
   /shelters/me/animals/{animalId}/tags:
     put:
       tags:

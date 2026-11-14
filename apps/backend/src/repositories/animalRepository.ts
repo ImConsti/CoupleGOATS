@@ -172,6 +172,23 @@ export async function updateAnimal(
   }
 }
 
+export async function deleteAnimal(
+  shelterId: string,
+  animalId: string,
+): Promise<boolean> {
+  try {
+    const [idDeletedAnimal] = await db
+      .delete(animals)
+      .where(
+        and(eq(animals.animalShelterId, shelterId), eq(animals.id, animalId)),
+      )
+      .returning({ id: animals.id });
+    return idDeletedAnimal !== undefined;
+  } catch (error: unknown) {
+    throw mapDatabaseError(error);
+  }
+}
+
 export async function deleteAnimalTags(
   animalId: string,
   exec: DbOrTrx = db,
