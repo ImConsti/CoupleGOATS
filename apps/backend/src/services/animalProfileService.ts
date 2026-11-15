@@ -3,6 +3,7 @@ import { NotFoundError, UnprocessableEntityError } from "../errors/errors.js";
 import {
   animalExistsForShelter,
   countAnimalsByShelterId,
+  deleteAnimal,
   deleteAnimalTags,
   findAnimalProfileById,
   findAnimalProfilesByShelterId,
@@ -138,6 +139,16 @@ export async function replaceAnimalTags(
     await replaceTags(animalId, tagIds, trx);
     return (await loadProfile(animalId, shelterId, trx)).tags;
   });
+}
+
+export async function deleteAnimalProfile(
+  shelterId: string,
+  animalId: string,
+): Promise<void> {
+  const deleted = await deleteAnimal(shelterId, animalId);
+  if (!deleted) {
+    throw new NotFoundError("Animal not found");
+  }
 }
 
 export async function getAnimalProfilesByShelter(

@@ -4,7 +4,7 @@ import {
   getAuth,
 } from "../middleware/authenticationHandler.js";
 import type { AuthRequest } from "../types.js";
-import { checkExactRole, checkRole } from "../middleware/roleHandler.js";
+import { checkExactRole } from "../middleware/roleHandler.js";
 import { zodValidation } from "../validation/zod-validation.js";
 import { z } from "zod";
 import {
@@ -15,6 +15,7 @@ import {
 } from "../validation/schemas.js";
 import {
   createAnimalProfile,
+  deleteAnimalProfile,
   getAnimalProfile,
   getAnimalProfilesByShelter,
   replaceAnimalTags,
@@ -119,3 +120,18 @@ router.put(
   },
 );
 
+router.delete(
+  "/me/animals/:animalId",
+  authenticationHandler,
+  checkExactRole("shelter"),
+  async (req: AuthRequest, res: Response, next: NextFunction) => {
+    try {
+      const auth = getAuth(req);
+      const animalId = zodValidation(z.uuid(), req.params.animalId);
+      await deleteAnimalProfile(auth.sub, animalId);
+      res.status(204).send();
+    } catch (error: unknown) {
+      next(error);
+    }
+  },
+);

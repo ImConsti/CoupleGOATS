@@ -258,6 +258,22 @@ paths:
       description:
         "Mindestens ein Feld ist erforderlich. breedId: null entfernt die Rasse. tagIds ersetzt
         alle bisherigen Tags."
+    delete:
+      tags:
+        - Shelter Animals
+      summary: Tier löschen
+      responses:
+        "204":
+          description: Gelöscht
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
   /shelters/me/animals/{animalId}/tags:
     put:
       tags:
@@ -372,36 +388,60 @@ components:
         application/json:
           schema:
             $ref: "#/components/schemas/Error"
+          example:
+            error:
+              code: VALIDATION_ERROR
+              message: string
     Unauthorized:
       description: Ungültige Anmeldedaten oder fehlender beziehungsweise ungültiger Bearer-Token
       content:
         application/json:
           schema:
             $ref: "#/components/schemas/Error"
+          example:
+            error:
+              code: UNAUTHORIZED
+              message: string
     Forbidden:
       description: Keine Berechtigung für diese Ressource
       content:
         application/json:
           schema:
             $ref: "#/components/schemas/Error"
+          example:
+            error:
+              code: FORBIDDEN
+              message: string
     NotFound:
       description: Ressource nicht gefunden oder gehört nicht zum angemeldeten Tierheim
       content:
         application/json:
           schema:
             $ref: "#/components/schemas/Error"
+          example:
+            error:
+              code: NOT_FOUND
+              message: string
     Conflict:
       description: Existiert bereits
       content:
         application/json:
           schema:
             $ref: "#/components/schemas/Error"
+          example:
+            error:
+              code: CONFLICT
+              message: string
     UnprocessableEntity:
       description: Ungültiger Verweis auf Tierart, Rasse oder Tag
       content:
         application/json:
           schema:
             $ref: "#/components/schemas/Error"
+          example:
+            error:
+              code: UNPROCESSABLE_ENTITY
+              message: string
   schemas:
     Role:
       type: string
@@ -507,7 +547,7 @@ components:
                 - UNAUTHORIZED
                 - FORBIDDEN
                 - NOT_FOUND
-                - CONFLICT_ERROR
+                - CONFLICT
                 - UNPROCESSABLE_ENTITY
                 - DATABASE_ERROR
                 - INTERNAL_SERVER_ERROR
