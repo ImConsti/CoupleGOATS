@@ -67,13 +67,10 @@ export default function EditAnimalPage() {
     }
 
     function goBack() {
-        // verwirft alle lokalen Änderungen (der Formularzustand lebt nur im Browser)
         router.push("/shelter/animals");
     }
 
     async function handleSubmit(values: AnimalFormValues) {
-        // Das Speichern (PATCH /shelters/me/animals/{animalId} und PUT .../tags) wird im
-        // Mika-Sub-Issue umgesetzt. Bis dahin zeigt das Formular diese Meldung an.
         void values;
         throw new Error("Speichern ist noch nicht angebunden.");
     }

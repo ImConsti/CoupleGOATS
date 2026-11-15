@@ -21,7 +21,6 @@ export default function NavigationBar({userType}:NavBarAttributes) {
     const firstPath  = isUser ? `${basePath}/discover` : `${basePath}/overview`;
     const secondPath = isUser ? `${basePath}/matches`  : `${basePath}/animals`;
 
-    // Tab bleibt auch auf Unterseiten markiert (z.B. /shelter/animals/<id>/edit)
     function isActive(path: string) {
         return pathName === path || pathName.startsWith(path + "/");
     }

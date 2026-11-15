@@ -1,6 +1,5 @@
 @import "tailwindcss";
 
-/* Seite: breiter als die Anmeldekarte, aber nicht von Rand zu Rand */
 .editAnimalPage{
   @apply w-full max-w-5xl mx-auto px-4 py-8 sm:px-6 sm:py-10 flex flex-col gap-4;
 }

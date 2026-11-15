@@ -1,6 +1,6 @@
 "use client";
 
-import {useEffect, useState, type FormEvent, type ReactNode} from "react";
+import { useEffect, useState, type FormEvent, type ReactNode } from "react";
 import {
     EXPERIENCE_LABELS,
     categoryLabel,
@@ -17,7 +17,6 @@ import {
     type Tag,
 } from "@/lib/animals";
 
-/** Alle Formularwerte als Text bzw. ID-Liste, so wie sie in den Feldern stehen. */
 export type AnimalFormValues = {
     name: string;
     speciesId: string;
@@ -40,7 +39,6 @@ export const EMPTY_ANIMAL_FORM_VALUES: AnimalFormValues = {
     tagIds: [],
 };
 
-/** Wandelt ein Tier vom Backend in Formularwerte um (Edit-Modus). */
 export function animalToFormValues(animal: Animal): AnimalFormValues {
     return {
         name: animal.name,
@@ -55,14 +53,10 @@ export function animalToFormValues(animal: Animal): AnimalFormValues {
 }
 
 type AnimalFormProps = {
-    /** "create" = neues Tier, "edit" = vorhandenes Tier bearbeiten */
     mode: "create" | "edit";
     initialValues?: AnimalFormValues;
-    /** Wird mit den geprüften Werten aufgerufen. Wirft sie einen Fehler, wird er im Formular angezeigt. */
     onSubmit: (values: AnimalFormValues) => Promise<void> | void;
-    /** Abbrechen: verwirft die lokalen Änderungen, der Aufrufer navigiert zurück. */
     onCancel: () => void;
-    /** Optionaler Bereich rechts neben den Feldern (z. B. die Fotos). Auf dem Handy steht er darunter. */
     aside?: ReactNode;
 };
 
@@ -74,7 +68,7 @@ const LABEL = "text-sm font-medium text-gray-600";
 const FIELD = "flex flex-col gap-1.5 min-w-0";
 const ERROR = "text-sm text-red-600";
 
-function SectionTitle({overline, title}: {overline: string; title: string}) {
+function SectionTitle({ overline, title }: { overline: string; title: string }) {
     return (
         <div className="flex flex-col gap-0.5">
             <p className="text-xs font-semibold uppercase tracking-widest text-gray-500">{overline}</p>
@@ -84,7 +78,7 @@ function SectionTitle({overline, title}: {overline: string; title: string}) {
 }
 
 type MasterData = { species: Species[]; tags: Tag[] };
-type BreedsState = { speciesId: string; items: Breed[] | null }; // items null = Laden fehlgeschlagen
+type BreedsState = { speciesId: string; items: Breed[] | null };
 type FieldName = keyof AnimalFormValues;
 type FieldErrors = Partial<Record<FieldName, string>>;
 
@@ -99,14 +93,13 @@ const FIELD_IDS: Record<FieldName, string> = {
     tagIds: "animal-tags",
 };
 
-export default function AnimalForm({mode, initialValues = EMPTY_ANIMAL_FORM_VALUES, onSubmit, onCancel, aside}: AnimalFormProps) {
+export default function AnimalForm({ mode, initialValues = EMPTY_ANIMAL_FORM_VALUES, onSubmit, onCancel, aside }: AnimalFormProps) {
 
     const [values, setValues] = useState<AnimalFormValues>(initialValues);
     const [errors, setErrors] = useState<FieldErrors>({});
     const [submitError, setSubmitError] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
 
-    // Stammdaten (Tierarten + Tags) und Rassen der gewählten Tierart
     const [masterData, setMasterData] = useState<MasterData | "error" | null>(null);
     const [masterDataAttempt, setMasterDataAttempt] = useState(0);
     const [breedsState, setBreedsState] = useState<BreedsState | null>(null);
@@ -115,7 +108,7 @@ export default function AnimalForm({mode, initialValues = EMPTY_ANIMAL_FORM_VALU
     useEffect(() => {
         let cancelled = false;
         Promise.all([fetchSpecies(), fetchTags()])
-            .then(([species, tags]) => { if (!cancelled) setMasterData({species, tags}); })
+            .then(([species, tags]) => { if (!cancelled) setMasterData({ species, tags }); })
             .catch(() => { if (!cancelled) setMasterData("error"); });
         return () => { cancelled = true; };
     }, [masterDataAttempt]);
@@ -125,8 +118,8 @@ export default function AnimalForm({mode, initialValues = EMPTY_ANIMAL_FORM_VALU
         const speciesId = values.speciesId;
         let cancelled = false;
         fetchBreeds(speciesId)
-            .then((items) => { if (!cancelled) setBreedsState({speciesId, items}); })
-            .catch(() => { if (!cancelled) setBreedsState({speciesId, items: null}); });
+            .then((items) => { if (!cancelled) setBreedsState({ speciesId, items }); })
+            .catch(() => { if (!cancelled) setBreedsState({ speciesId, items: null }); });
         return () => { cancelled = true; };
     }, [values.speciesId, breedsAttempt]);
 
@@ -146,14 +139,13 @@ export default function AnimalForm({mode, initialValues = EMPTY_ANIMAL_FORM_VALU
     }
 
     function update<K extends FieldName>(field: K, value: AnimalFormValues[K]) {
-        setValues((current) => ({...current, [field]: value}));
-        setErrors((current) => ({...current, [field]: undefined}));
+        setValues((current) => ({ ...current, [field]: value }));
+        setErrors((current) => ({ ...current, [field]: undefined }));
     }
 
     function changeSpecies(speciesId: string) {
-        // andere Tierart -> bisherige Rasse passt nicht mehr
-        setValues((current) => ({...current, speciesId, breedId: ""}));
-        setErrors((current) => ({...current, speciesId: undefined, breedId: undefined}));
+        setValues((current) => ({ ...current, speciesId, breedId: "" }));
+        setErrors((current) => ({ ...current, speciesId: undefined, breedId: undefined }));
     }
 
     function toggleTag(tag: Tag, allTags: Tag[]) {
@@ -161,7 +153,6 @@ export default function AnimalForm({mode, initialValues = EMPTY_ANIMAL_FORM_VALU
             update("tagIds", values.tagIds.filter((id) => id !== tag.id));
             return;
         }
-        // Pro Kategorie ist nur ein Tag möglich: andere Tags derselben Kategorie werden abgewählt
         const sameCategory = tag.category
             ? allTags.filter((other) => other.category === tag.category).map((other) => other.id)
             : [];
@@ -228,7 +219,6 @@ export default function AnimalForm({mode, initialValues = EMPTY_ANIMAL_FORM_VALU
         );
     }
 
-    // Tags nach Kategorie gruppieren (Reihenfolge wie vom Backend geliefert)
     const tagGroups = new Map<string, Tag[]>();
     for (const tag of masterData.tags) {
         const group = tag.category ?? "";
@@ -251,11 +241,10 @@ export default function AnimalForm({mode, initialValues = EMPTY_ANIMAL_FORM_VALU
 
             <div className={aside ? "grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,1fr)_300px] lg:gap-10" : ""}>
 
-                {/* ---------- linke Spalte: Felder ---------- */}
                 <div className="flex flex-col gap-8 min-w-0">
 
                     <section className="flex flex-col gap-5" aria-label="Grunddaten">
-                        <SectionTitle overline="Grunddaten" title="Profildetails"/>
+                        <SectionTitle overline="Grunddaten" title="Profildetails" />
 
                         <div className={FIELD}>
                             <label htmlFor={FIELD_IDS.name} className={LABEL}>Name *</label>
@@ -390,7 +379,7 @@ export default function AnimalForm({mode, initialValues = EMPTY_ANIMAL_FORM_VALU
                     </section>
 
                     <section className="flex flex-col gap-4" aria-label="Eigenschaften">
-                        <SectionTitle overline="Eigenschaften" title="Tags"/>
+                        <SectionTitle overline="Eigenschaften" title="Tags" />
                         <p id="animal-tags-hint" className="text-sm text-gray-500 -mt-2">
                             Pro Kategorie kannst du einen Tag auswählen. Ein erneuter Klick wählt ihn wieder ab.
                         </p>
@@ -424,7 +413,6 @@ export default function AnimalForm({mode, initialValues = EMPTY_ANIMAL_FORM_VALU
                     </section>
                 </div>
 
-                {/* ---------- rechte Spalte (z. B. Fotos) ---------- */}
                 {aside && (
                     <aside className="flex flex-col gap-4 min-w-0 lg:border-l lg:border-gray-100 lg:pl-10">
                         {aside}
