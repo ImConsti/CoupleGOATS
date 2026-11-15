@@ -107,6 +107,35 @@ export type AnimalRow = InferSelectModel<typeof animals> & {
   animalsTags: { tag: Tag }[];
 };
 
+export type AnimalCardShelter = {
+  id: string;
+  name: string;
+  city: string;
+};
+
+export type AnimalCardRow = Pick<
+  InferSelectModel<typeof animals>,
+  "id" | "name" | "birthYear" | "gender"
+> & {
+  species: Species;
+  breed: Omit<Breed, "speciesId"> | null;
+  animalShelter: AnimalCardShelter;
+  animalsTags: { tag: Tag }[];
+  animalPictures: { id: string }[];
+};
+
+export type AnimalCard = {
+  id: string;
+  name: string;
+  species: Species;
+  breed: Omit<Breed, "speciesId"> | null;
+  birthYear: number;
+  gender: string;
+  tags: Tag[];
+  cardPictureId: string | null;
+  shelter: AnimalCardShelter;
+};
+
 export type AnimalSort = (typeof animalSortFields)[number];
 
 export type SortOrder = (typeof sortOrders)[number];
