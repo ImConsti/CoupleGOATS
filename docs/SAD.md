@@ -155,15 +155,15 @@ Zudem bräuchte jeder Dienst eine eigene Datenbank, SQLite lässt jedoch nur ein
 Des Weiteren können wir nicht mehrere Dienste betreiben, überwachen und deployen (C-02). 
 Wir würden neu entscheiden, wenn die App deutschlandweit mit vielen Tierheimen läuft und einzelne Teile getrennt skaliert werden müssen.
 
-### 2.2 Architecture decisions
+### 2.2 Architekturentscheidungen
 
-*Author: Constantin*
+*Autor: Constantin*
 
-<!-- One row per ADR in docs/decisions/. An accepted ADR is not rewritten: a new decision gets a
-     new ADR, and the old one gets the status "superseded by ADR-xx". -->
+<!-- Eine Zeile pro ADR in docs/decisions/. Ein akzeptierter ADR wird nicht umgeschrieben: Eine neue
+     Entscheidung bekommt einen neuen ADR, der alte erhält den Status "superseded by ADR-xx". -->
 
-| ADR    | Decision                                                  | Status     | Date         |
-| ------ | --------------------------------------------------------- | ---------- | ------------ |
+| ADR    | Entscheidung | Status | Datum |
+| ------ | ------------ | ------ | ----- |
 | ADR-01 | [SQLite-Datei statt PostgreSQL-Server](decisions/ADR-01_sqlite-statt-postgresql.md) | accepted | 15.11.2026 |
 
 
