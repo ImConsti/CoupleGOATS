@@ -157,14 +157,14 @@ Wir würden neu entscheiden, wenn die App deutschlandweit mit vielen Tierheimen 
 
 ### 2.2 Architecture decisions
 
-*Author: [first name]*
+*Author: Constantin*
 
 <!-- One row per ADR in docs/decisions/. An accepted ADR is not rewritten: a new decision gets a
      new ADR, and the old one gets the status "superseded by ADR-xx". -->
 
 | ADR    | Decision                                                  | Status     | Date         |
 | ------ | --------------------------------------------------------- | ---------- | ------------ |
-| ADR-01 | [[short title]](decisions/ADR-01_[short-title].md)         | [accepted] | [dd.mm.yyyy] |
+| ADR-01 | [SQLite-Datei statt PostgreSQL-Server](decisions/ADR-01_sqlite-statt-postgresql.md) | accepted | 15.11.2026 |
 
 
 ## 3 Architektonische Ziele und Einschränkungen
