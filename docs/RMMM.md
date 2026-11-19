@@ -14,15 +14,15 @@ Steuerung). Diese Liste ist ein lebendes Dokument: Wir schauen bei jedem Sprintw
 
 | Wert | Wahrscheinlichkeit | Auswirkung |
 | :--: | ------------------ | ---------- |
-|  1   | [Worte]            | [Worte]    |
-|  2   | [Worte]            | [Worte]    |
-|  3   | [Worte]            | [Worte]    |
-|  4   | [Worte]            | [Worte]    |
-|  5   | [Worte]            | [Worte]    |
+|  1   | Fast ausgeschlossen            | Eine Stunde zeitverlust    |
+|  2   | Unwahrscheindlich          | Ein Tag Zeitverlust    |
+|  3   | Möglich            | Ein Sprintziel wird verfehlt    |
+|  4   | Wahrscheindlich            | Ein Anwendungsfall fehlt in der Demo    |
+|  5   | Nahezu sicher           | keine Demo möglich oder Datenverlust    |
 
 Score = Wahrscheinlichkeit × Auswirkung.
 
-**Unsere Schwellenwerte:** ab [Score]: sofort handeln · ab [Score]: planen · darunter: beobachten
+**Unsere Schwellenwerte:** ab 15: sofort handeln · ab 5: planen · darunter: beobachten
 
 ## Risiken
 
@@ -34,7 +34,7 @@ Score = Wahrscheinlichkeit × Auswirkung.
 | ---- | ----------------------------------------- | --------- | --- | --- | ------- | -------------- | ------ | ------------ |
 | R-03 | Teammitglied fällt aus                    | Projekt   | 3   | 4   | 12      | Mika           | offen  | 19.11.26     |
 | R-01 | Single Point of Failure (Backend-Instanz) | technisch | 3   | 3   | 9       | Constantin     | offen  | 18.11.26     |
-| R-02 | [ein paar Worte]                          |           |     |     |         | [Name]         | offen  | [TT.MM.JJ]   |
+| R-02 | Datenverlust                         |      technisch     | 3    |  5  |   15      | Carolin        | offen  | 19.11.26  |
 
 W = Wahrscheinlichkeit, A = Auswirkung.
 
@@ -80,22 +80,33 @@ offen.
 
 <!-- Vorlage für die übrigen Risiken: Block kopieren, ID und Name ersetzen. -->
 
-### R-02 [Risiko, kurz]
+### R-02 Datenverlust
 
-*Verantwortlich: [Name]*
+*Verantwortlich: Carolin*
 
-**Risiko.** Weil [Ursache – was heute schon wahr ist], kann [Ereignis – was passieren kann], sodass
-[Wirkung – was es uns kosten würde].
+**Risiko.** Weil alle Daten in einer einzigen SQLite-Datei auf einem Volume liegen, kann eine fehlerhafte Migration, ein Absturz des Backends oder ein beschädigtes Volume die Daten beschädigen oder löschen, sodass User, Tierprofile, Matches und Termine fehlen.
 
-**Bewertung.** Wahrscheinlichkeit [Wert] × Auswirkung [Wert] = [Score]. [Ein Satz: Warum diese
-Zahlen?]
+**Bewertung.** Wahrscheinlichkeit 3 × Auswirkung 5 = 15. Wir spielen laufend neue Migrationen automatisch auf die einzige Datenbankdatei ein. 
+Ein Verlust der Daten wäre auf unserer Skala der schlimmste Fall.
 
-**Mitigation.** [Was wir tun, bevor es passiert, damit es weniger wahrscheinlich oder weniger
-schlimm wird. Oder: akzeptiert, weil …]
+**Mitigation.** Wir verringern den Schaden, indem das Volume mit der Datenbankdatei täglich mit Velero gesichert wird. 
+Der Datenverlust ist dadurch auf höchstens einen Tag begrenzt, egal ob er durch eine fehlerhafte Migration, einen Absturz des Backends oder ein beschädigtes Volume entsteht. 
+Die Sicherung läuft automatisch und braucht keinen Eingriff im Backend.
 
-**Indikator.** [Das Warnzeichen, auf das wir achten.]
+**Indikator.** Wir beobachten bei jedem Deployment, ob die Anwendung sauber läuft. 
+Warnzeichen sind eine fehlgeschlagene Migration, ein Backend, das nicht richtig startet oder mehrfach neu startet, Fehlermeldungen zum Zugriff auf die Datenbankdatei oder das Volume sowie eine fehlgeschlagene tägliche Velero-Sicherung.
 
-**Contingency.** [Unser Plan B: Was wir tun, wenn es trotzdem eingetreten ist.]
+**Contingency.** Zuerst stoppen wir neue Deployments und skalieren das Backend auf 0 Replikas, damit nichts mehr in die Datenbankdatei schreibt.
+Je nach Situation gehen wir dann wie folgt vor:
+- Schlägt eine Migration fehl, sodass das Backend beim Start abbricht oder die Daten beschädigt sind, setzen wir das Backend auf die vorherige Version zurück. 
+Danach stellen wir das Volume mit Velero auf die letzte Tagessicherung zurück und starten das Backend wieder.
+- Stürzt das Backend ab, ohne dass eine Migration die Ursache ist, lassen wir die Backend-Version zunächst unverändert. 
+Wir prüfen in den Logs, wann und warum der Absturz passiert ist. 
+Sind Daten unvollständig oder fehlerhaft, stellen wir das Volume mit Velero aus der letzten Tagessicherung wieder her. 
+Andernfalls starten wir das Backend neu.
+- Ist das Volume beschädigt oder verloren, stellen wir es mit Velero aus der letzten Tagessicherung wieder her und starten das Backend wieder.
+
+Anschließend prüfen wir in allen Fällen, ob die Anwendung startet und die Daten vorhanden sind.
 
 ### R-03 Teammitglied fällt aus
 
