@@ -1,0 +1,27 @@
+@import "tailwindcss";
+
+.animalsPage {
+    @apply w-full max-w-5xl mx-auto px-4 pt-10 pb-16 sm:px-6;
+}
+
+.animalsHeader {
+    @apply flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between;
+}
+
+.animalsEyebrow {
+    @apply text-xs font-bold uppercase tracking-widest text-gray-500;
+}
+
+.animalsTitle {
+    @apply text-5xl font-medium text-gray-900 mt-1;
+}
+
+.animalsSubtitle {
+    @apply text-gray-500 mt-2;
+}
+
+.animalsAddButton {
+    @apply inline-flex items-center justify-center gap-2 h-12 px-6 rounded-xl bg-emerald-900 text-white font-semibold shadow-md shrink-0
+    hover:bg-emerald-800 transition-colors
+    focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-900 focus-visible:ring-offset-2;
+}
