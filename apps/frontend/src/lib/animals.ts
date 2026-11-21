@@ -181,3 +181,14 @@ export async function createAnimal(values: AnimalFormValues): Promise<CreateAnim
         errors: {form: "Beim Speichern ist ein Serverfehler aufgetreten. Bitte versuche es später erneut."},
     };
 }
+
+// TEMPORÄR:
+export type AnimalPicture = {
+    id: string;
+    url: string;
+    showOnCard: boolean;
+};
+
+export function pictureSrc(url: string): string {
+    return url;
+}
