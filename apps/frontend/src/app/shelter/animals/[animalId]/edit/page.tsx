@@ -1,130 +1,225 @@
 "use client";
 
-import {useEffect, useState} from "react";
+import "../../../../globals.css";
+import "./editAnimalPage.css";
+import {useEffect, useRef, useState} from "react";
 import Link from "next/link";
 import {useParams, useRouter} from "next/navigation";
-import "./editAnimalPage.css";
-import "../../../../globals.css";
 import NavigationBar from "@/components/navigationBar";
-import AnimalForm, {animalToFormValues, type AnimalFormValues} from "@/components/animalForm";
-import AnimalGallery from "@/components/animalGallery";
-import {ApiError, fetchMyAnimal, type Animal} from "@/lib/animals";
+import AnimalForm, {ANIMAL_FORM_ID} from "@/components/animalForm";
+import {
+    fetchBreeds,
+    fetchSpecies,
+    fetchTagGroups,
+    validateAnimalForm,
+    type AnimalFormErrors,
+    type AnimalFormValues,
+    type Breed,
+    type Species,
+    type TagGroup,
+} from "@/lib/animals";
+import {
+    animalToFormValues,
+    ApiError,
+    fetchMyAnimal,
+    updateMyAnimal,
+    type AnimalProfile,
+} from "@/lib/shelterAnimals";
 
-type ErrorKind = "unauthorized" | "forbidden" | "notFound" | "failed";
+const ANIMALS_PATH = "/shelter/animals";
 
-type LoadState =
-    | { status: "loading" }
-    | { status: "ready"; animal: Animal }
-    | { status: "error"; kind: ErrorKind };
-
-const ERROR_TEXTS: Record<ErrorKind, { title: string; text: string }> = {
-    unauthorized: {
-        title: "Anmeldung abgelaufen",
-        text: "Bitte melde dich erneut an, um dieses Tier zu bearbeiten.",
-    },
-    forbidden: {
-        title: "Keine Berechtigung",
-        text: "Dieses Tier gehört nicht zu deinem Tierheim. Du kannst es deshalb nicht bearbeiten.",
-    },
-    notFound: {
-        title: "Tier nicht gefunden",
-        text: "Dieses Tierprofil existiert nicht (mehr). Vielleicht wurde es gelöscht.",
-    },
-    failed: {
-        title: "Tier konnte nicht geladen werden",
-        text: "Es ist ein Fehler aufgetreten. Prüfe deine Verbindung und versuche es erneut.",
-    },
-};
+type LoadState = "loading" | "ready" | "error";
+type ErrorKind = "unauthorized" | "notFound" | "failed";
 
 function errorKindOf(error: unknown): ErrorKind {
     if (error instanceof ApiError) {
-        if (error.status === 401) return "unauthorized";
-        if (error.status === 403) return "forbidden";
+        if (error.status === 401 || error.status === 403) return "unauthorized";
         if (error.status === 404) return "notFound";
     }
     return "failed";
 }
 
-export default function EditAnimalPage() {
+const ERROR_TEXTS: Record<ErrorKind, string> = {
+    unauthorized: "Deine Sitzung ist abgelaufen oder du hast keine Berechtigung. Bitte melde dich erneut an.",
+    notFound: "Dieses Tierprofil existiert nicht (mehr) oder gehört nicht zu deinem Tierheim.",
+    failed: "Das Tierprofil konnte nicht geladen werden. Bitte prüfe deine Verbindung.",
+};
 
+export default function EditAnimalPage() {
     const router = useRouter();
     const {animalId} = useParams<{animalId: string}>();
 
-    const [state, setState] = useState<LoadState>({status: "loading"});
-    const [attempt, setAttempt] = useState(0);
+    const [animal, setAnimal] = useState<AnimalProfile | null>(null);
+    const [values, setValues] = useState<AnimalFormValues | null>(null);
+    const [errors, setErrors] = useState<AnimalFormErrors>({});
+
+    const [species, setSpecies] = useState<Species[]>([]);
+    const [tagGroups, setTagGroups] = useState<TagGroup[]>([]);
+    const [loadState, setLoadState] = useState<LoadState>("loading");
+    const [errorKind, setErrorKind] = useState<ErrorKind>("failed");
+    const [reloadKey, setReloadKey] = useState(0);
+
+    const [breeds, setBreeds] = useState<Breed[]>([]);
+    const [isLoadingBreeds, setIsLoadingBreeds] = useState(false);
+    const [breedsError, setBreedsError] = useState<string>();
+    const breedsRequestId = useRef(0);
+
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const isSubmittingRef = useRef(false);
 
     useEffect(() => {
         let cancelled = false;
-        fetchMyAnimal(animalId)
-            .then((animal) => { if (!cancelled) setState({status: "ready", animal}); })
-            .catch((error) => { if (!cancelled) setState({status: "error", kind: errorKindOf(error)}); });
-        return () => { cancelled = true; };
-    }, [animalId, attempt]);
+        Promise.all([fetchMyAnimal(animalId), fetchSpecies(), fetchTagGroups()])
+            .then(([loadedAnimal, loadedSpecies, loadedTagGroups]) => {
+                if (cancelled) return;
+                setAnimal(loadedAnimal);
+                setValues(animalToFormValues(loadedAnimal));
+                setSpecies(loadedSpecies);
+                setTagGroups(loadedTagGroups);
+                setLoadState("ready");
+                void loadBreeds(loadedAnimal.species.id);
+            })
+            .catch((error) => {
+                if (cancelled) return;
+                setErrorKind(errorKindOf(error));
+                setLoadState("error");
+            });
+        return () => {
+            cancelled = true;
+        };
+    }, [animalId, reloadKey]);
 
-    function retry() {
-        setState({status: "loading"});
-        setAttempt((current) => current + 1);
+    function handleRetry() {
+        setLoadState("loading");
+        setReloadKey((key) => key + 1);
     }
 
-    function goBack() {
-        router.push("/shelter/animals");
+    async function loadBreeds(speciesId: string) {
+        const requestId = ++breedsRequestId.current;
+        setBreeds([]);
+        setBreedsError(undefined);
+        if (!speciesId) {
+            setIsLoadingBreeds(false);
+            return;
+        }
+        setIsLoadingBreeds(true);
+        try {
+            const loadedBreeds = await fetchBreeds(speciesId);
+            if (requestId === breedsRequestId.current) setBreeds(loadedBreeds);
+        } catch {
+            if (requestId === breedsRequestId.current) {
+                setBreedsError("Die Rassen konnten nicht geladen werden. Bitte wähle die Tierart erneut.");
+            }
+        } finally {
+            if (requestId === breedsRequestId.current) setIsLoadingBreeds(false);
+        }
     }
 
-    async function handleSubmit(values: AnimalFormValues) {
-        void values;
-        throw new Error("Speichern ist noch nicht angebunden.");
+    async function handleSubmit() {
+        if (isSubmittingRef.current || !values) return;
+
+        const validationErrors = validateAnimalForm(values);
+        if (Object.keys(validationErrors).length > 0) {
+            setErrors(validationErrors);
+            return;
+        }
+
+        isSubmittingRef.current = true;
+        setIsSubmitting(true);
+        setErrors({});
+
+        const result = await updateMyAnimal(animalId, values);
+
+        if (result.ok) {
+            router.push(ANIMALS_PATH);
+            return;
+        }
+
+        setErrors(result.errors);
+        isSubmittingRef.current = false;
+        setIsSubmitting(false);
     }
+
+    function handleCancel() {
+        router.push(ANIMALS_PATH);
+    }
+
+    const canSubmit = loadState === "ready" && species.length > 0;
 
     return (
         <main>
             <NavigationBar userType="shelter"/>
 
             <div className="editAnimalPage">
-                <Link href="/shelter/animals" className="editAnimalBackLink">← Zurück zu meinen Tieren</Link>
+                <Link href={ANIMALS_PATH} className="editAnimalBackLink">← Zurück zu allen Tieren</Link>
 
-                <header className="editAnimalIntro">
-                    <p className="editAnimalEyebrow">Tierprofil</p>
-                    <h1 className="editAnimalHeader">
-                        {state.status === "ready" ? `${state.animal.name} bearbeiten` : "Tier bearbeiten"}
-                    </h1>
-                    <p className="editAnimalSubtitle">Halte die Angaben zum Tier aktuell.</p>
+                <header className="editAnimalHeader">
+                    <div>
+                        <p className="editAnimalEyebrow">Tierprofil bearbeiten</p>
+                        <h1 className="editAnimalTitle">{animal ? `${animal.name} bearbeiten` : "Profil bearbeiten"}</h1>
+                        <p className="editAnimalSubtitle">
+                            Halte die Daten des Tieres aktuell, damit passende Adoptierende es finden.
+                        </p>
+                    </div>
+                    <div className="editAnimalHeaderActions">
+                        {/* TODO: Löschen ist noch nicht angebunden (API-Funktion deleteMyAnimal in lib/shelterAnimals.ts ist vorbereitet). */}
+                        <button
+                            type="button"
+                            className="editAnimalDeleteButton"
+                            disabled
+                            title="Löschen ist noch nicht verfügbar"
+                        >
+                            Tier löschen
+                        </button>
+                        <button
+                            type="submit"
+                            form={ANIMAL_FORM_ID}
+                            className="editAnimalHeaderButton"
+                            disabled={isSubmitting || !canSubmit}
+                        >
+                            {isSubmitting ? "Wird gespeichert…" : "Änderungen speichern"}
+                        </button>
+                    </div>
                 </header>
 
-                {state.status === "loading" && (
-                    <div className="editAnimalCard editAnimalCardNarrow">
-                        <p role="status" className="editAnimalStatus">Tierprofil wird geladen...</p>
+                {loadState === "loading" && (
+                    <p className="editAnimalStatus" role="status">Tierprofil wird geladen…</p>
+                )}
+
+                {loadState === "error" && (
+                    <div className="editAnimalStatus editAnimalStatusError" role="alert">
+                        <p>{ERROR_TEXTS[errorKind]}</p>
+                        {errorKind === "failed" && (
+                            <button type="button" className="editAnimalRetry" onClick={handleRetry}>Erneut versuchen</button>
+                        )}
+                        {errorKind === "unauthorized" && (
+                            <Link href="/auth/login" className="editAnimalRetry">Zur Anmeldung</Link>
+                        )}
                     </div>
                 )}
 
-                {state.status === "error" && (
-                    <div className="editAnimalCard editAnimalCardNarrow">
-                        <div role="alert" className="editAnimalStatus">
-                            <h2 className="editAnimalErrorTitle">{ERROR_TEXTS[state.kind].title}</h2>
-                            <p>{ERROR_TEXTS[state.kind].text}</p>
-                            <div className="editAnimalErrorActions">
-                                {state.kind === "failed" && (
-                                    <button type="button" className="editAnimalButton" onClick={retry}>Erneut versuchen</button>
-                                )}
-                                {state.kind === "unauthorized" ? (
-                                    <Link href="/auth/login" className="editAnimalButton">Zur Anmeldung</Link>
-                                ) : (
-                                    <Link href="/shelter/animals" className="editAnimalButton">Zu meinen Tieren</Link>
-                                )}
-                            </div>
-                        </div>
+                {loadState === "ready" && species.length === 0 && (
+                    <div className="editAnimalStatus editAnimalStatusError" role="alert">
+                        Es sind noch keine Tierarten hinterlegt. Das Tierprofil kann deshalb gerade nicht bearbeitet werden.
                     </div>
                 )}
 
-                {state.status === "ready" && (
-                    <div className="editAnimalCard">
-                        <AnimalForm
-                            mode="edit"
-                            initialValues={animalToFormValues(state.animal)}
-                            onSubmit={handleSubmit}
-                            onCancel={goBack}
-                            aside={<AnimalGallery pictures={state.animal.pictures ?? []} animalName={state.animal.name}/>}
-                        />
-                    </div>
+                {canSubmit && values && (
+                    <AnimalForm
+                        values={values}
+                        onChange={setValues}
+                        onSubmit={handleSubmit}
+                        onCancel={handleCancel}
+                        species={species}
+                        breeds={breeds}
+                        tagGroups={tagGroups}
+                        errors={errors}
+                        isSubmitting={isSubmitting}
+                        isLoadingBreeds={isLoadingBreeds}
+                        breedsError={breedsError}
+                        onSpeciesChange={loadBreeds}
+                        submitLabel="Änderungen speichern"
+                    />
                 )}
             </div>
         </main>
