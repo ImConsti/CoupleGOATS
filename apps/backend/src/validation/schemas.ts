@@ -29,6 +29,10 @@ export const tagCategories = [
   "lifestyle",
 ] as const;
 
+export const animalSortFields = ["name", "createdAt"] as const;
+
+export const sortOrders = ["asc", "desc"] as const;
+
 export const emailSchema = z.string().trim().toLowerCase().pipe(z.email());
 
 export const passwordSchema = z.string().min(8).max(72);
@@ -86,6 +90,21 @@ export const updateAnimalProfileSchema = z
 
 export const replaceAnimalTagsSchema = z.strictObject({
   tagIds: animalTagIdsSchema,
+});
+
+const positiveQueryInteger = z
+  .string()
+  .regex(/^[1-9]\d*$/)
+  .transform(Number)
+  .pipe(z.int().positive());
+
+export const listShelterAnimalsQuerySchema = z.strictObject({
+  page: positiveQueryInteger.default(1),
+  limit: positiveQueryInteger.pipe(z.number().max(100)).default(20),
+  sort: z.enum(animalSortFields).default("name"),
+  order: z.enum(sortOrders).default("asc"),
+  speciesId: z.uuid().optional(),
+  search: z.string().trim().min(1).max(100).optional(),
 });
 
 export const createTagSchema = z.object({

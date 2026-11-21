@@ -21,10 +21,6 @@ export default function NavigationBar({userType}:NavBarAttributes) {
     const firstPath  = isUser ? `${basePath}/discover` : `${basePath}/overview`;
     const secondPath = isUser ? `${basePath}/matches`  : `${basePath}/animals`;
 
-    function isActive(path: string) {
-        return pathName === path || pathName.startsWith(path + "/");
-    }
-
     async function handleLogout() {
         await signOut();
         router.push("/auth/login");
@@ -45,19 +41,19 @@ export default function NavigationBar({userType}:NavBarAttributes) {
             </div>
 
             <div className="navbarItemGroup">
-                <Link href={firstPath} className={isActive(firstPath) ? "navItem selectedTab" : "navItem"}>
+                <Link href={firstPath} className={pathName.startsWith(firstPath) ? "navItem selectedTab" : "navItem"}>
                     <p className="navItemContent">{isUser ? <><img src="/compass.svg" alt="compass icon" className="navIcon"/> Entdecken</> : <><img src="/house.svg" alt="house icon" className="navIcon"/> Übersicht</>}</p>
                 </Link>
 
-                <Link href={secondPath} className={isActive(secondPath) ? "navItem selectedTab" : "navItem"}>
+                <Link href={secondPath} className={pathName.startsWith(secondPath) ? "navItem selectedTab" : "navItem"}>
                     <p className="navItemContent">{isUser ? <><img src="/heart.svg" alt="heart icon" className="navIcon"/> Matches</> : <><img src="/paw2.svg" alt="paw icon" className="navIcon"/> Tiere</>}</p>
                 </Link>
 
-                <Link href={basePath+"/appointments"} className={isActive(basePath+"/appointments") ? "navItem selectedTab" : "navItem"}>
+                <Link href={basePath+"/appointments"} className={pathName.startsWith(basePath+"/appointments") ? "navItem selectedTab" : "navItem"}>
                     <p className="navItemContent"><img src="/calender.svg" alt="calender icon" className="navIcon"/> Termine</p>
                 </Link>
 
-                <Link href={basePath+"/profile"} className={isActive(basePath+"/profile") ? "navItem selectedTab" : "navItem"}>
+                <Link href={basePath+"/profile"} className={pathName.startsWith(basePath+"/profile") ? "navItem selectedTab" : "navItem"}>
                     <p className="navItemContent"><img src="/person.svg" alt="person icon" className="navIcon"/> Profil</p>
                 </Link>
             </div>
@@ -76,4 +72,4 @@ export default function NavigationBar({userType}:NavBarAttributes) {
             
         </nav>
     );
-}   
+}

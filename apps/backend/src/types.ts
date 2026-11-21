@@ -11,6 +11,8 @@ import type {
   roles,
   tagCategories,
   updateAnimalProfileSchema,
+  animalSortFields,
+  sortOrders,
 } from "./validation/schemas.js";
 
 
@@ -98,3 +100,66 @@ export type AnimalProfileRelations = {
 
 export type AnimalProfile = Omit<Animal, "breedId" | "speciesId"> &
   AnimalProfileRelations;
+
+export type AnimalRow = InferSelectModel<typeof animals> & {
+  species: Species;
+  breed: Omit<Breed, "speciesId"> | null;
+  animalsTags: { tag: Tag }[];
+};
+
+export type AnimalCardShelter = {
+  id: string;
+  name: string;
+  city: string;
+};
+
+export type AnimalCardRow = Pick<
+  InferSelectModel<typeof animals>,
+  "id" | "name" | "birthYear" | "gender"
+> & {
+  species: Species;
+  breed: Omit<Breed, "speciesId"> | null;
+  animalShelter: AnimalCardShelter;
+  animalsTags: { tag: Tag }[];
+  animalPictures: { id: string }[];
+};
+
+export type AnimalCard = {
+  id: string;
+  name: string;
+  species: Species;
+  breed: Omit<Breed, "speciesId"> | null;
+  birthYear: number;
+  gender: string;
+  tags: Tag[];
+  cardPictureId: string | null;
+  shelter: AnimalCardShelter;
+};
+
+export type AnimalSort = (typeof animalSortFields)[number];
+
+export type SortOrder = (typeof sortOrders)[number];
+
+export type AnimalFilters = {
+  speciesId?: string | undefined;
+  search?: string | undefined;
+}
+
+export type AnimalListParams = {
+  offset: number;
+  limit: number;
+  sort: AnimalSort;
+  order: SortOrder;
+  filters?: AnimalFilters;
+};
+
+export type PaginationMeta = {
+  page: number;
+  limit: number;
+  total: number;
+}
+
+export type Paginated<T> = {
+  items: T[];
+  meta: PaginationMeta;
+}

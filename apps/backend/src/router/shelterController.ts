@@ -4,27 +4,56 @@ import {
   getAuth,
 } from "../middleware/authenticationHandler.js";
 import type { AuthRequest } from "../types.js";
-import { checkRole } from "../middleware/roleHandler.js";
+import { checkExactRole } from "../middleware/roleHandler.js";
 import { zodValidation } from "../validation/zod-validation.js";
 import { z } from "zod";
 import {
   createAnimalProfileSchema,
+  listShelterAnimalsQuerySchema,
   replaceAnimalTagsSchema,
   updateAnimalProfileSchema,
 } from "../validation/schemas.js";
 import {
   createAnimalProfile,
+  deleteAnimalProfile,
   getAnimalProfile,
+  getAnimalProfilesByShelter,
   replaceAnimalTags,
   updateAnimalProfile,
 } from "../services/animalProfileService.js";
 
 export const router = express.Router({ mergeParams: true });
 
+router.get(
+  "/me/animals",
+  authenticationHandler,
+  checkExactRole("shelter"),
+  async (req: AuthRequest, res: Response, next: NextFunction) => {
+    try {
+      const auth = getAuth(req);
+      const { page, limit, sort, order, speciesId, search } = zodValidation(
+        listShelterAnimalsQuerySchema,
+        req.query,
+      );
+      const result = await getAnimalProfilesByShelter(
+        auth.sub,
+        page,
+        limit,
+        sort,
+        order,
+        { speciesId, search },
+      );
+      res.status(200).json(result);
+    } catch (error: unknown) {
+      next(error);
+    }
+  },
+);
+
 router.post(
   "/me/animals",
   authenticationHandler,
-  checkRole("shelter"),
+  checkExactRole("shelter"),
   async (req: AuthRequest, res: Response, next: NextFunction) => {
     try {
       const auth = getAuth(req);
@@ -40,7 +69,7 @@ router.post(
 router.get(
   "/me/animals/:animalId",
   authenticationHandler,
-  checkRole("shelter"),
+  checkExactRole("shelter"),
   async (req: AuthRequest, res: Response, next: NextFunction) => {
     try {
       const auth = getAuth(req);
@@ -56,7 +85,7 @@ router.get(
 router.patch(
   "/me/animals/:animalId",
   authenticationHandler,
-  checkRole("shelter"),
+    checkExactRole("shelter"),
   async (req: AuthRequest, res: Response, next: NextFunction) => {
     try {
       const auth = getAuth(req);
@@ -77,7 +106,7 @@ router.patch(
 router.put(
   "/me/animals/:animalId/tags",
   authenticationHandler,
-  checkRole("shelter"),
+    checkExactRole("shelter"),
   async (req: AuthRequest, res: Response, next: NextFunction) => {
     try {
       const auth = getAuth(req);
@@ -91,3 +120,18 @@ router.put(
   },
 );
 
+router.delete(
+  "/me/animals/:animalId",
+  authenticationHandler,
+  checkExactRole("shelter"),
+  async (req: AuthRequest, res: Response, next: NextFunction) => {
+    try {
+      const auth = getAuth(req);
+      const animalId = zodValidation(z.uuid(), req.params.animalId);
+      await deleteAnimalProfile(auth.sub, animalId);
+      res.status(204).send();
+    } catch (error: unknown) {
+      next(error);
+    }
+  },
+);

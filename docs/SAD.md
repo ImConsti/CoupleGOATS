@@ -126,6 +126,46 @@ Die Architektur von CoupleGOATS wird in fünf Sichten beschrieben, die den Sicht
 | Bereitstellungsansicht | Was läuft wo, und wie ist es verbunden? | [Bereitstellungsdiagramm](diagrams/deployment.png) ([Quelle](diagrams/deployment.puml)) | 7 |
 | Implementierungsansicht | Woraus besteht der Code? | [Komponentendiagramm](diagrams/components.png) ([Quelle](diagrams/components.puml)) | 8 |
 
+### 2.1 Architekturstil
+
+*Autor: Carolin*
+
+<!-- Three short paragraphs, together rarely longer than half a page.
+     Every reason names a scenario or a constraint from section 3 by its ID. -->
+
+**Hauptstil.** 
+Unser Backend ist ein Layered Monolith: ein einziger Node.js-Prozess (Express), der intern in die Schichten Controller, Services und Persistence (Repositories mit Drizzle ORM) aufgeteilt ist. 
+Jede Schicht ruft nur die darunterliegende auf. 
+Frontend (Next.js) und Backend bilden ein Client-Server-System: Der Browser fragt über die REST-API unter `/api/v1` an, das Backend antwortet mit JSON. 
+Weitere Stile setzen wir nicht ein.
+
+**Warum.** 
+(1) Wir sind vier Personen un besuchen parallel weitere Vorlesungen (C-02): Ein Backend bedeutet nur einen Prozess, der gebaut, deployt und überwacht werden muss, und wenige Komponenten, die wir selbst warten müssen. 
+(2) Die Daten liegen in einer SQLite-Datei (C-01), die nur ein Prozess gleichzeitig beschreiben darf. 
+Deshalb läuft das Backend mit einer Instanz (siehe Abschnitt 7).
+Das reicht auch für QS-02, da die Datei auf einem persistenten Volume liegt.
+(3) Keines unserer Szenarien (QS-01 bis QS-03) braucht unabhängige Skalierung. QS-01 verlangt beispielsweise, dass die Suche bei bis zu 1.000 Datensätzen in 95% der Fälle unter 10 s antworten. 
+Das schafft ein Prozess, in dem Service und Repository sich direkt aufrufen.
+
+**Verworfene Alternative.** 
+Microservices (z. B. je ein Dienst für Tiere, Matches und Termine). 
+Sie würden uns unabhängiges Deployment und Skalieren ermöglichen. 
+Wir haben sie nicht gewählt, weil Tiere, Matches und Termine eng zusammenhängen. 
+Zudem bräuchte jeder Dienst eine eigene Datenbank, SQLite lässt jedoch nur eine Instanz zu (C-01). 
+Des Weiteren können wir nicht mehrere Dienste betreiben, überwachen und deployen (C-02). 
+Wir würden neu entscheiden, wenn die App deutschlandweit mit vielen Tierheimen läuft und einzelne Teile getrennt skaliert werden müssen.
+
+### 2.2 Architekturentscheidungen
+
+*Autor: Constantin*
+
+<!-- Eine Zeile pro ADR in docs/decisions/. Ein akzeptierter ADR wird nicht umgeschrieben: Eine neue
+     Entscheidung bekommt einen neuen ADR, der alte erhält den Status "superseded by ADR-xx". -->
+
+| ADR    | Entscheidung | Status | Datum |
+| ------ | ------------ | ------ | ----- |
+| ADR-01 | [SQLite-Datei statt PostgreSQL-Server](decisions/ADR-01_sqlite-statt-postgresql.md) | accepted | 15.11.2026 |
+
 
 ## 3 Architektonische Ziele und Einschränkungen
 
@@ -312,11 +352,23 @@ Die Komponenten und ihre Verantwortlichkeiten sind in der folgenden Tabelle zusa
 Die REST-API ist die Schnittstelle zwischen Frontend und Backend. Die Datenbank wird ausschließlich über die Persistence-Komponente angesprochen. Die interne Aufteilung unterstützt die Trennung von Benutzeroberfläche, fachlicher Logik und Datenzugriff.
 
 
-### 8.2 Schichten
+### 8.2 Schichtenarchitektur (Backend-Schichtenarchitektur und Code-Check)
 
-<!-- Vorlesungen 8 und 9. Die Schichten der Anwendung und die Regeln zwischen ihnen. Bis dahin unverändert lassen. -->
+*Autor: brdly06*
 
-*Folgt mit den Vorlesungen 8 und 9.*
+| Schicht | Ordner | Inhalt | Darf verwenden |
+| --- | --- | --- | --- |
+| HTTP / Controller | `src/router/` | Express-Routen, Request-/Response-Verarbeitung und Aufruf der Anwendungsfälle | `services/`, `middleware/`, `validation/`, `errors/`, `types.ts` sowie Express |
+| Middleware | `src/middleware/` | Authentifizierung, Rollenprüfung und Fehler-/404-Behandlung | `services/`, `utils/`, `errors/`, `types.ts` sowie Express |
+| Validierung | `src/validation/` | Zod-Schemas und Validierungs-Hilfsfunktionen | Zod, `errors/` und gemeinsame Typen |
+| Anwendung / Services | `src/services/` | Anwendungsfälle und Geschäftsregeln | `repositories/`, `errors/`, `utils/` und `types.ts` |
+| Persistenz / Repository | `src/repositories/` | Datenbankabfragen und Repository-Funktionen | `db/`, `errors/` und `types.ts` |
+| Datenbank | `src/db/` sowie `drizzle/` | Drizzle-Verbindung, Schema, Relationen und SQL-Migrationen | Datenbank-/Drizzle-Bibliotheken; innerhalb der Anwendung keine höheren Schichten |
+| Gemeinsame Hilfsfunktionen | `src/errors/`, `src/utils/`, `src/types.ts` | Fehlerklassen/-mapping, technische Hilfsfunktionen und gemeinsam verwendete Typen | Externe Bibliotheken und niedrigere technische Typdefinitionen; keine Router-, Service- oder Repository-Aufrufe |
+
+Das Backend ist als modularer Monolith organisiert. In der vorliegenden Ordnerstruktur sind keine getrennten fachlichen Module mit eigenen Modulgrenzen erkennbar.
+
+**Im Code geprüft.** Wir haben den Anwendungsfall „Rassen einer Tierart abrufen“ verfolgt: `src/router/speciesController.ts` (Zeilen 22–29) → `src/services/breedService.ts` (Zeilen 6–12) → `src/repositories/breedRepository.ts` (Zeilen 5–18). Der geprüfte Hauptpfad hält die Schichtenfolge ein: Der Controller ruft den Service auf und der Service das Repository. Bei der Prüfung weiterer Imports fanden wir jedoch Abweichungen von den Regeln: `src/middleware/authenticationHandler.ts` verwendet die Repositories direkt (Zeilen 4–5), `src/services/animalProfileService.ts` greift direkt auf die Datenbank zu (Zeile 15) und `src/services/tagService.ts` importiert ein Validierungs-Schema (Zeile 2). Diese Abweichungen sind dokumentiert und werden im Rahmen dieses Issues nicht behoben.
 
 ## 9 Datenansicht
 
@@ -332,6 +384,14 @@ Die REST-API ist die Schnittstelle zwischen Frontend und Backend. Die Datenbank 
 
 ## 11 Qualität
 
-<!-- Vorlesungen 7 bis 9. Wie die Architektur die benötigten Qualitäten unterstützt: Verfügbarkeit, Sicherheit, Wartbarkeit, … Bis dahin unverändert lassen. -->
+*Autor: Mika*
 
-*Folgt mit den Vorlesungen 7 bis 9.*
+So erreicht unsere Architektur die Szenarien aus Abschnitt 3.1. Der Status wurde gegen den Code unter `apps/backend`, die Migrationen in `apps/backend/drizzle/`, das Dockerfile und die Workflows in `.github/workflows/` geprüft.
+
+| Szenario | Taktiken | Wo | Status | Preis | Entscheidung |
+| -------- | -------- | -- | ------ | ----- | ------------ |
+| QS-01 Suchergebnisse innerhalb von 10 s | (1) Ergebnismenge begrenzen: serverseitige Paginierung (`page`, `limit` höchstens 100, Standard 20); die Listenabfrage lädt keine Bilder, diese liegen getrennt in `animal_pictures`.<br>(2) Indizes auf `animals(animal_shelter_id)` und `animals(species_id)` für die Filter der Suche. | (1) Application Services und Persistence (`animalProfileService`, `animalRepository`)<br>(2) SQLite Database (`db/schema.ts`, `drizzle/`) | (1) in place, bisher für die Tierliste des Tierheims; der Discovery-Endpunkt für Adoptierende existiert noch nicht und übernimmt das Muster<br>(2) planned: Die Migrationen 0000 bis 0007 legen nur `user_filters_unique` an, auf `animals` gibt es keine Indizes | (1) Eine zusätzliche Zählabfrage je Anfrage; der Client muss Seiten nachladen<br>(2) Etwas langsamere Schreibvorgänge und eine weitere Migration | — |
+| QS-02 Datenerhalt bei Serverneustart | (1) SQLite-Datei auf persistentem Volume (`/data/couplegoats.db`), Backend mit einer Replik und Strategie `Recreate`.<br>(2) Atomare Schreibvorgänge: mehrstufige Änderungen laufen in `db.transaction`, Migrationen werden beim Start vom Drizzle-Migrator eingespielt. | (1) SQLite Database und Bereitstellung (Abschnitt 7)<br>(2) Application Services und Persistence (`animalProfileService`, `index.ts`) | (1) in place: Der Pfad ist im Dockerfile gesetzt (`DB_FILE_NAME=file:/data/couplegoats.db`); Volume, Replik und `Recreate` stammen aus Abschnitt 7, das Manifest liegt im Infrastruktur-Repository und wurde nicht geprüft<br>(2) in place für Tierprofile und Tags (drei Transaktionen); für Matches und Termine gibt es noch keinen Schreibcode, die Tabelle für Termine fehlt noch | (1) Das Backend lässt sich nicht auf mehrere Instanzen skalieren und ist bei jedem Update kurz nicht erreichbar<br>(2) Schreibvorgänge laufen seriell; Transaktionen müssen im Service bewusst gesetzt werden | (1) ADR-01 SQLite-Datei statt PostgreSQL-Server, weil sie zu Teamgröße und Budget passt und keinen zusätzlichen Server braucht. Preis: nur eine Backend-Instanz. |
+| QS-03 Vollständigkeit der API-Dokumentation | (1) `openapi.yaml` als einzige Quelle im Repository, ausgeliefert über Swagger UI unter `/api/docs`.<br>(2) Automatischer Abgleich der Express-Routen mit `openapi.yaml` in der CI und ein Prüfpunkt in der PR-Checkliste. | (1) API & Auth (`src/router/`, `openapi.yaml`)<br>(2) API & Auth und GitHub Actions | (1) in place: 13 von 13 Operationen unter `/api/v1` sind dokumentiert; `/` und `/test` in `index.ts` sind es nicht<br>(2) planned: `deploy.yml` baut nur die Images, einen Test- oder Lint-Schritt gibt es nicht | (1) Zod-Schemas und OpenAPI-Datei werden parallel von Hand gepflegt<br>(2) Ein zusätzlicher CI-Schritt, der bei neuen Routenmustern angepasst werden muss | — |
+
+QS-01 hat unter den Szenarien mit hohem Geschäftswert das höchste Risiko. Deshalb begrenzen wir die Antwortgröße durch Paginierung und halten die Bilder aus der Listenabfrage heraus. Die Indizes für die Filter nach Tierart und Tierheim folgen mit der Discovery-Suche, die Antwortzeit messen wir, sobald dieser Endpunkt existiert. Die Namenssuche (`LIKE '%…%'`) kann keinen Index nutzen, ist bei bis zu 1.000 Datensätzen als Tabellenscan aber unkritisch. Eine Volltextsuche mit SQLite FTS5 oder einer eigenen Suchmaschine haben wir nicht gewählt, weil sie bei dieser Datenmenge keinen messbaren Vorteil brächte und mehr Betrieb und Wartung verlangte (C-02, C-03).

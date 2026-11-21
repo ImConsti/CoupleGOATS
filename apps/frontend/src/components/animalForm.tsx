@@ -1,435 +1,248 @@
 "use client";
 
-import { useEffect, useState, type FormEvent, type ReactNode } from "react";
+import {useId, type FormEvent} from "react";
+import "./animalForm.css";
 import {
-    EXPERIENCE_LABELS,
-    categoryLabel,
-    GENDER_LABELS,
-    fetchBreeds,
-    fetchSpecies,
-    fetchTags,
-    idOf,
-    type Animal,
+    CATEGORY_LABELS,
+    ENERGY_CATEGORY,
+    EXPERIENCE_OPTIONS,
+    GENDER_OPTIONS,
+    MAX_DESCRIPTION_LENGTH,
+    MAX_NAME_LENGTH,
+    type AnimalFormErrors,
+    type AnimalFormValues,
     type Breed,
-    type ExperienceLevel,
-    type Gender,
     type Species,
-    type Tag,
+    type TagGroup,
 } from "@/lib/animals";
 
-export type AnimalFormValues = {
-    name: string;
-    speciesId: string;
-    breedId: string;
-    birthYear: string;
-    gender: Gender | "";
-    requiredExperience: ExperienceLevel | "";
-    description: string;
-    tagIds: string[];
-};
-
-export const EMPTY_ANIMAL_FORM_VALUES: AnimalFormValues = {
-    name: "",
-    speciesId: "",
-    breedId: "",
-    birthYear: "",
-    gender: "",
-    requiredExperience: "",
-    description: "",
-    tagIds: [],
-};
-
-export function animalToFormValues(animal: Animal): AnimalFormValues {
-    return {
-        name: animal.name,
-        speciesId: idOf(animal.species),
-        breedId: idOf(animal.breed),
-        birthYear: String(animal.birthYear),
-        gender: animal.gender,
-        requiredExperience: animal.requiredExperience,
-        description: animal.description,
-        tagIds: (animal.tags ?? []).map((tag) => tag.id),
-    };
-}
+export const ANIMAL_FORM_ID = "animal-form";
 
 type AnimalFormProps = {
-    mode: "create" | "edit";
-    initialValues?: AnimalFormValues;
-    onSubmit: (values: AnimalFormValues) => Promise<void> | void;
+    values: AnimalFormValues;
+    onChange: (values: AnimalFormValues) => void;
+    onSubmit: () => void;
     onCancel: () => void;
-    aside?: ReactNode;
+    species: Species[];
+    breeds: Breed[];
+    tagGroups: TagGroup[];
+    errors?: AnimalFormErrors;
+    isSubmitting?: boolean;
+    isLoadingBreeds?: boolean;
+    breedsError?: string;
+    onSpeciesChange?: (speciesId: string) => void;
+    submitLabel?: string;
+    formId?: string;
 };
 
-const FOCUS_RING = "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-900";
-const INPUT_BASE = `bg-white border border-gray-200 rounded-xl placeholder-gray-400 w-full px-3 text-gray-900 ${FOCUS_RING} disabled:bg-gray-50 disabled:text-gray-400 disabled:cursor-not-allowed aria-[invalid=true]:border-red-500`;
-const INPUT = `${INPUT_BASE} h-11`;
-const TEXTAREA = `${INPUT_BASE} py-2 resize-y`;
-const LABEL = "text-sm font-medium text-gray-600";
-const FIELD = "flex flex-col gap-1.5 min-w-0";
-const ERROR = "text-sm text-red-600";
+export default function AnimalForm({
+    values,
+    onChange,
+    onSubmit,
+    onCancel,
+    species,
+    breeds,
+    tagGroups,
+    errors = {},
+    isSubmitting = false,
+    isLoadingBreeds = false,
+    breedsError,
+    onSpeciesChange,
+    submitLabel = "Profil erstellen",
+    formId = ANIMAL_FORM_ID,
+}: AnimalFormProps) {
+    const uid = useId();
+    const id = (field: string) => `${uid}-${field}`;
 
-function SectionTitle({ overline, title }: { overline: string; title: string }) {
-    return (
-        <div className="flex flex-col gap-0.5">
-            <p className="text-xs font-semibold uppercase tracking-widest text-gray-500">{overline}</p>
-            <h2 className="text-xl font-semibold text-gray-900">{title}</h2>
-        </div>
-    );
-}
-
-type MasterData = { species: Species[]; tags: Tag[] };
-type BreedsState = { speciesId: string; items: Breed[] | null };
-type FieldName = keyof AnimalFormValues;
-type FieldErrors = Partial<Record<FieldName, string>>;
-
-const FIELD_IDS: Record<FieldName, string> = {
-    name: "animal-name",
-    speciesId: "animal-species",
-    breedId: "animal-breed",
-    birthYear: "animal-birth-year",
-    gender: "animal-gender",
-    requiredExperience: "animal-experience",
-    description: "animal-description",
-    tagIds: "animal-tags",
-};
-
-export default function AnimalForm({ mode, initialValues = EMPTY_ANIMAL_FORM_VALUES, onSubmit, onCancel, aside }: AnimalFormProps) {
-
-    const [values, setValues] = useState<AnimalFormValues>(initialValues);
-    const [errors, setErrors] = useState<FieldErrors>({});
-    const [submitError, setSubmitError] = useState("");
-    const [isSubmitting, setIsSubmitting] = useState(false);
-
-    const [masterData, setMasterData] = useState<MasterData | "error" | null>(null);
-    const [masterDataAttempt, setMasterDataAttempt] = useState(0);
-    const [breedsState, setBreedsState] = useState<BreedsState | null>(null);
-    const [breedsAttempt, setBreedsAttempt] = useState(0);
-
-    useEffect(() => {
-        let cancelled = false;
-        Promise.all([fetchSpecies(), fetchTags()])
-            .then(([species, tags]) => { if (!cancelled) setMasterData({ species, tags }); })
-            .catch(() => { if (!cancelled) setMasterData("error"); });
-        return () => { cancelled = true; };
-    }, [masterDataAttempt]);
-
-    useEffect(() => {
-        if (!values.speciesId) return;
-        const speciesId = values.speciesId;
-        let cancelled = false;
-        fetchBreeds(speciesId)
-            .then((items) => { if (!cancelled) setBreedsState({ speciesId, items }); })
-            .catch(() => { if (!cancelled) setBreedsState({ speciesId, items: null }); });
-        return () => { cancelled = true; };
-    }, [values.speciesId, breedsAttempt]);
-
-    const breedsLoaded = breedsState !== null && breedsState.speciesId === values.speciesId;
-    const breeds = breedsLoaded ? breedsState.items : null;
-    const breedsLoading = values.speciesId !== "" && !breedsLoaded;
-    const breedsFailed = breedsLoaded && breedsState.items === null;
-
-    function retryMasterData() {
-        setMasterData(null);
-        setMasterDataAttempt((attempt) => attempt + 1);
+    function update<K extends keyof AnimalFormValues>(field: K, value: AnimalFormValues[K]) {
+        onChange({...values, [field]: value});
     }
 
-    function retryBreeds() {
-        setBreedsState(null);
-        setBreedsAttempt((attempt) => attempt + 1);
+    function handleSpeciesChange(speciesId: string) {
+        onChange({...values, speciesId, breedId: ""});
+        onSpeciesChange?.(speciesId);
     }
 
-    function update<K extends FieldName>(field: K, value: AnimalFormValues[K]) {
-        setValues((current) => ({ ...current, [field]: value }));
-        setErrors((current) => ({ ...current, [field]: undefined }));
+    function toggleTag(tagId: string, groupTagIds: string[], single: boolean) {
+        const selected = values.tagIds.includes(tagId);
+        const base = single ? values.tagIds.filter((t) => !groupTagIds.includes(t)) : values.tagIds.filter((t) => t !== tagId);
+        update("tagIds", selected ? base : [...base, tagId]);
     }
 
-    function changeSpecies(speciesId: string) {
-        setValues((current) => ({ ...current, speciesId, breedId: "" }));
-        setErrors((current) => ({ ...current, speciesId: undefined, breedId: undefined }));
-    }
-
-    function toggleTag(tag: Tag, allTags: Tag[]) {
-        if (values.tagIds.includes(tag.id)) {
-            update("tagIds", values.tagIds.filter((id) => id !== tag.id));
-            return;
-        }
-        const sameCategory = tag.category
-            ? allTags.filter((other) => other.category === tag.category).map((other) => other.id)
-            : [];
-        update("tagIds", [...values.tagIds.filter((id) => !sameCategory.includes(id)), tag.id]);
-    }
-
-    function validate(): FieldErrors {
-        const result: FieldErrors = {};
-        const currentYear = new Date().getFullYear();
-        const year = Number(values.birthYear);
-
-        if (!values.name.trim()) result.name = "Bitte gib einen Namen an.";
-        if (!values.speciesId) result.speciesId = "Bitte wähle eine Tierart.";
-        if (!values.birthYear.trim()) {
-            result.birthYear = "Bitte gib das Geburtsjahr an.";
-        } else if (!Number.isInteger(year) || year < currentYear - 40 || year > currentYear) {
-            result.birthYear = `Das Geburtsjahr muss zwischen ${currentYear - 40} und ${currentYear} liegen.`;
-        }
-        if (!values.gender) result.gender = "Bitte wähle ein Geschlecht.";
-        if (!values.requiredExperience) result.requiredExperience = "Bitte wähle die benötigte Erfahrung.";
-        if (!values.description.trim()) result.description = "Bitte gib eine Beschreibung an.";
-        return result;
-    }
-
-    async function handleSubmit(event: FormEvent) {
+    function handleSubmit(event: FormEvent) {
         event.preventDefault();
-        setSubmitError("");
-
-        const validationErrors = validate();
-        setErrors(validationErrors);
-
-        const firstInvalid = (Object.keys(FIELD_IDS) as FieldName[]).find((field) => validationErrors[field]);
-        if (firstInvalid) {
-            document.getElementById(FIELD_IDS[firstInvalid])?.focus();
-            return;
-        }
-
-        setIsSubmitting(true);
-        try {
-            await onSubmit({
-                ...values,
-                name: values.name.trim(),
-                description: values.description.trim(),
-            });
-        } catch (error) {
-            setSubmitError(error instanceof Error ? error.message : "Speichern fehlgeschlagen.");
-        } finally {
-            setIsSubmitting(false);
-        }
+        if (!isSubmitting) onSubmit();
     }
 
-    if (masterData === null) {
-        return <p role="status" className="text-sm text-gray-500 py-6 text-center">Formular wird geladen...</p>;
-    }
+    const breedDisabled = !values.speciesId || isLoadingBreeds || isSubmitting;
+    const breedPlaceholder = !values.speciesId
+        ? "Zuerst Tierart wählen"
+        : isLoadingBreeds
+            ? "Rassen werden geladen…"
+            : breeds.length === 0
+                ? "Keine Rassen vorhanden"
+                : "Keine Angabe";
 
-    if (masterData === "error") {
-        return (
-            <div role="alert" className="text-sm text-gray-500 py-6 text-center">
-                <p className="text-red-500">Tierarten und Tags konnten nicht geladen werden.</p>
-                <button type="button" className={`mt-3 h-10 px-5 bg-white text-gray-800 border border-gray-200 rounded-xl cursor-pointer hover:bg-gray-50 ${FOCUS_RING}`} onClick={retryMasterData}>
-                    Erneut versuchen
-                </button>
-            </div>
-        );
-    }
-
-    const tagGroups = new Map<string, Tag[]>();
-    for (const tag of masterData.tags) {
-        const group = tag.category ?? "";
-        tagGroups.set(group, [...(tagGroups.get(group) ?? []), tag]);
-    }
-
-    function describedBy(field: FieldName, hintId?: string): string | undefined {
-        const ids = [errors[field] ? `${FIELD_IDS[field]}-error` : undefined, hintId].filter(Boolean);
-        return ids.length ? ids.join(" ") : undefined;
-    }
-
-    function fieldError(field: FieldName) {
-        return errors[field]
-            ? <p id={`${FIELD_IDS[field]}-error`} className={ERROR}>{errors[field]}</p>
-            : null;
-    }
+    const describedBy = (field: keyof AnimalFormValues) => (errors[field] ? `${id(field)}-error` : undefined);
 
     return (
-        <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-8">
-
-            <div className={aside ? "grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,1fr)_300px] lg:gap-10" : ""}>
-
-                <div className="flex flex-col gap-8 min-w-0">
-
-                    <section className="flex flex-col gap-5" aria-label="Grunddaten">
-                        <SectionTitle overline="Grunddaten" title="Profildetails" />
-
-                        <div className={FIELD}>
-                            <label htmlFor={FIELD_IDS.name} className={LABEL}>Name *</label>
-                            <input
-                                id={FIELD_IDS.name}
-                                type="text"
-                                className={INPUT}
-                                placeholder="z. B. Bello"
-                                value={values.name}
-                                onChange={(e) => update("name", e.target.value)}
-                                aria-invalid={errors.name ? true : undefined}
-                                aria-describedby={describedBy("name")}
-                            />
-                            {fieldError("name")}
-                        </div>
-
-                        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-                            <div className={FIELD}>
-                                <label htmlFor={FIELD_IDS.speciesId} className={LABEL}>Tierart *</label>
-                                <select
-                                    id={FIELD_IDS.speciesId}
-                                    className={INPUT}
-                                    value={values.speciesId}
-                                    onChange={(e) => changeSpecies(e.target.value)}
-                                    aria-invalid={errors.speciesId ? true : undefined}
-                                    aria-describedby={describedBy("speciesId")}
-                                >
-                                    <option value="">Bitte wählen</option>
-                                    {masterData.species.map((species) => (
-                                        <option key={species.id} value={species.id}>{species.name}</option>
-                                    ))}
-                                </select>
-                                {fieldError("speciesId")}
-                            </div>
-
-                            <div className={FIELD}>
-                                <label htmlFor={FIELD_IDS.breedId} className={LABEL}>Rasse</label>
-                                <select
-                                    id={FIELD_IDS.breedId}
-                                    className={INPUT}
-                                    value={values.breedId}
-                                    onChange={(e) => update("breedId", e.target.value)}
-                                    disabled={!values.speciesId || breedsLoading || breedsFailed}
-                                    aria-invalid={errors.breedId ? true : undefined}
-                                    aria-describedby={describedBy("breedId", "animal-breed-hint")}
-                                >
-                                    <option value="">
-                                        {!values.speciesId ? "Zuerst Tierart wählen" : breedsLoading ? "Rassen werden geladen..." : "Keine Angabe"}
-                                    </option>
-                                    {(breeds ?? []).map((breed) => (
-                                        <option key={breed.id} value={breed.id}>{breed.name}</option>
-                                    ))}
-                                </select>
-                                {breedsFailed && (
-                                    <p id="animal-breed-hint" role="alert" className={ERROR}>
-                                        Rassen konnten nicht geladen werden.{" "}
-                                        <button type="button" className="underline text-emerald-900 cursor-pointer" onClick={retryBreeds}>Erneut versuchen</button>
-                                    </p>
-                                )}
-                                {fieldError("breedId")}
-                            </div>
-                        </div>
-
-                        <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
-                            <div className={FIELD}>
-                                <label htmlFor={FIELD_IDS.birthYear} className={LABEL}>Geburtsjahr *</label>
-                                <input
-                                    id={FIELD_IDS.birthYear}
-                                    type="number"
-                                    inputMode="numeric"
-                                    className={INPUT}
-                                    placeholder="z. B. 2021"
-                                    value={values.birthYear}
-                                    onChange={(e) => update("birthYear", e.target.value)}
-                                    aria-invalid={errors.birthYear ? true : undefined}
-                                    aria-describedby={describedBy("birthYear")}
-                                />
-                                {fieldError("birthYear")}
-                            </div>
-
-                            <div className={FIELD}>
-                                <label htmlFor={FIELD_IDS.gender} className={LABEL}>Geschlecht *</label>
-                                <select
-                                    id={FIELD_IDS.gender}
-                                    className={INPUT}
-                                    value={values.gender}
-                                    onChange={(e) => update("gender", e.target.value as Gender | "")}
-                                    aria-invalid={errors.gender ? true : undefined}
-                                    aria-describedby={describedBy("gender")}
-                                >
-                                    <option value="">Bitte wählen</option>
-                                    {(Object.keys(GENDER_LABELS) as Gender[]).map((gender) => (
-                                        <option key={gender} value={gender}>{GENDER_LABELS[gender]}</option>
-                                    ))}
-                                </select>
-                                {fieldError("gender")}
-                            </div>
-
-                            <div className={FIELD}>
-                                <label htmlFor={FIELD_IDS.requiredExperience} className={LABEL}>Benötigte Erfahrung *</label>
-                                <select
-                                    id={FIELD_IDS.requiredExperience}
-                                    className={INPUT}
-                                    value={values.requiredExperience}
-                                    onChange={(e) => update("requiredExperience", e.target.value as ExperienceLevel | "")}
-                                    aria-invalid={errors.requiredExperience ? true : undefined}
-                                    aria-describedby={describedBy("requiredExperience")}
-                                >
-                                    <option value="">Bitte wählen</option>
-                                    {(Object.keys(EXPERIENCE_LABELS) as ExperienceLevel[]).map((level) => (
-                                        <option key={level} value={level}>{EXPERIENCE_LABELS[level]}</option>
-                                    ))}
-                                </select>
-                                {fieldError("requiredExperience")}
-                            </div>
-                        </div>
-
-                        <div className={FIELD}>
-                            <label htmlFor={FIELD_IDS.description} className={LABEL}>Beschreibung *</label>
-                            <textarea
-                                id={FIELD_IDS.description}
-                                rows={5}
-                                className={TEXTAREA}
-                                placeholder="Erzähl etwas über das Tier: Charakter, Vorgeschichte, Besonderheiten..."
-                                value={values.description}
-                                onChange={(e) => update("description", e.target.value)}
-                                aria-invalid={errors.description ? true : undefined}
-                                aria-describedby={describedBy("description")}
-                            />
-                            {fieldError("description")}
-                        </div>
-                    </section>
-
-                    <section className="flex flex-col gap-4" aria-label="Eigenschaften">
-                        <SectionTitle overline="Eigenschaften" title="Tags" />
-                        <p id="animal-tags-hint" className="text-sm text-gray-500 -mt-2">
-                            Pro Kategorie kannst du einen Tag auswählen. Ein erneuter Klick wählt ihn wieder ab.
-                        </p>
-
-                        {masterData.tags.length === 0 ? (
-                            <p className="text-sm text-gray-500">Es sind noch keine Tags vorhanden.</p>
-                        ) : (
-                            <div id={FIELD_IDS.tagIds} tabIndex={-1} className="flex flex-col gap-4">
-                                {[...tagGroups.entries()].map(([group, tags]) => (
-                                    <fieldset key={group || "all"} className="flex flex-col gap-2 border-0 p-0 m-0 min-w-0" aria-describedby="animal-tags-hint">
-                                        <legend className={`${LABEL} mb-2`}>{group ? categoryLabel(group) : "Weitere Tags"}</legend>
-                                        <div className="flex flex-wrap gap-2">
-                                            {tags.map((tag) => (
-                                                <label key={tag.id} className="relative cursor-pointer">
-                                                    <input
-                                                        className="peer absolute opacity-0 w-full h-full m-0 cursor-pointer"
-                                                        type="checkbox"
-                                                        checked={values.tagIds.includes(tag.id)}
-                                                        onChange={() => toggleTag(tag, masterData.tags)}
-                                                    />
-                                                    <span className="inline-block rounded-full border border-gray-200 bg-white px-3.5 py-1.5 text-sm text-gray-700 transition-colors hover:border-emerald-900 peer-checked:bg-emerald-900 peer-checked:border-emerald-900 peer-checked:text-white peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-emerald-900">
-                                                        {tag.name}
-                                                    </span>
-                                                </label>
-                                            ))}
-                                        </div>
-                                    </fieldset>
-                                ))}
-                            </div>
-                        )}
-                    </section>
-                </div>
-
-                {aside && (
-                    <aside className="flex flex-col gap-4 min-w-0 lg:border-l lg:border-gray-100 lg:pl-10">
-                        {aside}
-                    </aside>
-                )}
-            </div>
-
-            {submitError && (
-                <p role="alert" className={ERROR}>{submitError}</p>
+        <form id={formId} className="animalForm" onSubmit={handleSubmit} noValidate>
+            {errors.form && (
+                <div className="animalFormAlert" role="alert">{errors.form}</div>
             )}
 
-            <div className="flex flex-col-reverse gap-3 border-t border-gray-100 pt-6 sm:flex-row sm:justify-end">
-                <button type="button" className={`h-11 px-6 bg-white text-gray-800 border border-gray-200 rounded-xl cursor-pointer hover:bg-gray-50 ${FOCUS_RING} disabled:opacity-60 disabled:cursor-not-allowed`} onClick={onCancel} disabled={isSubmitting}>
+            <section className="animalFormCard" aria-labelledby={id("basic-title")}>
+                <p className="animalFormEyebrow">Grunddaten</p>
+                <h2 id={id("basic-title")} className="animalFormTitle">Profildetails</h2>
+                <p className="animalFormHint"><span aria-hidden="true">*</span> Pflichtfeld</p>
+
+                <div className="animalFormGrid">
+                    <div className="animalFormField">
+                        <label htmlFor={id("name")} className="animalFormLabel">Name <span aria-hidden="true">*</span></label>
+                        <input
+                            id={id("name")} type="text" className="animalFormInput" required aria-required="true"
+                            maxLength={MAX_NAME_LENGTH} autoComplete="off" value={values.name} disabled={isSubmitting}
+                            aria-invalid={!!errors.name} aria-describedby={describedBy("name")}
+                            onChange={(e) => update("name", e.target.value)}
+                        />
+                        {errors.name && <p id={`${id("name")}-error`} className="animalFormError">{errors.name}</p>}
+                    </div>
+
+                    <div className="animalFormField">
+                        <label htmlFor={id("speciesId")} className="animalFormLabel">Tierart <span aria-hidden="true">*</span></label>
+                        <select
+                            id={id("speciesId")} className="animalFormInput" required aria-required="true"
+                            value={values.speciesId} disabled={isSubmitting}
+                            aria-invalid={!!errors.speciesId} aria-describedby={describedBy("speciesId")}
+                            onChange={(e) => handleSpeciesChange(e.target.value)}
+                        >
+                            <option value="">Bitte wählen</option>
+                            {species.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
+                        </select>
+                        {errors.speciesId && <p id={`${id("speciesId")}-error`} className="animalFormError">{errors.speciesId}</p>}
+                    </div>
+
+                    <div className="animalFormField">
+                        <label htmlFor={id("breedId")} className="animalFormLabel">Rasse</label>
+                        <select
+                            id={id("breedId")} className="animalFormInput" value={values.breedId} disabled={breedDisabled}
+                            aria-invalid={!!errors.breedId} aria-describedby={breedsError ? `${id("breedId")}-error` : describedBy("breedId")}
+                            onChange={(e) => update("breedId", e.target.value)}
+                        >
+                            <option value="">{breedPlaceholder}</option>
+                            {breeds.map((b) => <option key={b.id} value={b.id}>{b.name}</option>)}
+                        </select>
+                        {(breedsError || errors.breedId) && (
+                            <p id={`${id("breedId")}-error`} className="animalFormError">{breedsError ?? errors.breedId}</p>
+                        )}
+                    </div>
+
+                    <div className="animalFormField">
+                        <label htmlFor={id("birthYear")} className="animalFormLabel">Geburtsjahr <span aria-hidden="true">*</span></label>
+                        <input
+                            id={id("birthYear")} type="text" inputMode="numeric" pattern="\d{4}" maxLength={4}
+                            placeholder="z. B. 2021" className="animalFormInput" required aria-required="true"
+                            value={values.birthYear} disabled={isSubmitting}
+                            aria-invalid={!!errors.birthYear} aria-describedby={describedBy("birthYear")}
+                            onChange={(e) => update("birthYear", e.target.value.replace(/\D/g, ""))}
+                        />
+                        {errors.birthYear && <p id={`${id("birthYear")}-error`} className="animalFormError">{errors.birthYear}</p>}
+                    </div>
+
+                    <div className="animalFormField">
+                        <label htmlFor={id("gender")} className="animalFormLabel">Geschlecht <span aria-hidden="true">*</span></label>
+                        <select
+                            id={id("gender")} className="animalFormInput" required aria-required="true"
+                            value={values.gender} disabled={isSubmitting}
+                            aria-invalid={!!errors.gender} aria-describedby={describedBy("gender")}
+                            onChange={(e) => update("gender", e.target.value as AnimalFormValues["gender"])}
+                        >
+                            <option value="">Bitte wählen</option>
+                            {GENDER_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+                        </select>
+                        {errors.gender && <p id={`${id("gender")}-error`} className="animalFormError">{errors.gender}</p>}
+                    </div>
+
+                    <div className="animalFormField">
+                        <label htmlFor={id("requiredExperience")} className="animalFormLabel">Benötigte Erfahrung <span aria-hidden="true">*</span></label>
+                        <select
+                            id={id("requiredExperience")} className="animalFormInput" required aria-required="true"
+                            value={values.requiredExperience} disabled={isSubmitting}
+                            aria-invalid={!!errors.requiredExperience} aria-describedby={describedBy("requiredExperience")}
+                            onChange={(e) => update("requiredExperience", e.target.value as AnimalFormValues["requiredExperience"])}
+                        >
+                            <option value="">Bitte wählen</option>
+                            {EXPERIENCE_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+                        </select>
+                        {errors.requiredExperience && (
+                            <p id={`${id("requiredExperience")}-error`} className="animalFormError">{errors.requiredExperience}</p>
+                        )}
+                    </div>
+                </div>
+
+                <div className="animalFormField animalFormFieldFull">
+                    <label htmlFor={id("description")} className="animalFormLabel">Beschreibung <span aria-hidden="true">*</span></label>
+                    <textarea
+                        id={id("description")} rows={5} className="animalFormInput animalFormTextarea" required aria-required="true"
+                        maxLength={MAX_DESCRIPTION_LENGTH} value={values.description} disabled={isSubmitting}
+                        placeholder="Beschreibe Persönlichkeit, Lieblingsbeschäftigungen und das ideale Zuhause."
+                        aria-invalid={!!errors.description} aria-describedby={describedBy("description")}
+                        onChange={(e) => update("description", e.target.value)}
+                    />
+                    <div className="animalFormMeta">
+                        {errors.description
+                            ? <p id={`${id("description")}-error`} className="animalFormError">{errors.description}</p>
+                            : <span />}
+                        <span className="animalFormCounter">{values.description.length} / {MAX_DESCRIPTION_LENGTH}</span>
+                    </div>
+                </div>
+            </section>
+
+            <section className="animalFormCard" aria-labelledby={id("tags-title")}>
+                <p className="animalFormEyebrow">Eigenschaften</p>
+                <h2 id={id("tags-title")} className="animalFormTitle">Energielevel & Tags</h2>
+
+                {tagGroups.length === 0 && (
+                    <p className="animalFormHint">Es sind noch keine Tags vorhanden.</p>
+                )}
+
+                {errors.tagIds && <p className="animalFormError" role="alert">{errors.tagIds}</p>}
+
+                {tagGroups.map((group) => {
+                    const single = group.category === ENERGY_CATEGORY;
+                    const groupTagIds = group.tags.map((t) => t.id);
+                    const label = CATEGORY_LABELS[group.category] ?? group.category;
+                    return (
+                        <fieldset key={group.category} className="animalFormTagGroup" disabled={isSubmitting}>
+                            <legend className="animalFormLabel">
+                                {label}
+                                {single && <span className="animalFormLegendHint"> (eine Auswahl)</span>}
+                            </legend>
+                            <div className="animalFormChips">
+                                {group.tags.map((tag) => {
+                                    const selected = values.tagIds.includes(tag.id);
+                                    return (
+                                        <button
+                                            key={tag.id} type="button" aria-pressed={selected}
+                                            className={selected ? "animalFormChip animalFormChipSelected" : "animalFormChip"}
+                                            onClick={() => toggleTag(tag.id, groupTagIds, single)}
+                                        >
+                                            {tag.name}
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                        </fieldset>
+                    );
+                })}
+            </section>
+
+            <div className="animalFormActions">
+                <button type="button" className="animalFormButtonSecondary" onClick={onCancel} disabled={isSubmitting}>
                     Abbrechen
                 </button>
-                <button type="submit" className={`h-11 px-6 bg-emerald-900 text-white rounded-xl cursor-pointer hover:bg-emerald-800 ${FOCUS_RING} disabled:opacity-60 disabled:cursor-not-allowed`} disabled={isSubmitting}>
-                    {isSubmitting ? "Wird gespeichert..." : mode === "edit" ? "Änderungen speichern" : "Tier anlegen"}
+                <button type="submit" className="animalFormButtonPrimary" disabled={isSubmitting}>
+                    {isSubmitting ? "Wird gespeichert…" : submitLabel}
                 </button>
             </div>
         </form>
