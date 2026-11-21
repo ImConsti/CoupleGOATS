@@ -1,6 +1,7 @@
 # Risikoliste (RMMM)
 
-*Projekt: CoupleGOATS · Team: Mika, Carolin, Aaron, Constantin*
+*Projekt: CoupleGOATS · Team: Mika, Carolin, brdly06, Constantin*  
+*Autor: brdly06*
 
 RMMM steht für Risk Mitigation, Monitoring and Management (Risikominderung, Überwachung und
 Steuerung). Diese Liste ist ein lebendes Dokument: Wir schauen bei jedem Sprintwechsel darauf und
@@ -8,17 +9,13 @@ Steuerung). Diese Liste ist ein lebendes Dokument: Wir schauen bei jedem Sprintw
 
 ## Unsere Skala
 
-<!-- Eure Skala, eure Worte. Vorlesung 10, Folie 18 zeigt ein Beispiel als Ausgangspunkt – ändert
-     die Worte, bis ihr alle dasselbe unter jeder Zahl versteht. Fünf Stufen sind üblich, drei
-     gehen auch. -->
-
 | Wert | Wahrscheinlichkeit | Auswirkung |
 | :--: | ------------------ | ---------- |
-|  1   | Fast ausgeschlossen            | Eine Stunde zeitverlust    |
-|  2   | Unwahrscheindlich          | Ein Tag Zeitverlust    |
-|  3   | Möglich            | Ein Sprintziel wird verfehlt    |
-|  4   | Wahrscheindlich            | Ein Anwendungsfall fehlt in der Demo    |
-|  5   | Nahezu sicher           | keine Demo möglich oder Datenverlust    |
+|  1   | Fast ausgeschlossen | Eine Stunde Zeitverlust |
+|  2   | Unwahrscheinlich | Ein Tag Zeitverlust |
+|  3   | Möglich | Ein Sprintziel wird verfehlt |
+|  4   | Wahrscheinlich | Ein Anwendungsfall fehlt in der Demo |
+|  5   | Nahezu sicher | Keine Demo möglich oder Datenverlust |
 
 Score = Wahrscheinlichkeit × Auswirkung.
 
@@ -26,22 +23,15 @@ Score = Wahrscheinlichkeit × Auswirkung.
 
 ## Risiken
 
-<!-- Eine Zeile pro Risiko, sortiert nach Score, höchster zuerst. Art: Projekt, technisch oder
-     geschäftlich. Status: offen, eingetreten oder geschlossen. Aktualisiert: Datum der letzten
-     Änderung. -->
-
-| ID   | Risiko, kurz                              | Art       | W   | A   | Score   | Verantwortlich | Status | Aktualisiert |
-| ---- | ----------------------------------------- | --------- | --- | --- | ------- | -------------- | ------ | ------------ |
-| R-03 | Teammitglied fällt aus                    | Projekt   | 3   | 4   | 12      | Mika           | offen  | 19.11.26     |
-| R-01 | Single Point of Failure (Backend-Instanz) | technisch | 3   | 3   | 9       | Constantin     | offen  | 18.11.26     |
-| R-02 | Datenverlust                         |      technisch     | 3    |  5  |   15      | Carolin        | offen  | 19.11.26  |
+| ID   | Risiko, kurz                              | Art       | W | A | Score | Verantwortlich | Status | Aktualisiert |
+| ---- | ----------------------------------------- | --------- | - | - | ----- | -------------- | ------ | ------------ |
+| R-02 | Datenverlust                              | technisch | 3 | 5 | 15    | Carolin        | open   | 21.11.26     |
+| R-03 | Teammitglied fällt aus                    | Projekt   | 3 | 4 | 12    | Mika           | open   | 21.11.26     |
+| R-01 | Single Point of Failure (Backend-Instanz) | technisch | 3 | 3 | 9     | Constantin     | open   | 18.11.26     |
 
 W = Wahrscheinlichkeit, A = Auswirkung.
 
-<!-- Ein Risiko mit Auswirkung 5, das ihr nicht ausführlich beschreibt: hier ein Satz dazu, was ihr
-     tun würdet, wenn es eintritt. -->
-
-<!-- Kopiert den folgenden Block für jedes Risiko, das ihr ausführlich beschreibt. -->
+Ein Risiko mit Auswirkung 5, das nicht ausführlich beschrieben wird, gibt es nicht.
 
 ### R-01 Single Point of Failure (Backend-Instanz)
 
@@ -77,8 +67,6 @@ nichts mehr, setzt er in `infra/customers/couplegoats/backend.yaml` des Infrastr
 den Image-Tag auf den letzten funktionierenden Commit zurück; Argo CD rollt ihn aus. (3) Ist der
 Server nicht erreichbar oder Constantin nicht verfügbar, zeigt das Team die lokale Demo und sagt das
 offen.
-
-<!-- Vorlage für die übrigen Risiken: Block kopieren, ID und Name ersetzen. -->
 
 ### R-02 Datenverlust
 
