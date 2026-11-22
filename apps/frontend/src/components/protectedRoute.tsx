@@ -1,7 +1,7 @@
 "use client";
 
 import type {ReactNode} from "react";
-// TODO: Beim Wiedereinschalten der Auth diese Imports einkommentieren (und den Import von ReactNode oben beibehalten):
+// TODO: Beim Wiedereinschalten der Auth diese Imports einkommentieren:
 // import {useEffect} from "react";
 // import {useRouter} from "next/navigation";
 // import {useAuth} from "@/components/authProvider";
@@ -13,15 +13,8 @@ type ProtectedRouteProps = {
     children: ReactNode;
 };
 
-/**
- * Schützt einen Bereich:
- * - nicht angemeldet        -> /auth/login
- * - angemeldet, falsche Rolle -> eigene Startseite
- * Die Inhalte werden erst gerendert, wenn beides passt.
- *
- * ACHTUNG: Die Auth ist aktuell DEAKTIVIERT (zum Entwickeln), jeder kann alle Seiten sehen.
- * TODO: Vor dem Livegang die echte Auth unten wieder einkommentieren und den
- *       temporären "return <>{children}</>" entfernen.
+/** TODO: Vor dem Livegang die echte Auth unten wieder einkommentieren und:
+ *       temporären "return <>{children}</>" entfernen
  */
 export default function ProtectedRoute({allowedRole, children}: ProtectedRouteProps) {
 
@@ -50,6 +43,6 @@ export default function ProtectedRoute({allowedRole, children}: ProtectedRoutePr
     // }
     // ---------------------------------------------------------------
 
-    // TEMPORÄR: kein Zugriffsschutz
+    // TEMPORÄR:
     return <>{children}</>;
 }
