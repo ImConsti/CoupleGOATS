@@ -9,9 +9,7 @@ type AuthStatus = "loading" | "authenticated" | "unauthenticated";
 type AuthContextValue = {
     status: AuthStatus;
     user: AuthUser | null;
-    /** Nach erfolgreichem Login/Registrieren aufrufen: speichert das Token und lädt den Nutzer. */
     signIn: (token: string) => Promise<void>;
-    /** Meldet beim Backend ab, löscht das Token und setzt den Status zurück. */
     signOut: () => Promise<void>;
 };
 
@@ -35,12 +33,11 @@ export default function AuthProvider({children}: {children: ReactNode}) {
         setStatus(me ? "authenticated" : "unauthenticated");
     }, []);
 
-    // Beim ersten Laden prüfen, ob schon jemand angemeldet ist
     useEffect(() => {
         let cancelled = false;
         fetchMe()
             .then((me) => { if (!cancelled) applyUser(me); })
-            .catch(() => { if (!cancelled) applyUser(null); }); // z.B. Backend nicht erreichbar
+            .catch(() => { if (!cancelled) applyUser(null); }); 
         return () => { cancelled = true; };
     }, [applyUser]);
 
