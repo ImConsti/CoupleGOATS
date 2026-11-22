@@ -35,7 +35,6 @@ export default function LoginForm({role}: {role: AuthRole}) {
 
             const data = await response.json();
 
-            // Token speichern + Anmeldestatus laden, die Weiterleitung übernimmt AuthFlow
             await signIn(data.token);
         } catch {
             setIsLoginValid(false);
