@@ -15,7 +15,6 @@ export default function RegisterForm({role}: {role: AuthRole}) {
     const [errorMessage, setErrorMessage] = useState("");
     const [isLoading, setIsLoading] = useState(false);
 
-    // gemeinsame Felder
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [passwordRepeat, setPasswordRepeat] = useState("");
@@ -23,7 +22,6 @@ export default function RegisterForm({role}: {role: AuthRole}) {
     const [postalCode, setPostalCode] = useState("");
     const [city, setCity] = useState("");
 
-    // Adoptierende
     const [firstName, setFirstName] = useState("");
     const [lastName, setLastName] = useState("");
     const [houseType, setHouseType] = useState<"apartment" | "house">("apartment");
@@ -31,7 +29,6 @@ export default function RegisterForm({role}: {role: AuthRole}) {
     const [hasChildren, setHasChildren] = useState(false);
     const [roamingPossible, setRoamingPossible] = useState(false);
 
-    // Tierheim
     const [shelterName, setShelterName] = useState("");
 
     function validate(): string {
@@ -112,7 +109,6 @@ export default function RegisterForm({role}: {role: AuthRole}) {
 
             const data = await response.json();
 
-            // Token speichern + Anmeldestatus laden, die Weiterleitung übernimmt AuthFlow
             await signIn(data.token);
         } catch {
             setErrorMessage("Der Server ist nicht erreichbar. Bitte versuche es später erneut.");
