@@ -36,12 +36,10 @@ export default function AnimalsPage() {
     const [errorText, setErrorText] = useState("");
     const [reloadKey, setReloadKey] = useState(0);
 
-    // Tierarten für den Filter (kein Problem, wenn das fehlschlägt: dann gibt es nur keinen Filter)
     useEffect(() => {
         fetchSpecies().then(setSpeciesList).catch(() => setSpeciesList([]));
     }, []);
 
-    // Suche leicht verzögern, damit nicht bei jedem Tastendruck geladen wird
     useEffect(() => {
         const timer = setTimeout(() => {
             setDebouncedSearch(search);
