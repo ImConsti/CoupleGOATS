@@ -1,13 +1,3 @@
-/**
- * API-Funktionen für die Tierverwaltung eines Tierheims (Liste, Einzelansicht, Bearbeiten, Löschen).
- * Das Erstellen (createAnimal) bleibt unverändert in "@/lib/animals".
- *
- * Backend-Endpunkte (alle: Rolle "shelter", Bearer-Token):
- *   GET    /api/v1/shelters/me/animals            -> Liste (paginiert)
- *   GET    /api/v1/shelters/me/animals/:id        -> ein Tier
- *   PATCH  /api/v1/shelters/me/animals/:id        -> Tier ändern (inkl. tagIds)
- *   DELETE /api/v1/shelters/me/animals/:id        -> Tier löschen (204)
- */
 import {getToken} from "@/lib/auth";
 import {
     emptyAnimalForm,
@@ -21,7 +11,6 @@ import {
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
 const ANIMALS_URL = `${API_URL}/api/v1/shelters/me/animals`;
 
-/** So liefert das Backend ein Tierprofil. */
 export type AnimalProfile = {
     id: string;
     animalShelterId: string;
@@ -96,7 +85,6 @@ export async function fetchMyAnimal(animalId: string): Promise<AnimalProfile> {
     return response.json() as Promise<AnimalProfile>;
 }
 
-/** Backend-Tier -> Werte für das (bestehende) Tierformular. */
 export function animalToFormValues(animal: AnimalProfile): AnimalFormValues {
     return {
         ...emptyAnimalForm,
@@ -133,7 +121,7 @@ export async function updateMyAnimal(animalId: string, values: AnimalFormValues)
     const body = {
         name: values.name.trim(),
         speciesId: values.speciesId,
-        breedId: values.breedId || null, // null = Rasse entfernen
+        breedId: values.breedId || null, 
         birthYear: Number(values.birthYear),
         gender: values.gender,
         requiredExperience: values.requiredExperience,
@@ -189,11 +177,6 @@ export async function updateMyAnimal(animalId: string, values: AnimalFormValues)
     };
 }
 
-/**
- * Löscht ein Tier (Backend: DELETE /shelters/me/animals/:id -> 204).
- * TODO: Noch nirgends verwendet. Die Löschen-Buttons sind absichtlich deaktiviert;
- *       zum Aktivieren hier aufrufen (mit Bestätigungsdialog) und danach die Liste neu laden.
- */
 export async function deleteMyAnimal(animalId: string): Promise<void> {
     await request(`${ANIMALS_URL}/${animalId}`, {method: "DELETE"});
 }
