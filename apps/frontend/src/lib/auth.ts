@@ -16,11 +16,6 @@ export function clearToken() {
     localStorage.removeItem("token");
 }
 
-/**
- * Fragt beim Backend (GET /auth/me), wer gerade angemeldet ist.
- * - kein Token oder Token ungültig/abgelaufen (401) -> null (und Token wird gelöscht)
- * - Server nicht erreichbar / Serverfehler -> wirft einen Fehler
- */
 export async function fetchMe(): Promise<AuthUser | null> {
     const token = getToken();
     if (!token) return null;
@@ -41,12 +36,10 @@ export async function fetchMe(): Promise<AuthUser | null> {
     return { id: data.id ?? data.userOrShelterId, role: data.role };
 }
 
-/** Startseite je Rolle (Admins nutzen vorerst den Adoptierenden-Bereich). */
 export function homePathForRole(role: Role): string {
     return role === "shelter" ? "/shelter/overview" : "/user/discover";
 }
 
-/** Darf diese Rolle den Bereich "user" bzw. "shelter" sehen? */
 export function canAccess(role: Role, area: AreaRole): boolean {
     if (role === "admin") return area === "user";
     return role === area;
